@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
 
   <!-- KODE PWA -->
-  <link rel="manifest" href="manifest.json?v=13">
+  <link rel="manifest" href="manifest.json?v=15">
   <meta name="theme-color" content="#059669">
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -315,7 +315,7 @@
           </div>
           
           <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">
-            &copy; 2026 Tuwoto. Hak Cipta Dilindungi Undang-Undang.
+            &copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.
           </div>
         </div>
       </div>
@@ -360,6 +360,11 @@
             <option value="Boalemo">Boalemo</option>
             <option value="Gorontalo Utara">Gorontalo Utara</option>
           </select>
+        </div>
+        <!-- KOLOM KECAMATAN BARU -->
+        <div class="form-group">
+          <label>Kecamatan</label>
+          <input type="text" id="inKecamatan" required placeholder="Contoh: Kota Tengah">
         </div>
         <div class="form-group" id="divJenisSampah">
           <label>Jenis Sampah Spesifik</label>
@@ -452,7 +457,7 @@
     <div class="modal-content">
       <h2>🔐 Login Admin</h2>
       <div class="form-group">
-        <input type="password" id="inPasswordAdmin" placeholder="Masukan Password" style="text-align:center;">
+        <input type="password" id="inPasswordAdmin" placeholder="Masukkan Password" style="text-align:center;">
       </div>
       <button type="button" class="btn-submit" onclick="prosesLogin()">Masuk</button>
       <button type="button" class="btn-cancel" onclick="tutupLoginAdmin()">Batal</button>
@@ -491,13 +496,14 @@ const SUPABASE_URL = 'https://jhetrpqhcytlyqyvfvla.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_IuPMT8dpVh7NtXkGTwPHLA_cUbkUuB1';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// DAFTAR FILE GEOJSON LOKAL
+// DAFTAR FILE GEOJSON LOKAL (Lengkap 6 Kabupaten/Kota)
 const daftarFileGeoJSON = [
   'Kabupaten Pohuwato-KECAMATAN.geojson.json',
   'Kabupaten Bone Bolango-KECAMATAN.geojson.json',
   'Kabupaten Boalemo-KECAMATAN.geojson.json',
   'Kabupaten Gorontalo Utara-KECAMATAN.geojson.json',
-  'Kabupaten Gorontalo-KECAMATAN.geojson.json'
+  'Kabupaten Gorontalo-KECAMATAN.geojson.json',
+  'Kota Gorontalo-KECAMATAN.geojson.json'
 ];
 
 const edukasiSampah = {
@@ -718,39 +724,43 @@ async function muatChoropleth() {
       features: semuaFitur
     };
 
-    let skorSampah = {};
+    // MENGHITUNG SKOR PER KECAMATAN
+    let skorKecamatan = {};
     const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
     approvedData.forEach(t => {
       let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
-      skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai;
+      if (t.kecamatan) {
+        skorKecamatan[t.kecamatan] = (skorKecamatan[t.kecamatan] || 0) + nilai;
+      }
     });
 
     choroplethLayer = L.geoJSON(dataGabungan, {
       style: function (feature) {
         let props = feature.properties;
-        // Mendeteksi nama Kabupaten untuk diwarnai berdasarkan skor sampah Kabupaten
-        let namaKab = props.WADMKK || props.KABUPATEN || "";
+        // Mendeteksi nama Kecamatan dari file GeoJSON
+        let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || "";
+        
+        // Pencocokan nama Kecamatan (case-insensitive)
         let namaData = "";
-        for (let key in skorSampah) {
-          if (namaKab.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(namaKab.toLowerCase())) { namaData = key; break; }
+        for (let key in skorKecamatan) {
+          if (namaKec.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(namaKec.toLowerCase())) { namaData = key; break; }
         }
 
-        let skor = namaData ? skorSampah[namaData] : 0;
-        let penduduk = namaData ? (dataPenduduk[namaData] || 0) : 0;
-        let rasio = penduduk > 0 ? (skor / (penduduk / 100000)) : 0;
+        let skor = namaData ? skorKecamatan[namaData] : 0;
         
-        let fillColor = '#e2e8f0';
-        if (rasio > 1.5) fillColor = '#ef4444';
-        else if (rasio > 0.5) fillColor = '#f59e0b';
-        else if (rasio > 0) fillColor = '#10b981';
-        else if (namaKab) fillColor = '#cbd5e1'; // Abu-abu terang untuk wilayah tanpa data
+        // Warna berdasarkan Skor Kecamatan
+        let fillColor = '#e2e8f0'; // Default abu-abu
+        if (skor >= 6) fillColor = '#ef4444'; // Merah (Sangat Kritis)
+        else if (skor >= 3) fillColor = '#f59e0b'; // Kuning (Waspada)
+        else if (skor >= 1) fillColor = '#10b981'; // Hijau (Aman/Pantau)
+        else if (namaKec) fillColor = '#cbd5e1'; // Abu-abu terang untuk wilayah tanpa data
 
         return { fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6 };
       },
       onEachFeature: function (feature, layer) {
         let props = feature.properties;
-        let namaKec = props.NAME_3 || props.WADMKC || props.name || 'Kecamatan';
-        let namaKab = props.WADMKK || props.KABUPATEN || '';
+        let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || 'Kecamatan';
+        let namaKab = props.kab_kota || props.WADMKK || props.KABUPATEN || '';
         layer.bindPopup(`<b>Kec. ${namaKec}</b><br><small>${namaKab}</small>`);
       }
     }).addTo(map);
@@ -758,7 +768,7 @@ async function muatChoropleth() {
     map.fitBounds(choroplethLayer.getBounds());
   } catch (error) {
     console.error("Gagal memuat batas wilayah:", error);
-    alert("Gagal memuat peta batas wilayah. Pastikan kelima file .json sudah di-upload ke GitHub dan namanya sesuai.");
+    alert("Gagal memuat peta batas wilayah. Pastikan keenam file .json sudah di-upload ke GitHub dan namanya sesuai.");
     isChoroplethMode = false;
     const btn = document.getElementById('btnChoropleth'); 
     btn.style.background = '#8b5cf6'; 
@@ -817,7 +827,7 @@ function buatMarker(titik) {
     <div class="popup-body">
       <div class="popup-title">${titik.nama}</div>
       ${pendingHTML} ${popupContent}
-      <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah}</b></div>
+      <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah} (${titik.kecamatan || ''})</b></div>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b;font-style:italic">${titik.catatan || ''}</div>
     </div>`;
   return L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 260 });
@@ -908,16 +918,49 @@ function updateStats() {
 function renderAnalisis() {
   const panel = document.getElementById('analysis-panel');
   panel.innerHTML = '';
+  
   let skorSampah = {};
+  let totalPenduduk = 0;
+  let totalSkor = 0;
+  
   const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
-  approvedData.forEach(t => { let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1); skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai; });
+  approvedData.forEach(t => { 
+    let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1); 
+    skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai; 
+    totalSkor += nilai;
+  });
 
-  for (let wilayah in skorSampah) {
+  for (let key in dataPenduduk) {
+    totalPenduduk += parseInt(dataPenduduk[key]);
+  }
+
+  // Tampilkan Data Provinsi (Keseluruhan)
+  let rasioProvinsi = totalPenduduk > 0 ? (totalSkor / (totalPenduduk / 100000)).toFixed(2) : "0.00";
+  let warnaProv = rasioProvinsi > 1.5 ? '#ef4444' : (rasioProvinsi > 0.5 ? '#f59e0b' : '#10b981');
+  let statusProv = rasioProvinsi > 1.5 ? 'Waspada' : (rasioProvinsi > 0.5 ? 'Pantau' : 'Aman');
+  
+  let htmlProv = `
+    <div style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 8px; border: 1px solid #bae6fd;">
+      <div style="font-weight: bold; font-size: 14px; color: #0369a1; margin-bottom: 4px;">PROVINSI GORONTALO</div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #0c4a6e;"><span>Total Penduduk:</span> <b>${totalPenduduk.toLocaleString('id-ID')} jiwa</b></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #0c4a6e;"><span>Total Skor Sampah:</span> <b>${totalSkor} poin</b></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-top: 4px; color: ${warnaProv};">
+        <span>Rasio:</span> <span>${rasioProvinsi} (${statusProv})</span>
+      </div>
+    </div>
+    <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 8px;">RINCIAN PER KABUPATEN/KOTA:</div>
+  `;
+
+  panel.innerHTML = htmlProv;
+
+  // Tampilkan Data Kabupaten/Kota
+  for (let wilayah in dataPenduduk) {
     let penduduk = dataPenduduk[wilayah] || 0;
-    let skor = skorSampah[wilayah];
+    let skor = skorSampah[wilayah] || 0;
     let rasio = penduduk > 0 ? (skor / (penduduk / 100000)).toFixed(2) : "0.00";
     let warna = rasio > 1.5 ? '#ef4444' : (rasio > 0.5 ? '#f59e0b' : '#10b981');
     let status = rasio > 1.5 ? 'Waspada' : (rasio > 0.5 ? 'Pantau' : 'Aman');
+    
     panel.innerHTML += `
       <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1;">
         <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">${wilayah}</div>
@@ -973,6 +1016,7 @@ function bukaEdit(id) {
   document.getElementById('judulForm').textContent = "✏️ Edit Data"; document.getElementById('editId').value = data.id;
   document.getElementById('inKategori').value = data.kategori || 'krisis'; ubahFormKategori();
   document.getElementById('inNama').value = data.nama; document.getElementById('inLat').value = data.lat; document.getElementById('inLng').value = data.lng; document.getElementById('inWilayah').value = data.wilayah;
+  document.getElementById('inKecamatan').value = data.kecamatan || "";
   if (data.kategori !== 'fasilitas') document.getElementById('inJenis').value = data.jenis;
   document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
   document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
@@ -1027,7 +1071,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       const { data: publicUrlData } = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); 
       fotoUrl = publicUrlData.publicUrl; 
     }
-    const dataBaru = { nama: document.getElementById('inNama').value, lat: parseFloat(document.getElementById('inLat').value), lng: parseFloat(document.getElementById('inLng').value), wilayah: document.getElementById('inWilayah').value, jenis: kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value, kritis: document.getElementById('inKritis').value, kategori: kategori, status: statusValue, is_approved: isApprovedValue, catatan: document.getElementById('inCatatan').value, alamat: "-", foto: fotoUrl };
+    const dataBaru = { nama: document.getElementById('inNama').value, lat: parseFloat(document.getElementById('inLat').value), lng: parseFloat(document.getElementById('inLng').value), wilayah: document.getElementById('inWilayah').value, kecamatan: document.getElementById('inKecamatan').value, jenis: kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value, kritis: document.getElementById('inKritis').value, kategori: kategori, status: statusValue, is_approved: isApprovedValue, catatan: document.getElementById('inCatatan').value, alamat: "-", foto: fotoUrl };
     let error; if (isEditMode) { const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); error = result.error; } else { const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); error = result.error; }
     if (error) throw error;
     alert(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : "✅ Dikirim! Menunggu ACC."));
@@ -1036,7 +1080,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
 };
 
 let qrGenerated = false;
-function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://samaranakun61-pixel.github.io/peta_sampah/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } }
+function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://tuwoto-app.github.io/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } }
 function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
 
 async function ambilData() {
