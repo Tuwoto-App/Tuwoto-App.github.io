@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
 
   <!-- KODE PWA -->
-  <link rel="manifest" href="manifest.json?v=15">
+  <link rel="manifest" href="manifest.json?v=16">
   <meta name="theme-color" content="#059669">
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -361,10 +361,13 @@
             <option value="Gorontalo Utara">Gorontalo Utara</option>
           </select>
         </div>
-        <!-- KOLOM KECAMATAN BARU -->
+        <!-- KOLOM KECAMATAN DENGAN DATALIST -->
         <div class="form-group">
           <label>Kecamatan</label>
-          <input type="text" id="inKecamatan" required placeholder="Contoh: Kota Tengah">
+          <input type="text" id="inKecamatan" list="listKecamatan" required placeholder="Ketik atau pilih kecamatan...">
+          <datalist id="listKecamatan">
+            <!-- Data akan diisi otomatis oleh JavaScript -->
+          </datalist>
         </div>
         <div class="form-group" id="divJenisSampah">
           <label>Jenis Sampah Spesifik</label>
@@ -506,6 +509,12 @@ const daftarFileGeoJSON = [
   'Kota Gorontalo-KECAMATAN.geojson.json'
 ];
 
+// DAFTAR KECAMATAN UNTUK DATALIST (Agar pelapor mudah memilih)
+const listKecamatanGorontalo = [
+  "Kota Barat", "Kota Selatan", "Kota Timur", "Kota Utara", "Dungingi", "Kota Tengah", "Sipatana", "Dumbo Raya", "Hulonthalangi",
+  "Limboto", "Limboto Barat", "Telaga", "Telaga Biru", "Tilango", "Batudaa", "Batudaa Pantai", "Bongomeme", "Tabongo", "Dungaliyo", "Pulubala", "Tibawa", "Boliyohuto", "Mootilango", "Tolangohula", "Asparaga", "Bilato", "Biluhu", "Talaga Jaya", "Sungai Kakap" // (Sebagian contoh, bisa ditambah)
+];
+
 const edukasiSampah = {
   "Plastik": { icon: "🥤", title: "Plastik", color: "#2563eb", fakta: "Butuh <b>400-1000 tahun</b> untuk terurai.", dampak: "Mencemari laut, mematikan biota laut, dan menjadi mikroplastik.", solusi: "Gunakan tas kain, kurangi sedotan, pilah botol untuk Bank Sampah." },
   "Kertas & Kardus": { icon: "📦", title: "Kertas", color: "#d97706", fakta: "Butuh <b>2-6 bulan</b> untuk terurai.", dampak: "Menghasilkan gas metana jika tertimbun dan membusuk.", solusi: "Jaga kardus tetap kering, ikat rapi untuk didaur ulang." },
@@ -536,6 +545,14 @@ L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
+
+// Isi Datalist Kecamatan
+const datalistKec = document.getElementById('listKecamatan');
+listKecamatanGorontalo.forEach(kec => {
+  let option = document.createElement('option');
+  option.value = kec;
+  datalistKec.appendChild(option);
+});
 
 function toggleSheet() {
   document.getElementById('bottomSheet').classList.toggle('expanded');
@@ -737,13 +754,16 @@ async function muatChoropleth() {
     choroplethLayer = L.geoJSON(dataGabungan, {
       style: function (feature) {
         let props = feature.properties;
-        // Mendeteksi nama Kecamatan dari file GeoJSON
+        // Mendeteksi nama Kecamatan dari file GeoJSON (biasanya NAME_3 atau WADMKC)
         let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || "";
+        
+        // Membersihkan nama agar tidak dobel "Kecamatan"
+        let namaKecClean = namaKec.replace(/Kecamatan /gi, '').trim();
         
         // Pencocokan nama Kecamatan (case-insensitive)
         let namaData = "";
         for (let key in skorKecamatan) {
-          if (namaKec.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(namaKec.toLowerCase())) { namaData = key; break; }
+          if (namaKecClean.toLowerCase() === key.toLowerCase() || namaKecClean.toLowerCase().includes(key.toLowerCase())) { namaData = key; break; }
         }
 
         let skor = namaData ? skorKecamatan[namaData] : 0;
@@ -753,13 +773,16 @@ async function muatChoropleth() {
         if (skor >= 6) fillColor = '#ef4444'; // Merah (Sangat Kritis)
         else if (skor >= 3) fillColor = '#f59e0b'; // Kuning (Waspada)
         else if (skor >= 1) fillColor = '#10b981'; // Hijau (Aman/Pantau)
-        else if (namaKec) fillColor = '#cbd5e1'; // Abu-abu terang untuk wilayah tanpa data
+        else if (namaKecClean) fillColor = '#cbd5e1'; // Abu-abu terang untuk wilayah tanpa data
 
         return { fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6 };
       },
       onEachFeature: function (feature, layer) {
         let props = feature.properties;
         let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || 'Kecamatan';
+        // Membersihkan nama agar tidak dobel
+        namaKec = namaKec.replace(/Kecamatan /gi, '').trim();
+        
         let namaKab = props.kab_kota || props.WADMKK || props.KABUPATEN || '';
         layer.bindPopup(`<b>Kec. ${namaKec}</b><br><small>${namaKab}</small>`);
       }
