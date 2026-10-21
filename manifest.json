@@ -4,7 +4,7 @@
   "description": "Sistem Informasi Geografis Pengelolaan Sampah",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#059669",
+  "background_color": "#ffffff",
   "theme_color": "#059669",
   "icons": [
     {
