@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Tuwoto - Smart Waste Management</title>
+
+  <!-- FONT POPPINS -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+
+  <!-- KODE PWA -->
+  <link rel="manifest" href="manifest.json?v=13">
+  <meta name="theme-color" content="#059669">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <!-- Pustaka CSS & Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+  <!-- LIBRARY CHART.JS UNTUK GRAFIK -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
+    
+    #app { position: relative; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
+    #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+    /* HEADER BARU YANG LEBIH MODERN */
+    .floating-header { 
+      position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; 
+      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); 
+      padding: 8px 12px; border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+      display: flex; align-items: center; gap: 10px; 
+    }
+    
+    .floating-header img { 
+      width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .floating-header h1 { 
+      font-family: 'Poppins', sans-serif; 
+      font-size: 20px; font-weight: 800; 
+      color: var(--primary); margin: 0; letter-spacing: -0.5px;
+    }
+    
+    .floating-header .subtitle {
+      font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600;
+    }
+    
+    #bottomSheet { position: absolute; bottom: 0; left: 0; width: 100%; height: 85vh; background: var(--card); z-index: 2000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(calc(100% - 140px)); display: flex; flex-direction: column; }
+    #bottomSheet.expanded { transform: translateY(0); }
+
+    .drag-handle { width: 100%; padding: 12px 0 5px 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+    .drag-pill { width: 40px; height: 5px; background: #cbd5e1; border-radius: 10px; margin-bottom: 8px; }
+    .drag-text { font-size: 11px; color: var(--teks-muted); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    .drag-text i { font-style: normal; transition: 0.3s; }
+    #bottomSheet.expanded .drag-text i { transform: rotate(180deg); }
+
+    .sheet-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 12px 16px; }
+    .stat { padding: 10px 6px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .stat.tinggi { background: #fef2f2; border-top: 4px solid var(--merah); }
+    .stat.sedang { background: #fffbeb; border-top: 4px solid var(--kuning); }
+    .stat.rendah { background: #ecfdf5; border-top: 4px solid var(--hijau); }
+    .stat-num { font-size: 20px; font-weight: 800; }
+    .stat.tinggi .stat-num { color: var(--merah); }
+    .stat.sedang .stat-num { color: var(--kuning); }
+    .stat.rendah .stat-num { color: var(--hijau); }
+    .stat-label { font-size: 9px; color: var(--teks-muted); font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+
+    /* SISTEM TAB (4 TABS) */
+    .tab-menu { display: flex; background: white; border-bottom: 2px solid #e2e8f0; padding: 0; }
+    .tab-btn { flex: 1; padding: 12px 2px; border: none; background: none; font-size: 11px; font-weight: bold; color: var(--teks-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .tab-content { display: none; flex-direction: column; flex: 1; overflow-y: auto; }
+    .tab-content.active { display: flex; }
+
+    .filters { padding: 10px 16px 6px 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn { padding: 5px 10px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--teks-muted); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .search-box { padding: 0 16px 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .search-box input { flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; min-width: 150px;}
+    .search-box select { width: 30%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-family: inherit; background: white; }
+    
+    .btn-terdekat { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
+    .btn-lacak { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #fdf4ff; border: 1px solid #f5d0fe; color: #a21caf; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
+
+    .list-title { padding: 8px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+    .list { flex: 1; overflow-y: auto; padding: 8px 16px 30px 16px; }
+    .item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+    .item-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: white; }
+    .badge.tinggi { background: var(--merah); }
+    .badge.sedang { background: var(--kuning); }
+    .badge.rendah { background: var(--hijau); }
+    .badge.fasilitas { background: var(--biru); }
+    .badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+
+    .btn-lihat { width: 100%; padding: 8px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 4px; }
+    .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .admin-actions { display: flex; gap: 6px; margin-top: 4px; }
+
+    .menu-accordion { margin: 0 16px 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .menu-accordion summary { padding: 10px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; color: var(--teks); list-style: none; outline: none; }
+    .menu-accordion summary::-webkit-details-marker { display: none; }
+    .menu-accordion-content { padding: 0 10px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .menu-accordion button { width: 100%; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
+    #btnChoropleth { background: #8b5cf6; color: white; }
+    #btnHeatmap { background: #f97316; color: white; }
+    #qrBtnSidebar { background: #0ea5e9; color: white; }
+    #adminBtnSidebar { background: #64748b; color: white; }
+    #adminPendudukBtn { display: none; background: #8b5cf6; color: white; margin-top: 4px; }
+
+    .custom-div-icon { background: none !important; border: none !important; }
+    .marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
+    .marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
+    .marker-pulse.sedang { background: var(--kuning); animation: pulse-kuning 1.5s infinite; }
+    .marker-pulse.rendah { background: var(--hijau); animation: pulse-hijau 1.5s infinite; }
+    .marker-pulse.pending { background: #94a3b8; animation: none; }
+    @keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    @keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+    @keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    .marker-fasilitas { background: var(--biru); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    
+    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
+    .leaflet-popup-content { margin: 0; }
+    .popup-img { width: 100%; height: 140px; object-fit: cover; background: #e2e8f0; display: block; }
+    .popup-body { padding: 12px; }
+    .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+
+    #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 1001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    #bottomSheet.expanded ~ #laporBtn { bottom: 20px; opacity: 0; pointer-events: none; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
+    .modal-content h2 { font-size: 18px; margin-bottom: 15px; color: var(--teks); }
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--teks-muted); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
+    .form-group textarea { resize: vertical; height: 60px; }
+    .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    .btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
+    #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; }
+    #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+    #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
+    .penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
+    .penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
+
+    .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+    .edu-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .edu-card:active { transform: scale(0.95); background: #f8fafc; }
+    .edu-card-icon { font-size: 30px; margin-bottom: 5px; display: block; }
+    .edu-card-title { font-size: 12px; font-weight: bold; color: var(--teks); }
+    
+    #modalEdukasi .modal-content { padding: 0; overflow: hidden; background: #f8fafc; text-align: left; max-width: 450px; border-radius: 20px; }
+    .edu-header { padding: 30px 20px 20px 20px; text-align: center; color: white; position: relative; }
+    .edu-header-icon { font-size: 60px; display: block; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .edu-header-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+    .edu-close-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.3); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .edu-body { padding: 20px; }
+    .edu-section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .edu-section-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .edu-section-text { font-size: 13px; line-height: 1.5; color: #475569; }
+
+    #chart-container { width: 100%; padding: 10px; margin-bottom: 20px; }
+
+    .about-container { padding: 20px; text-align: center; }
+    .about-logo { width: 100px; height: 100px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .about-title { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+    .about-version { font-size: 12px; color: var(--teks-muted); margin-bottom: 20px; display: inline-block; background: #e2e8f0; padding: 2px 10px; border-radius: 10px; }
+    .about-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .about-card h4 { font-size: 14px; color: var(--teks); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .about-card p { font-size: 12px; color: #475569; line-height: 1.6; }
+    .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tech-tag { background: #f1f5f9; color: #334155; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="map"></div>
+
+  <!-- HEADER BARU -->
+  <div class="floating-header">
+    <img src="icon.png" alt="Logo Tuwoto" onerror="this.src='https://via.placeholder.com/32?text=T'">
+    <div>
+      <h1>Tuwoto</h1>
+      <div class="subtitle">Smart Waste Management</div>
+    </div>
+  </div>
+
+  <button id="laporBtn">+ Lapor</button>
+
+  <div id="bottomSheet">
+    <div class="drag-handle" onclick="toggleSheet()">
+      <div class="drag-pill"></div>
+      <div class="drag-text">Ketuk untuk melihat menu <i>▲</i></div>
+    </div>
+
+    <div class="sheet-content">
+      <div class="stats">
+        <div class="stat tinggi"><div class="stat-num" id="statTinggi">0</div><div class="stat-label">Tinggi</div></div>
+        <div class="stat sedang"><div class="stat-num" id="statSedang">0</div><div class="stat-label">Sedang</div></div>
+        <div class="stat rendah"><div class="stat-num" id="statRendah">0</div><div class="stat-label">Rendah</div></div>
+      </div>
+
+      <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('lokasi', this)">📍 Lokasi</button>
+        <button class="tab-btn" onclick="switchTab('analisis', this)">📊 Analisis</button>
+        <button class="tab-btn" onclick="switchTab('edukasi', this)">📚 Edukasi</button>
+        <button class="tab-btn" onclick="switchTab('tentang', this)">ℹ️ Tentang</button>
+      </div>
+
+      <div id="tab-lokasi" class="tab-content active">
+        <button class="btn-terdekat" onclick="cariTerdekat()">📍 Cari Tempat Sampah Terdekat</button>
+        <button class="btn-lacak" onclick="bukaLacak()">🔍 Lacak Status Laporan Anda</button>
+
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">Semua</button>
+          <button class="filter-btn" data-filter="Tinggi">Tinggi</button>
+          <button class="filter-btn" data-filter="Sedang">Sedang</button>
+          <button class="filter-btn" data-filter="Rendah">Rendah</button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Cari nama lokasi...">
+          <select id="sortSelect">
+            <option value="default">Terbaru</option>
+            <option value="nama_asc">A-Z</option>
+            <option value="kritis_tinggi">Kritis</option>
+          </select>
+        </div>
+
+        <div style="padding: 0 16px 10px 16px; font-size:11px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)">
+          <label for="toggleFasilitas">Tampilkan Tempat Sampah (RT/RW)</label>
+        </div>
+
+        <details class="menu-accordion">
+          <summary>⚙️ Menu Alat Peta & Admin</summary>
+          <div class="menu-accordion-content">
+            <button id="btnChoropleth" onclick="toggleChoropleth()">🗺️ Batas Wilayah</button>
+            <button id="btnHeatmap" onclick="toggleHeatmap()">🔥 Peta Panas</button>
+            <button id="qrBtnSidebar" onclick="bukaQR()">📱 QR Code</button>
+            <button id="adminBtnSidebar" onclick="bukaLoginAdmin()">🔐 Login Admin</button>
+            <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()">⚙️ Kelola Penduduk</button>
+          </div>
+        </details>
+
+        <div class="list-title">Data Laporan</div>
+        <div class="list" id="list"></div>
+      </div>
+
+      <div id="tab-analisis" class="tab-content">
+        <div style="padding: 15px;">
+          <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); text-align:center;">📊 Statistik Jenis Sampah</h3>
+          <div id="chart-container">
+            <canvas id="myChart"></canvas>
+          </div>
+          <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">📈 Rasio Sampah vs Penduduk</h3>
+          <div id="analysis-panel"></div>
+        </div>
+      </div>
+
+      <div id="tab-edukasi" class="tab-content">
+        <div class="list-title" style="background:none; border:none; padding-bottom:0;">Pilih topik untuk dipelajari:</div>
+        <div class="edu-grid" id="eduGrid"></div>
+      </div>
+
+      <div id="tab-tentang" class="tab-content">
+        <div class="about-container">
+          <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
+          <div class="about-title">Tuwoto</div>
+          <div class="about-version">Versi 1.0.0 (HAKI Ready)</div>
+
+          <div class="about-card">
+            <h4>📖 Filosofi Nama</h4>
+            <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH) untuk segera ditindaklanjuti.</p>
+          </div>
+
+          <div class="about-card">
+            <h4>🎯 Visi & Misi</h4>
+            <p>Menciptakan lingkungan Gorontalo yang bersih dan berkelanjutan melalui kolaborasi digital (Smart Waste Management) antara warga, petugas kebersihan, dan pemangku kebijakan.</p>
+          </div>
+
+          <div class="about-card">
+            <h4>💻 Teknologi</h4>
+            <p>Aplikasi ini dibangun menggunakan teknologi web modern tanpa memerlukan unduhan aplikasi besar (PWA).</p>
+            <div class="tech-tags">
+              <span class="tech-tag">PWA (Progressive Web App)</span>
+              <span class="tech-tag">Leaflet.js (GIS)</span>
+              <span class="tech-tag">Supabase (Real-time DB)</span>
+              <span class="tech-tag">Chart.js</span>
+              <span class="tech-tag">HTML/CSS/JS</span>
+            </div>
+          </div>
+          
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">
+            &copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL LAPORAN -->
+  <div id="modalLapor" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;" id="judulForm">📝 Form Laporan</h2>
+      <form id="formLaporan">
+        <input type="hidden" id="editId" value="">
+        <div class="form-group">
+          <label>Kategori Data</label>
+          <select id="inKategori" required onchange="ubahFormKategori()">
+            <option value="krisis">🚨 Krisis Sampah</option>
+            <option value="fasilitas">🗑️ Tambah Tempat Sampah</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label id="labelNama">Nama Lokasi / TPS</label>
+          <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
+        </div>
+        <div class="form-group">
+          <label>Lokasi (Koordinat)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="number" step="any" id="inLat" required placeholder="Latitude" style="flex:1;">
+            <input type="number" step="any" id="inLng" required placeholder="Longitude" style="flex:1;">
+          </div>
+          <button type="button" id="locBtn" onclick="ambilLokasiGPS()">📍 Ambil GPS</button>
+          <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()">🗺️ Pilih di Peta</button>
+        </div>
+        <div class="form-group">
+          <label>Kabupaten / Kota</label>
+          <select id="inWilayah" required>
+            <option value="">-- Pilih --</option>
+            <option value="Kota Gorontalo">Kota Gorontalo</option>
+            <option value="Kab. Gorontalo">Kab. Gorontalo</option>
+            <option value="Bone Bolango">Bone Bolango</option>
+            <option value="Pohuwato">Pohuwato</option>
+            <option value="Boalemo">Boalemo</option>
+            <option value="Gorontalo Utara">Gorontalo Utara</option>
+          </select>
+        </div>
+        <div class="form-group" id="divJenisSampah">
+          <label>Jenis Sampah Spesifik</label>
+          <select id="inJenis" required>
+            <option value="">-- Pilih --</option>
+            <option value="Plastik">Plastik</option>
+            <option value="Kertas & Kardus">Kertas & Kardus</option>
+            <option value="Logam & Kaleng">Logam & Kaleng</option>
+            <option value="Kaca">Kaca</option>
+            <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
+            <option value="Karet">Karet</option>
+            <option value="Campuran">Campuran</option>
+          </select>
+        </div>
+        <div class="form-group" id="divKritis">
+          <label id="labelKritis">Tingkat Kekritisan</label>
+          <select id="inKritis" required>
+            <option value="Tinggi">Tinggi</option>
+            <option value="Sedang">Sedang</option>
+            <option value="Rendah">Rendah</option>
+          </select>
+        </div>
+        <div class="form-group" id="divStatus" style="display:none;">
+          <label>Status Penanganan (Admin)</label>
+          <select id="inStatus">
+            <option value="Belum Ditangani">Belum Ditangani</option>
+            <option value="Sudah Ditangani">Sudah Ditangani</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
+          <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
+          <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
+        </div>
+        <div class="form-group">
+          <label>Catatan Tambahan</label>
+          <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
+        </div>
+        <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;" id="divAntiBot">
+          <label style="color:#b91c1c;">Verifikasi Anti-Bot: 3 + 4 = ?</label>
+          <input type="number" id="inVerifikasi" placeholder="Jawaban">
+        </div>
+        <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Data</button>
+        <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LACAK LAPORAN -->
+  <div id="modalLacak" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">🔍 Lacak Status Laporan</h2>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 15px; text-align: center;">Masukkan nama lokasi yang Anda laporkan sebelumnya.</p>
+      <div class="form-group">
+        <input type="text" id="inCariLaporan" placeholder="Contoh: TPS Pasar Sentral" style="text-align:center;">
+      </div>
+      <button type="button" class="btn-submit" onclick="prosesLacak()">Cari Laporan</button>
+      <button type="button" class="btn-cancel" onclick="tutupLacak()">Batal</button>
+      <div id="hasilLacak" style="margin-top: 15px; text-align: center;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL EDUKASI -->
+  <div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
+    <div class="modal-content">
+      <div class="edu-header" id="eduHeader">
+        <button class="edu-close-btn" onclick="tutupEdukasi()">✕</button>
+        <span id="eduIcon" class="edu-header-icon">💡</span>
+        <div id="eduTitle" class="edu-header-title">Memuat...</div>
+      </div>
+      <div class="edu-body">
+        <div class="edu-section">
+          <div class="edu-section-title" style="color: #f59e0b;">⏱️ Fakta Terurai</div>
+          <div id="eduFakta" class="edu-section-text">...</div>
+        </div>
+        <div class="edu-section">
+          <div class="edu-section-title" style="color: #ef4444;">⚠️ Dampak Buruk</div>
+          <div id="eduDampak" class="edu-section-text">...</div>
+        </div>
+        <div class="edu-section">
+          <div class="edu-section-title" style="color: #10b981;">♻️ Solusi</div>
+          <div id="eduSolusi" class="edu-section-text">...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modalLogin" class="modal-overlay">
+    <div class="modal-content">
+      <h2>🔐 Login Admin</h2>
+      <div class="form-group">
+        <input type="password" id="inPasswordAdmin" placeholder="Password (admin123)" style="text-align:center;">
+      </div>
+      <button type="button" class="btn-submit" onclick="prosesLogin()">Masuk</button>
+      <button type="button" class="btn-cancel" onclick="tutupLoginAdmin()">Batal</button>
+    </div>
+  </div>
+
+  <!-- MODAL KELOLA PENDUDUK -->
+  <div id="modalPenduduk" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">⚙️ Kelola Penduduk</h2>
+      <div id="formPendudukContainer"></div>
+      <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL QR CODE -->
+  <div id="modalQR" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Scan Aplikasi Tuwoto</h2>
+      <div id="qrcode"></div>
+      <button type="button" class="btn-cancel" onclick="tutupQR()">Tutup</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Pustaka JavaScript -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+const SUPABASE_URL = 'https://jhetrpqhcytlyqyvfvla.supabase.co'; 
+const SUPABASE_KEY = 'sb_publishable_IuPMT8dpVh7NtXkGTwPHLA_cUbkUuB1';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// DAFTAR FILE GEOJSON LOKAL
+const daftarFileGeoJSON = [
+  'Kabupaten Pohuwato-KECAMATAN.geojson.json',
+  'Kabupaten Bone Bolango-KECAMATAN.geojson.json',
+  'Kabupaten Boalemo-KECAMATAN.geojson.json',
+  'Kabupaten Gorontalo Utara-KECAMATAN.geojson.json',
+  'Kabupaten Gorontalo-KECAMATAN.geojson.json'
+];
+
+const edukasiSampah = {
+  "Plastik": { icon: "🥤", title: "Plastik", color: "#2563eb", fakta: "Butuh <b>400-1000 tahun</b> untuk terurai.", dampak: "Mencemari laut, mematikan biota laut, dan menjadi mikroplastik.", solusi: "Gunakan tas kain, kurangi sedotan, pilah botol untuk Bank Sampah." },
+  "Kertas & Kardus": { icon: "📦", title: "Kertas", color: "#d97706", fakta: "Butuh <b>2-6 bulan</b> untuk terurai.", dampak: "Menghasilkan gas metana jika tertimbun dan membusuk.", solusi: "Jaga kardus tetap kering, ikat rapi untuk didaur ulang." },
+  "Logam & Kaleng": { icon: "🥫", title: "Logam", color: "#475569", fakta: "Butuh <b>80-200 tahun</b>, tapi 100% bisa didaur ulang.", dampak: "Tajam dan berkarat, melukai satwa liar.", solusi: "Sangat berharga! Kumpulkan dan jual ke pengepul." },
+  "Kaca": { icon: "🍾", title: "Kaca", color: "#0ea5e9", fakta: "Secara alami <b>TIDAK TERURAI</b>, tapi bisa didaur ulang terus.", dampak: "Pecahan berbahaya, memantulkan cahaya memicu kebakaran.", solusi: "Bungkus pecahan dengan koran. Serahkan botol utuh ke Bank Sampah." },
+  "Elektronik (E-Waste)": { icon: "🔋", title: "E-Waste", color: "#ef4444", fakta: "Mengandung logam berat berbahaya (Merkuri, Timbal).", dampak: "Meracuni tanah dan air tanah.", solusi: "JANGAN buang ke tong biasa! Serahkan ke fasilitas E-Waste." },
+  "Karet": { icon: "🛞", title: "Karet", color: "#334155", fakta: "Butuh <b>50-80 tahun</b> untuk terurai.", dampak: "Sarang nyamuk, asap beracun jika dibakar.", solusi: "Serahkan ke pengrajin untuk jadi pot atau kursi." },
+  "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
+};
+
+let dataTitik = [];
+let dataPenduduk = {}; 
+let petaMarkers = []; 
+let isAdmin = false; 
+let tempMarker = null;
+let heatLayer = null;
+let choroplethLayer = null;
+let isHeatmapMode = false;
+let isChoroplethMode = false;
+let myChart = null;
+
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSort = 'default';
+
+const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
+
+const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
+
+function toggleSheet() {
+  document.getElementById('bottomSheet').classList.toggle('expanded');
+  const icon = document.querySelector('.drag-text i');
+  icon.innerText = document.getElementById('bottomSheet').classList.contains('expanded') ? '▼' : '▲';
+}
+
+function switchTab(tabName, btnElement) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  if(btnElement) btnElement.classList.add('active');
+  if(tabName === 'analisis') renderGrafik();
+}
+
+function generateEduGrid() {
+  const grid = document.getElementById('eduGrid');
+  grid.innerHTML = '';
+  for (let key in edukasiSampah) {
+    let data = edukasiSampah[key];
+    let card = document.createElement('div');
+    card.className = 'edu-card';
+    card.onclick = () => bukaEdukasi(key);
+    card.innerHTML = `<span class="edu-card-icon">${data.icon}</span><div class="edu-card-title">${data.title}</div>`;
+    grid.appendChild(card);
+  }
+}
+generateEduGrid();
+
+function bukaEdukasi(jenisSampah) {
+  const data = edukasiSampah[jenisSampah];
+  if (!data) return;
+  document.getElementById('eduHeader').style.background = data.color;
+  document.getElementById('eduIcon').innerText = data.icon;
+  document.getElementById('eduTitle').innerText = data.title;
+  document.getElementById('eduFakta').innerHTML = data.fakta;
+  document.getElementById('eduDampak').innerHTML = data.dampak;
+  document.getElementById('eduSolusi').innerHTML = data.solusi;
+  document.getElementById('modalEdukasi').style.display = 'flex';
+}
+function tutupEdukasi() { document.getElementById('modalEdukasi').style.display = 'none'; }
+
+function hitungJarak(lat1, lon1, lat2, lon2) {
+  const R = 6371; 
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; 
+}
+
+function cariTerdekat() {
+  if (!navigator.geolocation) { alert("HP Anda tidak mendukung GPS."); return; }
+  document.querySelector('.btn-terdekat').innerText = "Mencari lokasi Anda...";
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
+    const fasilitas = dataTitik.filter(t => t.kategori === 'fasilitas' && t.is_approved !== false);
+    if (fasilitas.length === 0) { alert("Belum ada data Tempat Sampah (RT/RW) di sistem."); return; }
+    let terdekat = null; let jarakTerdekat = Infinity;
+    fasilitas.forEach(f => {
+      const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
+      if (jarak < jarakTerdekat) { jarakTerdekat = jarak; terdekat = f; }
+    });
+    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari Tempat Sampah Terdekat";
+    if (terdekat) {
+      document.getElementById('bottomSheet').classList.remove('expanded');
+      map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 });
+      setTimeout(() => {
+        const index = dataTitik.findIndex(t => t.id === terdekat.id);
+        const marker = petaMarkers[index];
+        if (marker) marker.openPopup();
+        alert(`Tempat sampah terdekat: ${terdekat.nama} (${jarakTerdekat.toFixed(2)} km dari lokasi Anda)`);
+      }, 2100);
+    }
+  }, (err) => {
+    alert("Gagal mengambil lokasi. Pastikan GPS aktif dan izin diberikan.");
+    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari Tempat Sampah Terdekat";
+  });
+}
+
+function bukaLacak() { document.getElementById('modalLacak').style.display = 'flex'; document.getElementById('hasilLacak').innerHTML = ''; document.getElementById('inCariLaporan').value = ''; }
+function tutupLacak() { document.getElementById('modalLacak').style.display = 'none'; }
+
+function prosesLacak() {
+  const keyword = document.getElementById('inCariLaporan').value.toLowerCase();
+  const hasilContainer = document.getElementById('hasilLacak');
+  if (!keyword) { alert("Masukkan nama lokasi!"); return; }
+  const hasil = dataTitik.filter(t => t.nama.toLowerCase().includes(keyword));
+  if (hasil.length === 0) { hasilContainer.innerHTML = `<p style="color:#ef4444; font-size:13px;">Laporan dengan nama "${keyword}" tidak ditemukan.</p>`; return; }
+  hasilContainer.innerHTML = '';
+  hasil.forEach(t => {
+    let statusText = t.is_approved === false ? "Pending (Menunggu ACC)" : (t.status || "Belum Ditangani");
+    let statusColor = t.is_approved === false ? "#f59e0b" : (t.status === "Sudah Ditangani" ? "#10b981" : "#ef4444");
+    hasilContainer.innerHTML += `
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
+        <div style="font-weight:bold; font-size:13px; margin-bottom:4px;">${t.nama}</div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Wilayah: ${t.wilayah}</div>
+        <div style="font-size:12px; font-weight:bold; color:${statusColor};">Status: ${statusText}</div>
+      </div>
+    `;
+  });
+}
+
+function renderGrafik() {
+  const canvas = document.getElementById('myChart');
+  if (!canvas) return;
+  let hitungJenis = {};
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
+  approvedData.forEach(t => {
+    let jenis = t.jenis || 'Campuran';
+    hitungJenis[jenis] = (hitungJenis[jenis] || 0) + 1;
+  });
+  const labels = Object.keys(hitungJenis);
+  const dataValues = Object.values(hitungJenis);
+  const bgColors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#64748b', '#0ea5e9'];
+  if (myChart) { myChart.destroy(); }
+  const ctx = canvas.getContext('2d');
+  myChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels.length > 0 ? labels : ['Belum Ada Data'],
+      datasets: [{
+        data: dataValues.length > 0 ? dataValues : [1],
+        backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff'
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+}
+
+async function kompresGambar(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scale = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          const compressedFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+          resolve(compressedFile);
+        }, 'image/jpeg', 0.7);
+      };
+    };
+  });
+}
+
+async function toggleChoropleth() {
+  isChoroplethMode = !isChoroplethMode;
+  const btn = document.getElementById('btnChoropleth');
+  if (isChoroplethMode) { 
+    btn.style.background = '#ef4444'; 
+    btn.innerHTML = '📍 Sembunyikan Batas'; 
+    await muatChoropleth(); 
+  } else { 
+    btn.style.background = '#8b5cf6'; 
+    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah'; 
+    if (choroplethLayer) { map.removeLayer(choroplethLayer); choroplethLayer = null; } 
+  }
+}
+
+async function muatChoropleth() {
+  if (choroplethLayer) map.removeLayer(choroplethLayer);
+  try {
+    // Mengunduh semua file secara bersamaan
+    const promises = daftarFileGeoJSON.map(file => fetch(file).then(res => res.json()));
+    const hasilFetch = await Promise.all(promises);
+
+    // Menggabungkan semua fitur
+    let semuaFitur = [];
+    hasilFetch.forEach(geojson => {
+      if (geojson.features) {
+        semuaFitur.push(...geojson.features);
+      }
+    });
+
+    const dataGabungan = {
+      type: 'FeatureCollection',
+      features: semuaFitur
+    };
+
+    let skorSampah = {};
+    const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
+    approvedData.forEach(t => {
+      let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
+      skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai;
+    });
+
+    choroplethLayer = L.geoJSON(dataGabungan, {
+      style: function (feature) {
+        let props = feature.properties;
+        // Mendeteksi nama Kabupaten untuk diwarnai berdasarkan skor sampah Kabupaten
+        let namaKab = props.WADMKK || props.KABUPATEN || "";
+        let namaData = "";
+        for (let key in skorSampah) {
+          if (namaKab.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(namaKab.toLowerCase())) { namaData = key; break; }
+        }
+
+        let skor = namaData ? skorSampah[namaData] : 0;
+        let penduduk = namaData ? (dataPenduduk[namaData] || 0) : 0;
+        let rasio = penduduk > 0 ? (skor / (penduduk / 100000)) : 0;
+        
+        let fillColor = '#e2e8f0';
+        if (rasio > 1.5) fillColor = '#ef4444';
+        else if (rasio > 0.5) fillColor = '#f59e0b';
+        else if (rasio > 0) fillColor = '#10b981';
+        else if (namaKab) fillColor = '#cbd5e1'; // Abu-abu terang untuk wilayah tanpa data
+
+        return { fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6 };
+      },
+      onEachFeature: function (feature, layer) {
+        let props = feature.properties;
+        let namaKec = props.NAME_3 || props.WADMKC || props.name || 'Kecamatan';
+        let namaKab = props.WADMKK || props.KABUPATEN || '';
+        layer.bindPopup(`<b>Kec. ${namaKec}</b><br><small>${namaKab}</small>`);
+      }
+    }).addTo(map);
+    
+    map.fitBounds(choroplethLayer.getBounds());
+  } catch (error) {
+    console.error("Gagal memuat batas wilayah:", error);
+    alert("Gagal memuat peta batas wilayah. Pastikan kelima file .json sudah di-upload ke GitHub dan namanya sesuai.");
+    isChoroplethMode = false;
+    const btn = document.getElementById('btnChoropleth'); 
+    btn.style.background = '#8b5cf6'; 
+    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah';
+  }
+}
+
+function ubahFormKategori() {
+  const kat = document.getElementById('inKategori').value;
+  const selectKritis = document.getElementById('inKritis');
+  const labelKritis = document.getElementById('labelKritis');
+  const divJenis = document.getElementById('divJenisSampah');
+  const catatan = document.getElementById('inCatatan');
+  const labelNama = document.getElementById('labelNama');
+  const inNama = document.getElementById('inNama');
+
+  if (kat === 'fasilitas') {
+    divJenis.style.display = 'none'; document.getElementById('inJenis').required = false;
+    labelNama.innerText = "Nama Tempat Sampah / RT"; inNama.placeholder = "Contoh: Bak Sampah RT 05";
+    labelKritis.innerText = "Ukuran Tempat Sampah"; selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang">Sedang</option><option value="Besar">Besar</option>`;
+    catatan.placeholder = "Kondisi bak / butuh perbaikan";
+  } else {
+    divJenis.style.display = 'block'; document.getElementById('inJenis').required = true;
+    labelNama.innerText = "Nama Lokasi / TPS"; inNama.placeholder = "Contoh: TPS Pasar Sentral";
+    labelKritis.innerText = "Tingkat Kekritisan"; selectKritis.innerHTML = `<option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option>`;
+    catatan.placeholder = "Sudah 3 hari belum diangkut";
+  }
+}
+
+function buatMarker(titik) {
+  const isFasilitas = titik.kategori === 'fasilitas';
+  const warnaClass = (titik.is_approved === false) ? 'pending' : (titik.kritis || 'rendah').toLowerCase();
+  let icon;
+  if (isFasilitas) icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-fasilitas">🗑️</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] });
+  else icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pulse ${warnaClass}"></div>`, iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
+
+  const fotoUrl = titik.foto ? titik.foto : 'https://via.placeholder.com/400x200?text=Foto+Belum+Ada';
+  const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
+  let pendingHTML = '';
+  if (titik.is_approved === false) pendingHTML = `<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu ACC</span></div>`;
+
+  let popupContent = "";
+  if (isFasilitas) {
+    popupContent = `<div class="popup-row"><span>Tipe</span><span class="badge fasilitas">Tempat Sampah</span></div><div class="popup-row"><span>Ukuran</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis || '-'}</span></div>`;
+  } else {
+    popupContent = `
+      <div class="popup-row"><span>Jenis</span><b>${titik.jenis || '-'}</b></div>
+      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis}</span></div>
+      <div class="popup-row"><span>Status</span><span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span></div>
+      <button onclick="bukaEdukasi('${titik.jenis}')" style="width:100%; margin-top:8px; padding:6px; background:#fffbeb; border:1px solid #f59e0b; border-radius:6px; font-size:12px; font-weight:bold; color:#b45309; cursor:pointer;">💡 Pelajari Jenis Ini</button>
+    `;
+  }
+
+  const popupHTML = `
+    <img class="popup-img" src="${fotoUrl}" onerror="this.src='https://via.placeholder.com/400x200?text=Foto+Error'">
+    <div class="popup-body">
+      <div class="popup-title">${titik.nama}</div>
+      ${pendingHTML} ${popupContent}
+      <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah}</b></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b;font-style:italic">${titik.catatan || ''}</div>
+    </div>`;
+  return L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 260 });
+}
+
+function keLokasiMenu(index) {
+  document.getElementById('bottomSheet').classList.remove('expanded');
+  const marker = petaMarkers[index];
+  if (!marker) return;
+  const lat = marker.getLatLng().lat; const lng = marker.getLatLng().lng;
+  setTimeout(() => {
+    map.invalidateSize(); map.flyTo([lat, lng], 16, { duration: 1.5 }); 
+    setTimeout(() => { marker.openPopup(); }, 1600);
+  }, 350);
+}
+
+function toggleHeatmap() {
+  isHeatmapMode = !isHeatmapMode;
+  const btn = document.getElementById('btnHeatmap');
+  if (isHeatmapMode) { btn.style.background = '#ef4444'; btn.innerHTML = '📍 Titik Biasa'; }
+  else { btn.style.background = '#f97316'; btn.innerHTML = '🔥 Peta Panas (Heatmap)'; }
+  renderSemua(currentFilter);
+}
+
+function renderSemua(filter = 'all') {
+  currentFilter = filter;
+  cluster.clearLayers();
+  petaMarkers = []; 
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  
+  let dataFilter = filter === 'all' ? dataTitik : dataTitik.filter(t => t.kritis === filter);
+  if (currentSearch) dataFilter = dataFilter.filter(t => t.nama.toLowerCase().includes(currentSearch) || t.wilayah.toLowerCase().includes(currentSearch));
+  const showFasilitas = document.getElementById('toggleFasilitas').checked;
+  if (!showFasilitas) dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
+
+  if (currentSort === 'nama_asc') dataFilter.sort((a, b) => a.nama.localeCompare(b.nama));
+  else if (currentSort === 'kritis_tinggi') dataFilter.sort((a, b) => (b.kritis === 'Tinggi' ? 3 : b.kritis === 'Sedang' ? 2 : 1) - (a.kritis === 'Tinggi' ? 3 : a.kritis === 'Sedang' ? 2 : 1));
+
+  if (dataFilter.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
+
+  if (isHeatmapMode) {
+    map.removeLayer(cluster);
+    if (heatLayer) map.removeLayer(heatLayer);
+    const krisisData = dataFilter.filter(t => t.kategori !== 'fasilitas');
+    if (krisisData.length > 0) {
+      const heatData = krisisData.map(t => [parseFloat(t.lat), parseFloat(t.lng), t.kritis === 'Tinggi' ? 1 : t.kritis === 'Sedang' ? 0.6 : 0.3]);
+      heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
+    }
+  } else {
+    if (heatLayer) map.removeLayer(heatLayer);
+    dataFilter.forEach((titik, index) => { const marker = buatMarker(titik); cluster.addLayer(marker); petaMarkers.push(marker); });
+    map.addLayer(cluster);
+  }
+
+  dataFilter.forEach((titik, index) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    let adminHTML = '';
+    if (isAdmin) {
+      let tombolAcc = '';
+      if (titik.is_approved === false) tombolAcc = `<button class="btn-admin-acc" onclick="setujuiData('${titik.id}')">✅ Setujui</button>`;
+      else if (titik.status !== 'Sudah Ditangani' && titik.kategori !== 'fasilitas') tombolAcc = `<button class="btn-admin-selesai" onclick="tandaiSelesai('${titik.id}')">✅ Selesai</button>`;
+      adminHTML = `<div class="admin-actions">${tombolAcc}<button class="btn-admin-edit" onclick="bukaEdit('${titik.id}')">✏️ Edit</button><button class="btn-admin-hapus" onclick="hapusData('${titik.id}')">🗑️ Hapus</button></div>`;
+    }
+    const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
+    const pendingHTML = (titik.is_approved === false) ? `<span class="badge-status status-pending">Pending</span>` : '';
+    div.innerHTML = `
+      <div class="item-title">${titik.nama}</div>
+      <div class="item-meta">${pendingHTML}<span class="badge ${titik.kritis.toLowerCase()}">${titik.kritis}</span>${titik.kategori !== 'fasilitas' ? `<span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span>` : ''}</div>
+      <button class="btn-lihat" onclick="keLokasiMenu(${index})">🗺️ Lihat Lokasi di Peta</button>
+      ${adminHTML}
+    `;
+    list.appendChild(div);
+  });
+
+  updateStats();
+  if (isChoroplethMode) muatChoropleth(); 
+}
+
+function updateStats() {
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
+  document.getElementById('statTinggi').textContent = approvedData.filter(t => t.kritis === 'Tinggi').length;
+  document.getElementById('statSedang').textContent = approvedData.filter(t => t.kritis === 'Sedang').length;
+  document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
+}
+
+function renderAnalisis() {
+  const panel = document.getElementById('analysis-panel');
+  panel.innerHTML = '';
+  let skorSampah = {};
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
+  approvedData.forEach(t => { let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1); skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai; });
+
+  for (let wilayah in skorSampah) {
+    let penduduk = dataPenduduk[wilayah] || 0;
+    let skor = skorSampah[wilayah];
+    let rasio = penduduk > 0 ? (skor / (penduduk / 100000)).toFixed(2) : "0.00";
+    let warna = rasio > 1.5 ? '#ef4444' : (rasio > 0.5 ? '#f59e0b' : '#10b981');
+    let status = rasio > 1.5 ? 'Waspada' : (rasio > 0.5 ? 'Pantau' : 'Aman');
+    panel.innerHTML += `
+      <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1;">
+        <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">${wilayah}</div>
+        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 2px;"><span>Penduduk:</span> <b>${penduduk.toLocaleString('id-ID')} jiwa</b></div>
+        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 4px;"><span>Skor Sampah:</span> <b>${skor} poin</b></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 8px; border-radius: 6px;">
+          <span>Rasio:</span> <span style="color: ${warna}; font-weight: bold;">${rasio} (${status})</span>
+        </div>
+      </div>`;
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => { currentSearch = e.target.value.toLowerCase(); renderSemua(currentFilter); });
+document.getElementById('sortSelect').addEventListener('change', (e) => { currentSort = e.target.value; renderSemua(currentFilter); });
+document.querySelectorAll('.filter-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderSemua(btn.dataset.filter); }; });
+
+function bukaLoginAdmin() { document.getElementById('modalLogin').style.display = 'flex'; }
+function tutupLoginAdmin() { document.getElementById('modalLogin').style.display = 'none'; }
+function prosesLogin() {
+  const pass = document.getElementById('inPasswordAdmin').value;
+  if (pass === 'admin123') { 
+    isAdmin = true; alert("✅ Login Admin Berhasil!"); tutupLoginAdmin();
+    document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin"; document.getElementById('adminBtnSidebar').style.background = "#ef4444"; document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
+    document.getElementById('adminPendudukBtn').style.display = 'block'; ambilData(); 
+  } else alert("❌ Password salah!");
+}
+function logoutAdmin() {
+  isAdmin = false; alert("Anda logout."); document.getElementById('adminBtnSidebar').textContent = "🔐 Login Admin"; document.getElementById('adminBtnSidebar').style.background = "#64748b"; document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()'); document.getElementById('adminPendudukBtn').style.display = 'none'; ambilData(); 
+}
+
+function bukaKelolaPenduduk() {
+  const container = document.getElementById('formPendudukContainer');
+  container.innerHTML = '';
+  for (let wilayah in dataPenduduk) {
+    let row = document.createElement('div'); row.className = 'penduduk-row'; let safeId = wilayah.replace(/[^a-zA-Z0-9]/g, '_');
+    row.innerHTML = `<label>${wilayah}</label><input type="number" id="input_${safeId}" value="${dataPenduduk[wilayah]}" onchange="simpanPenduduk('${wilayah}', this.value)">`;
+    container.appendChild(row);
+  }
+  document.getElementById('modalPenduduk').style.display = 'flex';
+}
+function tutupKelolaPenduduk() { document.getElementById('modalPenduduk').style.display = 'none'; }
+async function simpanPenduduk(wilayah, nilaiBaru) {
+  const jumlah = parseInt(nilaiBaru);
+  if (isNaN(jumlah) || jumlah < 0) { alert("Angka valid!"); return; }
+  try { const { error } = await supabaseClient.from('data_penduduk').update({ jumlah_penduduk: jumlah }).eq('nama_wilayah', wilayah); if (error) throw error; dataPenduduk[wilayah] = jumlah; renderAnalisis(); if (isChoroplethMode) muatChoropleth(); } catch (err) { alert("Gagal: " + err.message); }
+}
+
+async function setujuiData(id) { if (!confirm("Setujui data?")) return; const { error } = await supabaseClient.from('titik_sampah').update({ is_approved: true }).eq('id', id); if (error) alert("Gagal: " + error.message); else { alert("✅ Disetujui."); ambilData(); } }
+async function tandaiSelesai(id) { if (!confirm("Tandai Selesai?")) return; const { error } = await supabaseClient.from('titik_sampah').update({ status: 'Sudah Ditangani' }).eq('id', id); if (error) alert("Gagal: " + error.message); else { alert("✅ Selesai."); ambilData(); } }
+
+function bukaEdit(id) {
+  const data = dataTitik.find(t => t.id == id); if (!data) return;
+  document.getElementById('judulForm').textContent = "✏️ Edit Data"; document.getElementById('editId').value = data.id;
+  document.getElementById('inKategori').value = data.kategori || 'krisis'; ubahFormKategori();
+  document.getElementById('inNama').value = data.nama; document.getElementById('inLat').value = data.lat; document.getElementById('inLng').value = data.lng; document.getElementById('inWilayah').value = data.wilayah;
+  if (data.kategori !== 'fasilitas') document.getElementById('inJenis').value = data.jenis;
+  document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
+  document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
+  document.getElementById('divAntiBot').style.display = 'none'; document.getElementById('inVerifikasi').required = false;
+  document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
+  document.getElementById('modalLapor').style.display = 'flex';
+}
+
+async function hapusData(id) { if (!confirm("Hapus data?")) return; const { error } = await supabaseClient.from('titik_sampah').delete().eq('id', id); if (error) alert("Gagal: " + error.message); else { alert("✅ Dihapus."); ambilData(); } }
+
+document.getElementById('laporBtn').onclick = () => {
+  document.getElementById('formLaporan').reset(); document.getElementById('judulForm').textContent = "📝 Form Laporan"; document.getElementById('editId').value = "";
+  document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
+  document.getElementById('divAntiBot').style.display = 'block'; document.getElementById('inVerifikasi').required = true;
+  document.getElementById('inFoto').required = true; document.getElementById('labelFotoWajib').style.display = 'inline'; document.getElementById('infoFotoLama').style.display = 'none';
+  document.getElementById('divStatus').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+  document.getElementById('modalLapor').style.display = 'flex';
+};
+
+function tutupModal() { document.getElementById('modalLapor').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } }
+
+function ambilLokasiGPS() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((position) => { document.getElementById('inLat').value = position.coords.latitude; document.getElementById('inLng').value = position.coords.longitude; alert("GPS diambil!"); }, (error) => { alert("Gagal GPS."); }); } else alert("Tidak mendukung GPS."); }
+
+function mulaiPilihPeta() {
+  document.getElementById('modalLapor').style.display = 'none'; alert("Ketuk peta untuk ambil koordinat."); document.getElementById('map').style.cursor = 'crosshair';
+  map.once('click', function(e) {
+    const lat = e.latlng.lat, lng = e.latlng.lng; document.getElementById('inLat').value = lat.toFixed(6); document.getElementById('inLng').value = lng.toFixed(6);
+    if (tempMarker) map.removeLayer(tempMarker); tempMarker = L.marker([lat, lng]).addTo(map).bindPopup("<b>Lokasi Dipilih</b>").openPopup();
+    document.getElementById('map').style.cursor = ''; document.getElementById('modalLapor').style.display = 'flex';
+  });
+}
+
+document.getElementById('formLaporan').onsubmit = async (e) => {
+  e.preventDefault();
+  const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
+  if (!isEditMode) { const verifikasi = parseInt(document.getElementById('inVerifikasi').value); if (verifikasi !== 7) { alert("❌ Anti-bot salah!"); return; } }
+  const btnSubmit = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); const kategori = document.getElementById('inKategori').value;
+  btnSubmit.textContent = 'Memproses...'; btnSubmit.disabled = true;
+  let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false; 
+  if (isEditMode) { const dataLama = dataTitik.find(t => t.id == editId); if (dataLama) { fotoUrl = dataLama.foto; isApprovedValue = dataLama.is_approved; } statusValue = document.getElementById('inStatus').value; }
+  else { if (isAdmin) isApprovedValue = true; }
+  try {
+    if (fileInput.files.length > 0) {
+      btnSubmit.textContent = 'Kompres Foto...';
+      const file = fileInput.files[0]; 
+      const compressedFile = await kompresGambar(file);
+      
+      btnSubmit.textContent = 'Upload...';
+      const fileName = `${Date.now()}_${compressedFile.name.replace(/\s/g, '_')}`; 
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('foto_sampah').upload(fileName, compressedFile); 
+      if (uploadError) throw uploadError; 
+      const { data: publicUrlData } = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); 
+      fotoUrl = publicUrlData.publicUrl; 
+    }
+    const dataBaru = { nama: document.getElementById('inNama').value, lat: parseFloat(document.getElementById('inLat').value), lng: parseFloat(document.getElementById('inLng').value), wilayah: document.getElementById('inWilayah').value, jenis: kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value, kritis: document.getElementById('inKritis').value, kategori: kategori, status: statusValue, is_approved: isApprovedValue, catatan: document.getElementById('inCatatan').value, alamat: "-", foto: fotoUrl };
+    let error; if (isEditMode) { const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); error = result.error; } else { const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); error = result.error; }
+    if (error) throw error;
+    alert(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : "✅ Dikirim! Menunggu ACC."));
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } tutupModal(); ambilData(); 
+  } catch (error) { alert("❌ Gagal: " + error.message); } finally { btnSubmit.textContent = 'Kirim Data'; btnSubmit.disabled = false; }
+};
+
+let qrGenerated = false;
+function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://samaranakun61-pixel.github.io/peta_sampah/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } }
+function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
+
+async function ambilData() {
+  try {
+    let query = supabaseClient.from('titik_sampah').select('*'); if (!isAdmin) query = query.eq('is_approved', true);
+    const { data: dataSampah, error: errSampah } = await query; if (!errSampah) dataTitik = dataSampah || [];
+    const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*'); if (!errPend && dataPend) { dataPenduduk = {}; dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; }); }
+    renderSemua(currentFilter); renderAnalisis(); 
+    if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
+  } catch (err) { console.log("Error koneksi:", err); }
+}
+
+renderSemua(currentFilter); renderAnalisis(); ambilData();
+
+supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => { ambilData(); }).subscribe();
+supabaseClient.channel('schema-db-changes-penduduk').on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); }).subscribe();
+</script>
+
+<!-- MENGAKTIFKAN SERVICE WORKER PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(registration => {
+        console.log('Service Worker aktif:', registration.scope);
+      }).catch(error => {
+        console.log('Service Worker gagal:', error);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
