@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuwoto-v20'; // Naikkan versi cache agar browser ambil file baru
+const CACHE_NAME = 'tuwoto-v25'; // Naikkan versi cache agar browser ambil file baru
 const urlsToCache = [
   './',
   './index.html',
