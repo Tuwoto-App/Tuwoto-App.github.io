@@ -327,7 +327,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.2.0 (Bank Sampah)</div>
+          <div class="about-version">Versi 1.0.0</div>
 
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
@@ -505,7 +505,7 @@
     <div class="modal-content">
       <h2>🔐 Login Admin</h2>
       <div class="form-group">
-        <input type="password" id="inPasswordAdmin" placeholder="Password (admin123)" style="text-align:center;">
+        <input type="password" id="inPasswordAdmin" placeholder="Masukan Password" style="text-align:center;">
       </div>
       <button type="button" class="btn-submit" onclick="prosesLogin()">Masuk</button>
       <button type="button" class="btn-cancel" onclick="tutupLoginAdmin()">Batal</button>
@@ -1105,7 +1105,7 @@ function bukaLoginAdmin() { document.getElementById('modalLogin').style.display 
 function tutupLoginAdmin() { document.getElementById('modalLogin').style.display = 'none'; }
 function prosesLogin() {
   const pass = document.getElementById('inPasswordAdmin').value;
-  if (pass === 'admin123') { 
+  if (pass === 'admin911') { 
     isAdmin = true; alert("✅ Login Admin Berhasil!"); tutupLoginAdmin();
     document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin"; 
     document.getElementById('adminBtnSidebar').style.background = "#ef4444"; 
