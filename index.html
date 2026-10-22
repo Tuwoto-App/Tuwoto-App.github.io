@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=25">
+  <link rel="manifest" href="manifest.json?v=26">
   <meta name="theme-color" content="#059669">
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -14,13 +14,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-  
-  <!-- CSS Rute Navigasi (Leaflet Routing Machine) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-
-  <!-- CSS Lokasi Saya (Leaflet Locate Control) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -32,18 +27,9 @@
     #app { position: relative; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
     #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
-    /* Penyesuaian posisi tombol lokasi agar tidak tertutup header Tuwoto */
-    .leaflet-top.leaflet-right {
-      top: 75px; 
-    }
+    .leaflet-top.leaflet-right { top: 75px; }
 
-    .floating-header { 
-      position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; 
-      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); 
-      padding: 8px 12px; border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-      display: flex; align-items: center; gap: 10px; 
-    }
+    .floating-header { position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; }
     .floating-header img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
     .floating-header h1 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px; }
     .floating-header .subtitle { font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600; }
@@ -123,7 +109,6 @@
     .menu-accordion button { width: 100%; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
     #btnChoropleth { background: #8b5cf6; color: white; }
     #qrBtnSidebar { background: #0ea5e9; color: white; }
-    #adminBtnSidebar { background: #64748b; color: white; }
     #adminPendudukBtn { display: none; background: #8b5cf6; color: white; margin-top: 4px; }
     
     .heatmap-controls { display: flex; gap: 5px; margin-bottom: 5px; }
@@ -314,7 +299,6 @@
             </div>
 
             <button id="qrBtnSidebar" onclick="bukaQR()">📱 QR Code</button>
-            <button id="adminBtnSidebar" onclick="bukaLoginAdmin()">🔐 Login Admin</button>
             <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()">⚙️ Kelola Penduduk</button>
           </div>
         </details>
@@ -339,7 +323,7 @@
         <div class="edu-grid" id="eduGrid"></div>
       </div>
 
-      <!-- TAB PROFIL WARGA & AUTH -->
+      <!-- TAB PROFIL WARGA & ADMIN -->
       <div id="tab-profil" class="tab-content">
         
         <!-- UI JIKA BELUM LOGIN -->
@@ -367,22 +351,26 @@
             <div class="profile-level-desc" id="profilLevelDesc">Warga Baru Peduli Sampah</div>
             
             <div style="font-size:12px; color:var(--teks-muted); margin-bottom:5px;" id="profilEmailText">email@contoh.com</div>
-            <div class="profile-points-box">
+            <div class="profile-points-box" id="divPoinBox">
               <span id="profilTotalPoin">0</span> Poin
             </div>
             
-            <div class="progress-container">
-              <div class="progress-bar" id="profilProgressBar"></div>
+            <div id="divProgressContainer">
+              <div class="progress-container">
+                <div class="progress-bar" id="profilProgressBar"></div>
+              </div>
+              <div class="progress-text" id="profilProgressText">0/50 Poin menuju level berikutnya</div>
             </div>
-            <div class="progress-text" id="profilProgressText">0/50 Poin menuju level berikutnya</div>
             
             <button onclick="logoutWarga()" style="margin-top:20px; width:100%; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">Keluar Akun</button>
           </div>
           
-          <div class="list-title" style="margin-top:0;">Cara Mendapatkan Poin:</div>
-          <div style="padding: 0 16px 30px 16px; font-size: 12px; color: var(--teks-muted); line-height: 1.6;">
-            🟢 <b>+10 Poin:</b> Setiap kali berhasil membuat laporan krisis sampah baru.<br>
-            🟢 <b>+5 Poin:</b> Menambahkan data Tempat Sampah / Bank Sampah baru.<br>
+          <div id="divCaraDapatPoin">
+            <div class="list-title" style="margin-top:0;">Cara Mendapatkan Poin:</div>
+            <div style="padding: 0 16px 30px 16px; font-size: 12px; color: var(--teks-muted); line-height: 1.6;">
+              🟢 <b>+10 Poin:</b> Setiap kali berhasil membuat laporan krisis sampah baru.<br>
+              🟢 <b>+5 Poin:</b> Menambahkan data Tempat Sampah / Bank Sampah baru.<br>
+            </div>
           </div>
         </div>
 
@@ -392,30 +380,8 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.5.1 (Perbaikan Tombol Lokasi)</div>
-
-          <div class="about-card">
-            <h4>📖 Filosofi Nama</h4>
-            <p>Nama <b>Tuwoto</b> berasal dari bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH) untuk segera ditindaklanjuti.</p>
-          </div>
-
-          <div class="about-card">
-            <h4>🎯 Visi & Misi</h4>
-            <p>Menciptakan lingkungan Gorontalo yang bersih dan berkelanjutan melalui kolaborasi digital (Smart Waste Management) antara warga, petugas kebersihan, dan pemangku kebijakan.</p>
-          </div>
-
-          <div class="about-card">
-            <h4>💻 Teknologi</h4>
-            <p>Aplikasi ini dibangun menggunakan teknologi web modern tanpa memerlukan unduhan aplikasi besar (PWA).</p>
-            <div class="tech-tags">
-              <span class="tech-tag">PWA (Progressive Web App)</span>
-              <span class="tech-tag">Leaflet.js (GIS)</span>
-              <span class="tech-tag">Leaflet Routing Machine</span>
-              <span class="tech-tag">Supabase (Auth & DB)</span>
-              <span class="tech-tag">Chart.js</span>
-            </div>
-          </div>
-          
+          <div class="about-version">Versi 1.6.0 (Admin Terintegrasi)</div>
+          <!-- ... about content ... -->
           <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">
             &copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.
           </div>
@@ -580,18 +546,6 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN -->
-  <div id="modalLogin" class="modal-overlay">
-    <div class="modal-content">
-      <h2>🔐 Login Admin</h2>
-      <div class="form-group">
-        <input type="password" id="inPasswordAdmin" placeholder="Password (admin123)" style="text-align:center;">
-      </div>
-      <button type="button" class="btn-submit" onclick="prosesLogin()">Masuk</button>
-      <button type="button" class="btn-cancel" onclick="tutupLoginAdmin()">Batal</button>
-    </div>
-  </div>
-
   <!-- MODAL KELOLA PENDUDUK -->
   <div id="modalPenduduk" class="modal-overlay">
     <div class="modal-content" style="text-align: left;">
@@ -617,7 +571,6 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-<!-- Pustaka JS Lokasi Saya (Kanan Atas) -->
 <script src="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -663,6 +616,7 @@ const jadwalTrukData = {
 // VARIABEL STATE USER
 let currentUser = null;
 let currentUserPoints = 0;
+let currentUserRole = 'warga'; // default
 
 let dataTitik = [];
 let dataPenduduk = {}; 
@@ -685,7 +639,6 @@ const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
-// INISIALISASI TOMBOL LOKASI SAYA (Gaya Panah Biru di Kanan Atas)
 L.control.locate({
   position: 'topright',
   strings: { title: "Tunjukkan Lokasi Saya" },
@@ -701,15 +654,17 @@ listKecamatanGorontalo.forEach(kec => {
   datalistKec.appendChild(option);
 });
 
-// ================= SISTEM AUTH WARGA =================
+// ================= SISTEM AUTH WARGA & ADMIN =================
 async function cekSesiUser() {
   const { data: { session }, error } = await supabaseClient.auth.getSession();
   if (session) {
     currentUser = session.user;
-    await ambilPoinUser();
+    await ambilDataUser();
   } else {
     currentUser = null;
     currentUserPoints = 0;
+    currentUserRole = 'warga';
+    isAdmin = false;
   }
   updateUIProfil();
 }
@@ -731,7 +686,7 @@ async function prosesLoginWarga() {
     document.getElementById('inEmailUser').value = '';
     document.getElementById('inPassUser').value = '';
     currentUser = data.user;
-    await ambilPoinUser();
+    await ambilDataUser();
     updateUIProfil();
   }
 }
@@ -750,7 +705,7 @@ async function prosesDaftarWarga() {
     alert("❌ Gagal Daftar: " + error.message);
     btn.innerText = "Buat Akun Baru";
   } else {
-    alert("✅ Pendaftaran Berhasil! Silakan cek email Anda jika diperlukan, atau langsung login.");
+    alert("✅ Pendaftaran Berhasil! Silakan login.");
     btn.innerText = "Buat Akun Baru";
   }
 }
@@ -760,22 +715,40 @@ async function logoutWarga() {
   await supabaseClient.auth.signOut();
   currentUser = null;
   currentUserPoints = 0;
+  currentUserRole = 'warga';
+  isAdmin = false;
   updateUIProfil();
+  ambilData(); // Reload peta sebagai warga biasa
   alert("Anda telah keluar.");
 }
 
-async function ambilPoinUser() {
+async function ambilDataUser() {
   if(!currentUser) return;
-  const { data, error } = await supabaseClient.from('profiles').select('total_poin').eq('id', currentUser.id).single();
+  const { data, error } = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
   if (data) {
     currentUserPoints = data.total_poin;
+    currentUserRole = data.role || 'warga';
   } else {
     currentUserPoints = 0;
+    currentUserRole = 'warga';
   }
+  
+  // JIKA ROLE ADMIN, AKTIFKAN FITUR ADMIN
+  if (currentUserRole === 'admin') {
+    isAdmin = true;
+    document.getElementById('optBankSampah').style.display = 'block'; 
+    document.getElementById('adminPendudukBtn').style.display = 'block'; 
+  } else {
+    isAdmin = false;
+    document.getElementById('optBankSampah').style.display = 'none'; 
+    document.getElementById('adminPendudukBtn').style.display = 'none'; 
+  }
+  
+  ambilData(); // Reload peta (Admin bisa lihat yg pending)
 }
 
 async function tambahPoinKeDB(jumlah) {
-  if (!currentUser) return; // Hanya jalan jika login
+  if (!currentUser) return;
   const newPoin = currentUserPoints + jumlah;
   const { error } = await supabaseClient.from('profiles').update({ total_poin: newPoin }).eq('id', currentUser.id);
   if (!error) {
@@ -791,8 +764,19 @@ function updateUIProfil() {
   if (currentUser) {
     divBelum.style.display = 'none';
     divSudah.style.display = 'block';
-    document.getElementById('profilEmailText').innerText = currentUser.email;
+    document.getElementById('profilEmailText').innerText = currentUser.email + (isAdmin ? " (ADMIN)" : "");
     renderProfilLencana();
+    
+    // Sembunyikan poin/lencana jika Admin (Admin tidak butuh poin)
+    if (isAdmin) {
+      document.getElementById('divPoinBox').style.display = 'none';
+      document.getElementById('divProgressContainer').style.display = 'none';
+      document.getElementById('divCaraDapatPoin').style.display = 'none';
+    } else {
+      document.getElementById('divPoinBox').style.display = 'inline-block';
+      document.getElementById('divProgressContainer').style.display = 'block';
+      document.getElementById('divCaraDapatPoin').style.display = 'block';
+    }
   } else {
     divBelum.style.display = 'block';
     divSudah.style.display = 'none';
@@ -800,6 +784,8 @@ function updateUIProfil() {
 }
 
 function renderProfilLencana() {
+  if(isAdmin) return; // Admin tidak perlu render lencana
+
   const imgBadge = document.getElementById('profilBadge');
   const txtTitle = document.getElementById('profilLevelTitle');
   const txtDesc = document.getElementById('profilLevelDesc');
@@ -845,14 +831,15 @@ function renderProfilLencana() {
   }
 }
 
-// Pantau perubahan status login secara global
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') {
     currentUser = session.user;
-    ambilPoinUser().then(() => updateUIProfil());
+    ambilDataUser().then(() => updateUIProfil());
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     currentUserPoints = 0;
+    currentUserRole = 'warga';
+    isAdmin = false;
     updateUIProfil();
   }
 });
@@ -1418,37 +1405,6 @@ document.getElementById('searchInput').addEventListener('input', (e) => { curren
 document.getElementById('sortSelect').addEventListener('change', (e) => { currentSort = e.target.value; renderSemua(currentFilter); });
 document.querySelectorAll('.filter-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderSemua(btn.dataset.filter); }; });
 
-// ADMIN LOGIN TETAP SEPERTI SEBELUMNYA
-function bukaLoginAdmin() { document.getElementById('modalLogin').style.display = 'flex'; }
-function tutupLoginAdmin() { document.getElementById('modalLogin').style.display = 'none'; }
-function prosesLogin() {
-  const pass = document.getElementById('inPasswordAdmin').value;
-  if (pass === 'admin123') { 
-    isAdmin = true; alert("✅ Login Admin Berhasil!"); tutupLoginAdmin();
-    document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin"; 
-    document.getElementById('adminBtnSidebar').style.background = "#ef4444"; 
-    document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
-    document.getElementById('adminPendudukBtn').style.display = 'block'; 
-    
-    document.getElementById('optBankSampah').style.display = 'block'; 
-    
-    ambilData(); 
-  } else alert("❌ Password salah!");
-}
-function logoutAdmin() {
-  isAdmin = false; alert("Anda logout."); 
-  document.getElementById('adminBtnSidebar').textContent = "🔐 Login Admin"; 
-  document.getElementById('adminBtnSidebar').style.background = "#64748b"; 
-  document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()'); 
-  document.getElementById('adminPendudukBtn').style.display = 'none'; 
-  
-  document.getElementById('optBankSampah').style.display = 'none';
-  document.getElementById('inKategori').value = 'krisis'; 
-  ubahFormKategori();
-  
-  ambilData(); 
-}
-
 function bukaKelolaPenduduk() {
   const container = document.getElementById('formPendudukContainer');
   container.innerHTML = '';
@@ -1567,7 +1523,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
     if (error) throw error;
     
     // JIKA BUKAN EDIT (Laporan Baru) DAN USER SUDAH LOGIN, TAMBAH POIN KE DB
-    if (!isEditMode && currentUser) {
+    if (!isEditMode && currentUser && !isAdmin) {
        await tambahPoinKeDB(10); // Dapat 10 poin per laporan baru
     }
 
@@ -1582,9 +1538,17 @@ function tutupQR() { document.getElementById('modalQR').style.display = 'none'; 
 
 async function ambilData() {
   try {
-    let query = supabaseClient.from('titik_sampah').select('*'); if (!isAdmin) query = query.eq('is_approved', true);
-    const { data: dataSampah, error: errSampah } = await query; if (!errSampah) dataTitik = dataSampah || [];
-    const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*'); if (!errPend && dataPend) { dataPenduduk = {}; dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; }); }
+    let query = supabaseClient.from('titik_sampah').select('*'); 
+    // JIKA BUKAN ADMIN, HANYA TAMPILKAN YANG SUDAH DI-ACC
+    if (!isAdmin) query = query.eq('is_approved', true);
+    const { data: dataSampah, error: errSampah } = await query; 
+    if (!errSampah) dataTitik = dataSampah || [];
+    
+    const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*'); 
+    if (!errPend && dataPend) { 
+      dataPenduduk = {}; 
+      dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; }); 
+    }
     renderSemua(currentFilter); renderAnalisis(); 
     if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
   } catch (err) { console.log("Error koneksi:", err); }
