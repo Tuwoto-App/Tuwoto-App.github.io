@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
 
   <!-- KODE PWA -->
-  <link rel="manifest" href="manifest.json?v=19">
+  <link rel="manifest" href="manifest.json?v=21">
   <meta name="theme-color" content="#059669">
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -223,7 +223,14 @@
     .edu-section-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
     .edu-section-text { font-size: 13px; line-height: 1.5; color: #475569; }
 
-    #chart-container { width: 100%; padding: 10px; margin-bottom: 20px; }
+    /* Perbaikan Container Chart Agar Tidak Oversize di Laptop */
+    #chart-container { 
+      width: 100%; 
+      max-width: 320px; 
+      height: 320px; 
+      margin: 0 auto 20px auto; 
+      position: relative; 
+    }
 
     .about-container { padding: 20px; text-align: center; }
     .about-logo { width: 100px; height: 100px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -237,6 +244,40 @@
 
     .toggle-row { padding: 0 16px 10px 16px; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
     .toggle-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; }
+
+    /* ========================================================
+       MEDIA QUERY: TAMPILAN LAPTOP / DESKTOP (LEBIH PROPORSIONAL)
+       ======================================================== */
+    @media (min-width: 768px) {
+      .floating-header { 
+        max-width: 480px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+      }
+      #bottomSheet { 
+        width: 480px; 
+        left: 50%; 
+        transform: translateX(-50%) translateY(calc(100% - 140px)); 
+        border-radius: 20px 20px 0 0;
+      }
+      #bottomSheet.expanded { 
+        transform: translateX(-50%) translateY(0); 
+      }
+      #laporBtn {
+        right: calc(50% - 220px); 
+      }
+      .leaflet-top.leaflet-right {
+        right: calc(50% - 220px); 
+        top: 75px;
+      }
+      
+      /* Perbesar sedikit font di laptop agar tidak terlalu kecil */
+      .item-title { font-size: 15px; }
+      .item-meta { font-size: 12px; }
+      .btn-lihat { padding: 12px; font-size: 14px; }
+      .list { padding: 0 20px 30px 20px; }
+      .list-title { padding: 16px 20px 8px 20px; }
+    }
   </style>
 </head>
 <body>
@@ -324,9 +365,12 @@
       <div id="tab-analisis" class="tab-content">
         <div style="padding: 15px;">
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); text-align:center;">📊 Statistik Jenis Sampah</h3>
+          
+          <!-- Container Chart yang sudah dibatasi ukurannya -->
           <div id="chart-container">
             <canvas id="myChart"></canvas>
           </div>
+          
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">📈 Rasio Sampah vs Penduduk</h3>
           <div id="analysis-panel"></div>
         </div>
@@ -795,7 +839,11 @@ function renderGrafik() {
         backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff'
       }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, /* PENTING: Mematikan aspek rasio otomatis agar tidak melar */
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } 
+    }
   });
 }
 
