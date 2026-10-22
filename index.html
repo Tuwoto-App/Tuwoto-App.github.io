@@ -90,16 +90,38 @@
     .search-box input { flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; min-width: 150px;}
     .search-box select { width: 30%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-family: inherit; background: white; }
     
-    .btn-terdekat { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
-    .btn-lacak { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #fdf4ff; border: 1px solid #f5d0fe; color: #a21caf; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
-    .btn-bank-sampah { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
+    /* LAYOUT BARU UNTUK TOMBOL PENCARIAN AGAR BERDAMPINGAN */
+    .action-buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 16px 8px 16px;
+    }
 
-    .list-title { padding: 8px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; border-top: 1px solid #e2e8f0; }
-    .list { flex: 1; overflow-y: auto; padding: 8px 16px 30px 16px; }
-    .item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
-    .item-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-    .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-    .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: white; }
+    .btn-terdekat, .btn-bank-sampah { 
+      width: 100%; margin: 0; padding: 10px 5px; border-radius: 8px; font-weight: bold; cursor: pointer; 
+      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; text-align: center;
+    }
+    
+    .btn-terdekat { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; }
+    .btn-bank-sampah { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+    .btn-lacak { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #fdf4ff; border: 1px solid #f5d0fe; color: #a21caf; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
+
+    .list-title { padding: 12px 16px 8px 16px; font-size: 11px; font-weight: 800; color: var(--teks-muted); text-transform: uppercase; background: transparent; margin-top: 4px; }
+    .list { flex: 1; overflow-y: auto; padding: 0 16px 30px 16px; }
+    
+    /* KARTU LAPORAN DIBUAT LEBIH LEGA */
+    .item { 
+      padding: 16px; 
+      border-radius: 12px; 
+      background: white; 
+      margin-bottom: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+      border: 1px solid #f1f5f9;
+    }
+    .item-title { font-size: 14px; font-weight: 800; color: var(--teks); margin-bottom: 8px; line-height: 1.4; }
+    .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; color: white; }
     .badge.tinggi { background: var(--merah); }
     .badge.sedang { background: var(--kuning); }
     .badge.rendah { background: var(--hijau); }
@@ -108,17 +130,19 @@
     .badge.bank-kecil { background: #86efac; color: #14532d; }
     .badge.bank-sedang { background: #10b981; }
     .badge.bank-besar { background: #047857; }
-    .badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .badge-status { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; }
     .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-    .btn-lihat { width: 100%; padding: 8px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 4px; }
-    .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-    .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-    .btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-    .btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-    .admin-actions { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-lihat { width: 100%; padding: 10px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 0; transition: 0.2s; }
+    .btn-lihat:active { background: #bae6fd; }
+    
+    .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .admin-actions { display: flex; gap: 8px; margin-top: 10px; }
 
     .menu-accordion { margin: 0 16px 10px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
     .menu-accordion summary { padding: 10px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; color: var(--teks); list-style: none; outline: none; }
@@ -238,8 +262,13 @@
       </div>
 
       <div id="tab-lokasi" class="tab-content active">
-        <button class="btn-terdekat" onclick="cariTerdekat()">📍 Cari Tempat Sampah Terdekat</button>
-        <button class="btn-bank-sampah" onclick="cariBankTerdekat()">🏦 Cari Bank Sampah Terdekat</button>
+        
+        <!-- TOMBOL PENCARIAN BERDAMPINGAN (Lebih Hemat Ruang) -->
+        <div class="action-buttons-grid">
+          <button class="btn-terdekat" onclick="cariTerdekat()">📍 Cari TPS Terdekat</button>
+          <button class="btn-bank-sampah" onclick="cariBankTerdekat()">🏦 Cari Bank Sampah</button>
+        </div>
+        
         <button class="btn-lacak" onclick="bukaLacak()">🔍 Lacak Status Laporan Anda</button>
 
         <div class="filters">
@@ -298,7 +327,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.1.0 (Bank Sampah)</div>
+          <div class="about-version">Versi 1.2.0 (Bank Sampah)</div>
 
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
@@ -342,7 +371,8 @@
           <select id="inKategori" required onchange="ubahFormKategori()">
             <option value="krisis">🚨 Krisis Sampah</option>
             <option value="fasilitas">🗑️ Tambah Tempat Sampah</option>
-            <option value="bank_sampah">🏦 Bank Sampah</option>
+            <!-- OPSI INI HANYA MUNCUL JIKA ADMIN LOGIN -->
+            <option value="bank_sampah" id="optBankSampah" style="display:none;">🏦 Bank Sampah</option>
           </select>
         </div>
         <div class="form-group">
@@ -502,6 +532,7 @@
 
 </div>
 
+<!-- Pustaka JavaScript -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -604,17 +635,17 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 
 function cariTerdekat() {
   if (!navigator.geolocation) { alert("HP Anda tidak mendukung GPS."); return; }
-  document.querySelector('.btn-terdekat').innerText = "Mencari lokasi Anda...";
+  document.querySelector('.btn-terdekat').innerText = "Mencari...";
   navigator.geolocation.getCurrentPosition((pos) => {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
     const fasilitas = dataTitik.filter(t => t.kategori === 'fasilitas' && t.is_approved !== false);
-    if (fasilitas.length === 0) { alert("Belum ada data Tempat Sampah (RT/RW) di sistem."); document.querySelector('.btn-terdekat').innerHTML = "📍 Cari Tempat Sampah Terdekat"; return; }
+    if (fasilitas.length === 0) { alert("Belum ada data Tempat Sampah (RT/RW) di sistem."); document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat"; return; }
     let terdekat = null; let jarakTerdekat = Infinity;
     fasilitas.forEach(f => {
       const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
       if (jarak < jarakTerdekat) { jarakTerdekat = jarak; terdekat = f; }
     });
-    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari Tempat Sampah Terdekat";
+    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat";
     if (terdekat) {
       document.getElementById('bottomSheet').classList.remove('expanded');
       map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 });
@@ -627,7 +658,7 @@ function cariTerdekat() {
     }
   }, (err) => {
     alert("Gagal mengambil lokasi. Pastikan GPS aktif dan izin diberikan.");
-    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari Tempat Sampah Terdekat";
+    document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat";
   });
 }
 
@@ -635,7 +666,7 @@ function cariBankTerdekat() {
   if (!navigator.geolocation) { alert("HP Anda tidak mendukung GPS."); return; }
   const btn = document.querySelector('.btn-bank-sampah');
   const originalText = btn.innerHTML;
-  btn.innerText = "Mencari lokasi Anda...";
+  btn.innerText = "Mencari...";
   navigator.geolocation.getCurrentPosition((pos) => {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
     const banks = dataTitik.filter(t => t.kategori === 'bank_sampah' && t.is_approved !== false);
@@ -1003,9 +1034,8 @@ function renderSemua(filter = 'all') {
     
     const statusBadge = (!isBank && !isFas) ? `<span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span>` : '';
     
-    // Info tambahan untuk bank sampah
     const bankInfo = isBank && (titik.jam_operasional || titik.kontak) ? 
-      `<div style="font-size:11px; color:#065f46; background:#ecfdf5; padding:6px; border-radius:6px; margin-bottom:6px;">
+      `<div style="font-size:11px; color:#065f46; background:#ecfdf5; padding:8px; border-radius:8px; margin-bottom:10px; line-height:1.5;">
         ${titik.jam_operasional ? `🕒 ${titik.jam_operasional}<br>` : ''}
         ${titik.kontak ? `📞 ${titik.kontak}` : ''}
       </div>` : '';
@@ -1077,12 +1107,30 @@ function prosesLogin() {
   const pass = document.getElementById('inPasswordAdmin').value;
   if (pass === 'admin123') { 
     isAdmin = true; alert("✅ Login Admin Berhasil!"); tutupLoginAdmin();
-    document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin"; document.getElementById('adminBtnSidebar').style.background = "#ef4444"; document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
-    document.getElementById('adminPendudukBtn').style.display = 'block'; ambilData(); 
+    document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin"; 
+    document.getElementById('adminBtnSidebar').style.background = "#ef4444"; 
+    document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
+    document.getElementById('adminPendudukBtn').style.display = 'block'; 
+    
+    // MUNCULKAN OPSI BANK SAMPAH DI FORM
+    document.getElementById('optBankSampah').style.display = 'block'; 
+    
+    ambilData(); 
   } else alert("❌ Password salah!");
 }
 function logoutAdmin() {
-  isAdmin = false; alert("Anda logout."); document.getElementById('adminBtnSidebar').textContent = "🔐 Login Admin"; document.getElementById('adminBtnSidebar').style.background = "#64748b"; document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()'); document.getElementById('adminPendudukBtn').style.display = 'none'; ambilData(); 
+  isAdmin = false; alert("Anda logout."); 
+  document.getElementById('adminBtnSidebar').textContent = "🔐 Login Admin"; 
+  document.getElementById('adminBtnSidebar').style.background = "#64748b"; 
+  document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()'); 
+  document.getElementById('adminPendudukBtn').style.display = 'none'; 
+  
+  // SEMBUNYIKAN KEMBALI OPSI BANK SAMPAH
+  document.getElementById('optBankSampah').style.display = 'none';
+  document.getElementById('inKategori').value = 'krisis'; 
+  ubahFormKategori();
+  
+  ambilData(); 
 }
 
 function bukaKelolaPenduduk() {
@@ -1112,7 +1160,7 @@ function bukaEdit(id) {
   document.getElementById('inNama').value = data.nama; document.getElementById('inLat').value = data.lat; document.getElementById('inLng').value = data.lng; document.getElementById('inWilayah').value = data.wilayah;
   if (data.kategori === 'krisis') document.getElementById('inJenis').value = data.jenis;
   document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
-  // Field bank sampah
+  
   if (data.kategori === 'bank_sampah') {
     document.getElementById('inJam').value = data.jam_operasional || '';
     document.getElementById('inKontak').value = data.kontak || '';
@@ -1173,7 +1221,6 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       fotoUrl = publicUrlData.publicUrl; 
     }
     
-    // Bangun objek data
     const dataBaru = { 
       nama: document.getElementById('inNama').value, 
       lat: parseFloat(document.getElementById('inLat').value), 
@@ -1191,7 +1238,6 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       foto: fotoUrl 
     };
     
-    // Field khusus bank sampah
     if (kategori === 'bank_sampah') {
       dataBaru.jam_operasional = document.getElementById('inJam').value || null;
       dataBaru.kontak = document.getElementById('inKontak').value || null;
