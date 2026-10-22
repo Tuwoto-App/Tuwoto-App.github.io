@@ -5,23 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Tuwoto - Smart Waste Management</title>
 
-  <!-- FONT POPPINS -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-
-  <!-- KODE PWA -->
-  <link rel="manifest" href="manifest.json?v=21">
+  <link rel="manifest" href="manifest.json?v=24">
   <meta name="theme-color" content="#059669">
   <link rel="apple-touch-icon" href="icon.png">
 
-  <!-- Pustaka CSS & Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-  
-  <!-- Pustaka CSS Lokasi Saya (Leaflet Locate Control) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
-
-  <!-- LIBRARY CHART.JS UNTUK GRAFIK -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -33,34 +25,10 @@
     #app { position: relative; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
     #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 
-    /* Penyesuaian posisi tombol lokasi agar tidak tertutup header */
-    .leaflet-top.leaflet-right {
-      top: 75px; 
-    }
-
-    /* HEADER BARU YANG LEBIH MODERN */
-    .floating-header { 
-      position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; 
-      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); 
-      padding: 8px 12px; border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-      display: flex; align-items: center; gap: 10px; 
-    }
-    
-    .floating-header img { 
-      width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .floating-header h1 { 
-      font-family: 'Poppins', sans-serif; 
-      font-size: 20px; font-weight: 800; 
-      color: var(--primary); margin: 0; letter-spacing: -0.5px;
-    }
-    
-    .floating-header .subtitle {
-      font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600;
-    }
+    .floating-header { position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; }
+    .floating-header img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+    .floating-header h1 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px; }
+    .floating-header .subtitle { font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600; }
     
     #bottomSheet { position: absolute; bottom: 0; left: 0; width: 100%; height: 85vh; background: var(--card); z-index: 2000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(calc(100% - 140px)); display: flex; flex-direction: column; }
     #bottomSheet.expanded { transform: translateY(0); }
@@ -72,7 +40,6 @@
     #bottomSheet.expanded .drag-text i { transform: rotate(180deg); }
 
     .sheet-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-    
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 12px 16px; }
     .stat { padding: 10px 6px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .stat.tinggi { background: #fef2f2; border-top: 4px solid var(--merah); }
@@ -84,9 +51,9 @@
     .stat.rendah .stat-num { color: var(--hijau); }
     .stat-label { font-size: 9px; color: var(--teks-muted); font-weight: 700; text-transform: uppercase; margin-top: 2px; }
 
-    /* SISTEM TAB (4 TABS) */
-    .tab-menu { display: flex; background: white; border-bottom: 2px solid #e2e8f0; padding: 0; }
-    .tab-btn { flex: 1; padding: 12px 2px; border: none; background: none; font-size: 11px; font-weight: bold; color: var(--teks-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
+    .tab-menu { display: flex; background: white; border-bottom: 2px solid #e2e8f0; padding: 0; overflow-x: auto; }
+    .tab-menu::-webkit-scrollbar { display: none; }
+    .tab-btn { flex: 1; padding: 12px 2px; border: none; background: none; font-size: 10px; font-weight: bold; color: var(--teks-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; white-space: nowrap; min-width: 65px; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
     
     .tab-content { display: none; flex-direction: column; flex: 1; overflow-y: auto; }
@@ -100,19 +67,8 @@
     .search-box input { flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; min-width: 150px;}
     .search-box select { width: 30%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-family: inherit; background: white; }
     
-    /* LAYOUT TOMBOL PENCARIAN BERDAMPINGAN */
-    .action-buttons-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 0 16px 8px 16px;
-    }
-
-    .btn-terdekat, .btn-bank-sampah { 
-      width: 100%; margin: 0; padding: 10px 5px; border-radius: 8px; font-weight: bold; cursor: pointer; 
-      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; text-align: center;
-    }
-    
+    .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 8px 16px; }
+    .btn-terdekat, .btn-bank-sampah { width: 100%; margin: 0; padding: 10px 5px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; text-align: center; }
     .btn-terdekat { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; }
     .btn-bank-sampah { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
     .btn-lacak { width: calc(100% - 32px); margin: 0 16px 10px 16px; padding: 10px; background: #fdf4ff; border: 1px solid #f5d0fe; color: #a21caf; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;}
@@ -120,15 +76,7 @@
     .list-title { padding: 12px 16px 8px 16px; font-size: 11px; font-weight: 800; color: var(--teks-muted); text-transform: uppercase; background: transparent; margin-top: 4px; }
     .list { flex: 1; overflow-y: auto; padding: 0 16px 30px 16px; }
     
-    /* KARTU LAPORAN LEBIH LEGA */
-    .item { 
-      padding: 16px; 
-      border-radius: 12px; 
-      background: white; 
-      margin-bottom: 12px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
-      border: 1px solid #f1f5f9;
-    }
+    .item { padding: 16px; border-radius: 12px; background: white; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
     .item-title { font-size: 14px; font-weight: 800; color: var(--teks); margin-bottom: 8px; line-height: 1.4; }
     .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
     .badge { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; color: white; }
@@ -137,9 +85,6 @@
     .badge.rendah { background: var(--hijau); }
     .badge.fasilitas { background: var(--biru); }
     .badge.bank-sampah { background: #10b981; }
-    .badge.bank-kecil { background: #86efac; color: #14532d; }
-    .badge.bank-sedang { background: #10b981; }
-    .badge.bank-besar { background: #047857; }
     .badge-status { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; }
     .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
@@ -147,7 +92,6 @@
 
     .btn-lihat { width: 100%; padding: 10px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 0; transition: 0.2s; }
     .btn-lihat:active { background: #bae6fd; }
-    
     .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
     .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
     .btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
@@ -160,19 +104,20 @@
     .menu-accordion-content { padding: 0 10px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
     .menu-accordion button { width: 100%; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
     #btnChoropleth { background: #8b5cf6; color: white; }
-    #btnHeatmap { background: #f97316; color: white; }
     #qrBtnSidebar { background: #0ea5e9; color: white; }
     #adminBtnSidebar { background: #64748b; color: white; }
     #adminPendudukBtn { display: none; background: #8b5cf6; color: white; margin-top: 4px; }
+    
+    .heatmap-controls { display: flex; gap: 5px; margin-bottom: 5px; }
+    .heatmap-controls select { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;}
+    #btnHeatmap { background: #f97316; color: white; flex: 1; }
 
-    /* STYLE TITIK SAMPAH (BERKEDIP) */
     .custom-div-icon { background: none !important; border: none !important; }
     .marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
     .marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
     .marker-pulse.sedang { background: var(--kuning); animation: pulse-kuning 1.5s infinite; }
     .marker-pulse.rendah { background: var(--hijau); animation: pulse-hijau 1.5s infinite; }
     .marker-pulse.pending { background: #94a3b8; animation: none; }
-
     @keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     @keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
     @keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
@@ -190,6 +135,9 @@
 
     #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 1001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
     #bottomSheet.expanded ~ #laporBtn { bottom: 20px; opacity: 0; pointer-events: none; }
+    
+    #myLocationBtn { position: absolute; bottom: 160px; left: 20px; z-index: 1001; background: white; color: var(--teks); border: 2px solid #cbd5e1; padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; }
+    #bottomSheet.expanded ~ #myLocationBtn { bottom: 20px; opacity: 0; pointer-events: none; }
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
     .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
@@ -223,14 +171,7 @@
     .edu-section-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
     .edu-section-text { font-size: 13px; line-height: 1.5; color: #475569; }
 
-    /* Perbaikan Container Chart Agar Tidak Oversize di Laptop */
-    #chart-container { 
-      width: 100%; 
-      max-width: 320px; 
-      height: 320px; 
-      margin: 0 auto 20px auto; 
-      position: relative; 
-    }
+    #chart-container { width: 100%; max-width: 320px; height: 320px; margin: 0 auto 20px auto; position: relative; }
 
     .about-container { padding: 20px; text-align: center; }
     .about-logo { width: 100px; height: 100px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -245,33 +186,30 @@
     .toggle-row { padding: 0 16px 10px 16px; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
     .toggle-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; }
 
-    /* ========================================================
-       MEDIA QUERY: TAMPILAN LAPTOP / DESKTOP (LEBIH PROPORSIONAL)
-       ======================================================== */
+    /* STYLE KHUSUS TAB PROFIL & LENCANA */
+    .profile-card { margin: 16px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px 20px; text-align: center; position: relative; overflow: hidden; }
+    .profile-badge-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+    .profile-level-title { font-size: 22px; font-weight: 800; color: var(--teks); margin-bottom: 2px; }
+    .profile-level-desc { font-size: 12px; color: var(--teks-muted); margin-bottom: 15px; }
+    .profile-points-box { display: inline-block; background: #f0fdf4; color: #166534; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 16px; border: 1px solid #bbf7d0; margin-bottom: 20px; }
+    .progress-container { width: 100%; background: #e2e8f0; border-radius: 10px; height: 12px; margin-bottom: 8px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 10px; width: 0%; transition: width 1s ease-in-out; }
+    .progress-text { font-size: 11px; color: var(--teks-muted); font-weight: 600; }
+    
+    .auth-card { margin: 16px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px 20px; text-align: center; }
+    .auth-card h3 { font-size: 18px; color: var(--teks); margin-bottom: 10px; }
+    .auth-card p { font-size: 12px; color: var(--teks-muted); margin-bottom: 20px; }
+    .btn-auth-main { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+    .btn-auth-switch { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+
     @media (min-width: 768px) {
-      .floating-header { 
-        max-width: 480px; 
-        left: 50%; 
-        transform: translateX(-50%); 
-      }
-      #bottomSheet { 
-        width: 480px; 
-        left: 50%; 
-        transform: translateX(-50%) translateY(calc(100% - 140px)); 
-        border-radius: 20px 20px 0 0;
-      }
-      #bottomSheet.expanded { 
-        transform: translateX(-50%) translateY(0); 
-      }
-      #laporBtn {
-        right: calc(50% - 220px); 
-      }
-      .leaflet-top.leaflet-right {
-        right: calc(50% - 220px); 
-        top: 75px;
-      }
-      
-      /* Perbesar sedikit font di laptop agar tidak terlalu kecil */
+      .floating-header { max-width: 480px; left: 50%; transform: translateX(-50%); }
+      #bottomSheet { width: 480px; left: 50%; transform: translateX(-50%) translateY(calc(100% - 140px)); border-radius: 20px 20px 0 0; }
+      #bottomSheet.expanded { transform: translateX(-50%) translateY(0); }
+      #laporBtn { right: calc(50% - 220px); }
+      #myLocationBtn { left: calc(50% - 220px); }
+      .leaflet-top.leaflet-right { right: calc(50% - 220px); top: 75px; }
       .item-title { font-size: 15px; }
       .item-meta { font-size: 12px; }
       .btn-lihat { padding: 12px; font-size: 14px; }
@@ -285,7 +223,6 @@
 <div id="app">
   <div id="map"></div>
 
-  <!-- HEADER BARU -->
   <div class="floating-header">
     <img src="icon.png" alt="Logo Tuwoto" onerror="this.src='https://via.placeholder.com/32?text=T'">
     <div>
@@ -294,6 +231,7 @@
     </div>
   </div>
 
+  <button id="myLocationBtn" onclick="tampilkanLokasiSaya()">📍 Lokasi Saya</button>
   <button id="laporBtn">+ Lapor</button>
 
   <div id="bottomSheet">
@@ -313,18 +251,18 @@
         <button class="tab-btn active" onclick="switchTab('lokasi', this)">📍 Lokasi</button>
         <button class="tab-btn" onclick="switchTab('analisis', this)">📊 Analisis</button>
         <button class="tab-btn" onclick="switchTab('edukasi', this)">📚 Edukasi</button>
+        <button class="tab-btn" onclick="switchTab('profil', this)">🏅 Profil</button>
         <button class="tab-btn" onclick="switchTab('tentang', this)">ℹ️ Tentang</button>
       </div>
 
       <div id="tab-lokasi" class="tab-content active">
-        
-        <!-- TOMBOL PENCARIAN BERDAMPINGAN -->
         <div class="action-buttons-grid">
           <button class="btn-terdekat" onclick="cariTerdekat()">📍 Cari TPS Terdekat</button>
           <button class="btn-bank-sampah" onclick="cariBankTerdekat()">🏦 Cari Bank Sampah</button>
         </div>
         
         <button class="btn-lacak" onclick="bukaLacak()">🔍 Lacak Status Laporan Anda</button>
+        <button class="btn-lacak" style="background:#f0fdf4; border-color:#bbf7d0; color:#166534;" onclick="bukaJadwalTruk()">🚛 Lihat Jadwal Truk Sampah</button>
 
         <div class="filters">
           <button class="filter-btn active" data-filter="all">Semua</button>
@@ -351,7 +289,17 @@
           <summary>⚙️ Menu Alat Peta & Admin</summary>
           <div class="menu-accordion-content">
             <button id="btnChoropleth" onclick="toggleChoropleth()">🗺️ Batas Wilayah</button>
-            <button id="btnHeatmap" onclick="toggleHeatmap()">🔥 Peta Panas</button>
+            
+            <div class="heatmap-controls">
+              <select id="heatTimeFilter">
+                <option value="all">Semua Waktu</option>
+                <option value="24h">24 Jam Terakhir</option>
+                <option value="7d">7 Hari Terakhir</option>
+                <option value="30d">1 Bulan Terakhir</option>
+              </select>
+              <button id="btnHeatmap" onclick="toggleHeatmap()">🔥 Peta Panas</button>
+            </div>
+
             <button id="qrBtnSidebar" onclick="bukaQR()">📱 QR Code</button>
             <button id="adminBtnSidebar" onclick="bukaLoginAdmin()">🔐 Login Admin</button>
             <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()">⚙️ Kelola Penduduk</button>
@@ -365,12 +313,9 @@
       <div id="tab-analisis" class="tab-content">
         <div style="padding: 15px;">
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); text-align:center;">📊 Statistik Jenis Sampah</h3>
-          
-          <!-- Container Chart yang sudah dibatasi ukurannya -->
           <div id="chart-container">
             <canvas id="myChart"></canvas>
           </div>
-          
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">📈 Rasio Sampah vs Penduduk</h3>
           <div id="analysis-panel"></div>
         </div>
@@ -381,15 +326,64 @@
         <div class="edu-grid" id="eduGrid"></div>
       </div>
 
+      <!-- TAB PROFIL WARGA & AUTH -->
+      <div id="tab-profil" class="tab-content">
+        
+        <!-- UI JIKA BELUM LOGIN -->
+        <div id="profilBelumLogin" class="auth-card" style="display:block;">
+          <img src="icon.png" alt="Logo" style="width:60px; height:60px; border-radius:12px; margin-bottom:15px;">
+          <h3>Gabung Tuwoto</h3>
+          <p>Daftar atau masuk untuk mulai mengumpulkan poin, mendapatkan lencana, dan ikut serta dalam menjaga kebersihan Gorontalo.</p>
+          
+          <div class="form-group">
+            <input type="email" id="inEmailUser" placeholder="Alamat Email">
+          </div>
+          <div class="form-group">
+            <input type="password" id="inPassUser" placeholder="Password (min. 6 karakter)">
+          </div>
+          
+          <button class="btn-auth-main" onclick="prosesLoginWarga()">Masuk</button>
+          <button class="btn-auth-switch" onclick="prosesDaftarWarga()">Buat Akun Baru</button>
+        </div>
+
+        <!-- UI JIKA SUDAH LOGIN -->
+        <div id="profilSudahLogin" style="display:none;">
+          <div class="profile-card">
+            <img id="profilBadge" src="badge1.png" alt="Badge" class="profile-badge-img" onerror="this.src='https://via.placeholder.com/100?text=Badge'">
+            <div class="profile-level-title" id="profilLevelTitle">Tunas</div>
+            <div class="profile-level-desc" id="profilLevelDesc">Warga Baru Peduli Sampah</div>
+            
+            <div style="font-size:12px; color:var(--teks-muted); margin-bottom:5px;" id="profilEmailText">email@contoh.com</div>
+            <div class="profile-points-box">
+              <span id="profilTotalPoin">0</span> Poin
+            </div>
+            
+            <div class="progress-container">
+              <div class="progress-bar" id="profilProgressBar"></div>
+            </div>
+            <div class="progress-text" id="profilProgressText">0/50 Poin menuju level berikutnya</div>
+            
+            <button onclick="logoutWarga()" style="margin-top:20px; width:100%; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">Keluar Akun</button>
+          </div>
+          
+          <div class="list-title" style="margin-top:0;">Cara Mendapatkan Poin:</div>
+          <div style="padding: 0 16px 30px 16px; font-size: 12px; color: var(--teks-muted); line-height: 1.6;">
+            🟢 <b>+10 Poin:</b> Setiap kali berhasil membuat laporan krisis sampah baru.<br>
+            🟢 <b>+5 Poin:</b> Menambahkan data Tempat Sampah / Bank Sampah baru.<br>
+          </div>
+        </div>
+
+      </div>
+
       <div id="tab-tentang" class="tab-content">
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.2.0 (Bank Sampah)</div>
+          <div class="about-version">Versi 1.5.0 (Sistem Akun Warga)</div>
 
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
-            <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH) untuk segera ditindaklanjuti.</p>
+            <p>Nama <b>Tuwoto</b> berasal dari bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH) untuk segera ditindaklanjuti.</p>
           </div>
 
           <div class="about-card">
@@ -403,9 +397,8 @@
             <div class="tech-tags">
               <span class="tech-tag">PWA (Progressive Web App)</span>
               <span class="tech-tag">Leaflet.js (GIS)</span>
-              <span class="tech-tag">Supabase (Real-time DB)</span>
+              <span class="tech-tag">Supabase (Auth & DB)</span>
               <span class="tech-tag">Chart.js</span>
-              <span class="tech-tag">HTML/CSS/JS</span>
             </div>
           </div>
           
@@ -415,6 +408,15 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL JADWAL TRUK -->
+  <div id="modalJadwal" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">🚛 Jadwal Truk Sampah</h2>
+      <div id="jadwalContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
+      <button type="button" class="btn-cancel" onclick="document.getElementById('modalJadwal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -484,7 +486,6 @@
           </select>
         </div>
         
-        <!-- FORM KHUSUS BANK SAMPAH -->
         <div id="divBankSampah" style="display:none;">
           <div class="form-group">
             <label>Jam Operasional</label>
@@ -509,7 +510,7 @@
         </div>
         <div class="form-group">
           <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
-          <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
+          <input type="file" id="inFoto" accept="image/*" capture="environment" style="padding: 8px; background: #f8fafc;">
           <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
         </div>
         <div class="form-group">
@@ -565,7 +566,7 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN -->
+  <!-- MODAL LOGIN ADMIN (HARDCODE) -->
   <div id="modalLogin" class="modal-overlay">
     <div class="modal-content">
       <h2>🔐 Login Admin</h2>
@@ -601,8 +602,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-<!-- Pustaka JS Lokasi Saya -->
-<script src="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -635,13 +635,28 @@ const edukasiSampah = {
   "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
 };
 
+const jadwalTrukData = {
+  "Kota Gorontalo": "Senin & Kamis (08:00 - 12:00 WITA)",
+  "Kab. Gorontalo": "Selasa & Jumat (08:00 - 12:00 WITA)",
+  "Bone Bolango": "Rabu & Sabtu (08:00 - 12:00 WITA)",
+  "Pohuwato": "Senin & Jumat (07:00 - 11:00 WITA)",
+  "Boalemo": "Selasa & Sabtu (08:00 - 12:00 WITA)",
+  "Gorontalo Utara": "Rabu & Minggu (08:00 - 12:00 WITA)"
+};
+
+// VARIABEL STATE USER
+let currentUser = null;
+let currentUserPoints = 0;
+
 let dataTitik = [];
 let dataPenduduk = {}; 
 let petaMarkers = []; 
+let userMarker = null; 
 let isAdmin = false; 
 let tempMarker = null;
 let heatLayer = null;
 let choroplethLayer = null;
+let routingControl = null; 
 let isHeatmapMode = false;
 let isChoroplethMode = false;
 let myChart = null;
@@ -654,13 +669,6 @@ const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
-// INISIALISASI TOMBOL LOKASI SAYA (Gaya Panah Biru di Kanan Atas)
-L.control.locate({
-  position: 'topright',
-  strings: { title: "Tunjukkan Lokasi Saya" },
-  locateOptions: { enableHighAccuracy: true }
-}).addTo(map);
-
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
 const datalistKec = document.getElementById('listKecamatan');
@@ -670,6 +678,163 @@ listKecamatanGorontalo.forEach(kec => {
   datalistKec.appendChild(option);
 });
 
+// ================= SISTEM AUTH WARGA =================
+async function cekSesiUser() {
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await ambilPoinUser();
+  } else {
+    currentUser = null;
+    currentUserPoints = 0;
+  }
+  updateUIProfil();
+}
+
+async function prosesLoginWarga() {
+  const email = document.getElementById('inEmailUser').value;
+  const pass = document.getElementById('inPassUser').value;
+  if(!email || !pass) { alert("Email dan Password wajib diisi!"); return; }
+  
+  const btn = event.target;
+  btn.innerText = "Memproses...";
+  
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    alert("❌ Gagal Login: " + error.message);
+    btn.innerText = "Masuk";
+  } else {
+    alert("✅ Berhasil Login!");
+    document.getElementById('inEmailUser').value = '';
+    document.getElementById('inPassUser').value = '';
+    currentUser = data.user;
+    await ambilPoinUser();
+    updateUIProfil();
+  }
+}
+
+async function prosesDaftarWarga() {
+  const email = document.getElementById('inEmailUser').value;
+  const pass = document.getElementById('inPassUser').value;
+  if(!email || !pass) { alert("Email dan Password wajib diisi!"); return; }
+  if(pass.length < 6) { alert("Password minimal 6 karakter!"); return; }
+  
+  const btn = event.target;
+  btn.innerText = "Memproses...";
+  
+  const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
+  if (error) {
+    alert("❌ Gagal Daftar: " + error.message);
+    btn.innerText = "Buat Akun Baru";
+  } else {
+    alert("✅ Pendaftaran Berhasil! Silakan cek email Anda jika diperlukan, atau langsung login.");
+    btn.innerText = "Buat Akun Baru";
+  }
+}
+
+async function logoutWarga() {
+  if(!confirm("Keluar dari akun?")) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  currentUserPoints = 0;
+  updateUIProfil();
+  alert("Anda telah keluar.");
+}
+
+async function ambilPoinUser() {
+  if(!currentUser) return;
+  const { data, error } = await supabaseClient.from('profiles').select('total_poin').eq('id', currentUser.id).single();
+  if (data) {
+    currentUserPoints = data.total_poin;
+  } else {
+    currentUserPoints = 0;
+  }
+}
+
+async function tambahPoinKeDB(jumlah) {
+  if (!currentUser) return; // Hanya jalan jika login
+  const newPoin = currentUserPoints + jumlah;
+  const { error } = await supabaseClient.from('profiles').update({ total_poin: newPoin }).eq('id', currentUser.id);
+  if (!error) {
+    currentUserPoints = newPoin;
+    updateUIProfil();
+  }
+}
+
+function updateUIProfil() {
+  const divBelum = document.getElementById('profilBelumLogin');
+  const divSudah = document.getElementById('profilSudahLogin');
+  
+  if (currentUser) {
+    divBelum.style.display = 'none';
+    divSudah.style.display = 'block';
+    document.getElementById('profilEmailText').innerText = currentUser.email;
+    renderProfilLencana();
+  } else {
+    divBelum.style.display = 'block';
+    divSudah.style.display = 'none';
+  }
+}
+
+function renderProfilLencana() {
+  const imgBadge = document.getElementById('profilBadge');
+  const txtTitle = document.getElementById('profilLevelTitle');
+  const txtDesc = document.getElementById('profilLevelDesc');
+  const txtPoin = document.getElementById('profilTotalPoin');
+  const bar = document.getElementById('profilProgressBar');
+  const txtProgress = document.getElementById('profilProgressText');
+
+  txtPoin.innerText = currentUserPoints;
+
+  let levelData = {};
+
+  if (currentUserPoints <= 50) {
+    levelData = { title: "Tunas", desc: "Warga Baru Peduli Sampah", src: "badge1.png", next: 50 };
+  } else if (currentUserPoints <= 150) {
+    levelData = { title: "Peduli", desc: "Mulai Aktif Melapor", src: "badge2.png", next: 150 };
+  } else if (currentUserPoints <= 300) {
+    levelData = { title: "Pejuang", desc: "Pejuang Kebersihan Lingkungan", src: "badge3.png", next: 300 };
+  } else if (currentUserPoints <= 500) {
+    levelData = { title: "Pahlawan", desc: "Pahlawan Bumi Gorontalo", src: "badge4.png", next: 500 };
+  } else {
+    levelData = { title: "Legenda", desc: "Legenda Tuwoto", src: "badge5.png", next: 1000 };
+  }
+
+  imgBadge.src = levelData.src;
+  txtTitle.innerText = levelData.title;
+  txtDesc.innerText = levelData.desc;
+
+  let prevTarget = 0;
+  if (currentUserPoints > 50 && currentUserPoints <= 150) prevTarget = 50;
+  else if (currentUserPoints > 150 && currentUserPoints <= 300) prevTarget = 150;
+  else if (currentUserPoints > 300 && currentUserPoints <= 500) prevTarget = 300;
+  else if (currentUserPoints > 500) prevTarget = 500;
+
+  let percent = ((currentUserPoints - prevTarget) / (levelData.next - prevTarget)) * 100;
+  if (percent > 100) percent = 100;
+  
+  bar.style.width = percent + '%';
+  
+  if (currentUserPoints >= 1000) {
+     txtProgress.innerText = "Level Maksimal Tercapai!";
+  } else {
+     txtProgress.innerText = `${currentUserPoints}/${levelData.next} Poin menuju level berikutnya`;
+  }
+}
+
+// Pantau perubahan status login secara global
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') {
+    currentUser = session.user;
+    ambilPoinUser().then(() => updateUIProfil());
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentUserPoints = 0;
+    updateUIProfil();
+  }
+});
+
+// ================= FITUR PETA & UI =================
 function toggleSheet() {
   document.getElementById('bottomSheet').classList.toggle('expanded');
   const icon = document.querySelector('.drag-text i');
@@ -682,6 +847,80 @@ function switchTab(tabName, btnElement) {
   document.getElementById('tab-' + tabName).classList.add('active');
   if(btnElement) btnElement.classList.add('active');
   if(tabName === 'analisis') renderGrafik();
+  if(tabName === 'profil') updateUIProfil();
+}
+
+function tampilkanLokasiSaya() {
+  if (!navigator.geolocation) { alert("HP Anda tidak mendukung GPS."); return; }
+  const btn = document.getElementById('myLocationBtn');
+  btn.innerText = '⏳ Mencari...';
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const userLat = pos.coords.latitude;
+    const userLng = pos.coords.longitude;
+
+    if (userMarker) map.removeLayer(userMarker);
+
+    const userIcon = L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [16, 16], iconAnchor: [8, 8]
+    });
+
+    userMarker = L.marker([userLat, userLng], { icon: userIcon }).addTo(map)
+      .bindPopup("<b>📍 Lokasi Anda Saat Ini</b>").openPopup();
+
+    map.flyTo([userLat, userLng], 17, { duration: 1.5 });
+    btn.innerText = '📍 Lokasi Saya';
+  }, (err) => {
+    alert("Gagal mengambil lokasi. Pastikan GPS aktif.");
+    btn.innerText = '📍 Lokasi Saya';
+  });
+}
+
+function buatRute(lat, lng) {
+  if (!navigator.geolocation) { alert("HP Anda tidak mendukung GPS."); return; }
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const userLat = pos.coords.latitude;
+    const userLng = pos.coords.longitude;
+    
+    if (routingControl) {
+      map.removeControl(routingControl);
+    }
+
+    routingControl = L.Routing.control({
+      waypoints: [ L.latLng(userLat, userLng), L.latLng(lat, lng) ],
+      routeWhileDragging: true,
+      showAlternatives: false,
+      fitSelectedRoutes: true,
+      lineOptions: { styles: [{color: '#3b82f6', weight: 6}] },
+      createMarker: function() { return null; } 
+    }).addTo(map);
+
+    document.getElementById('bottomSheet').classList.remove('expanded');
+    map.closePopup();
+  });
+}
+
+function bukaJadwalTruk() {
+  const container = document.getElementById('jadwalContainer');
+  container.innerHTML = '';
+  for (let wilayah in jadwalTrukData) {
+    container.innerHTML += `
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:8px; margin-bottom:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#0f172a; margin-bottom:4px;">${wilayah}</div>
+        <div style="font-size:12px; color:#64748b;">🚛 ${jadwalTrukData[wilayah]}</div>
+      </div>
+    `;
+  }
+  document.getElementById('modalJadwal').style.display = 'flex';
+}
+
+function toggleHeatmap() {
+  isHeatmapMode = !isHeatmapMode;
+  const btn = document.getElementById('btnHeatmap');
+  if (isHeatmapMode) { btn.style.background = '#ef4444'; btn.innerHTML = '📍 Titik Biasa'; }
+  else { btn.style.background = '#f97316'; btn.innerHTML = '🔥 Peta Panas'; }
+  renderSemua(currentFilter);
 }
 
 function generateEduGrid() {
@@ -726,7 +965,7 @@ function cariTerdekat() {
   navigator.geolocation.getCurrentPosition((pos) => {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
     const fasilitas = dataTitik.filter(t => t.kategori === 'fasilitas' && t.is_approved !== false);
-    if (fasilitas.length === 0) { alert("Belum ada data Tempat Sampah (RT/RW) di sistem."); document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat"; return; }
+    if (fasilitas.length === 0) { alert("Belum ada data Tempat Sampah."); document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat"; return; }
     let terdekat = null; let jarakTerdekat = Infinity;
     fasilitas.forEach(f => {
       const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
@@ -740,11 +979,11 @@ function cariTerdekat() {
         const index = dataTitik.findIndex(t => t.id === terdekat.id);
         const marker = petaMarkers[index];
         if (marker) marker.openPopup();
-        alert(`Tempat sampah terdekat: ${terdekat.nama} (${jarakTerdekat.toFixed(2)} km dari lokasi Anda)`);
+        alert(`Tempat sampah terdekat: ${terdekat.nama} (${jarakTerdekat.toFixed(2)} km)`);
       }, 2100);
     }
   }, (err) => {
-    alert("Gagal mengambil lokasi. Pastikan GPS aktif dan izin diberikan.");
+    alert("Gagal mengambil lokasi.");
     document.querySelector('.btn-terdekat').innerHTML = "📍 Cari TPS Terdekat";
   });
 }
@@ -758,7 +997,7 @@ function cariBankTerdekat() {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
     const banks = dataTitik.filter(t => t.kategori === 'bank_sampah' && t.is_approved !== false);
     btn.innerHTML = originalText;
-    if (banks.length === 0) { alert("Belum ada Bank Sampah di sistem. Silakan hubungi admin."); return; }
+    if (banks.length === 0) { alert("Belum ada Bank Sampah."); return; }
     let terdekat = null; let jarakTerdekat = Infinity;
     banks.forEach(f => {
       const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
@@ -771,15 +1010,12 @@ function cariBankTerdekat() {
         const index = dataTitik.findIndex(t => t.id === terdekat.id);
         const marker = petaMarkers[index];
         if (marker) marker.openPopup();
-        let info = `🏦 Bank Sampah terdekat:\n\n${terdekat.nama}\n(${jarakTerdekat.toFixed(2)} km dari lokasi Anda)`;
-        if (terdekat.jam_operasional) info += `\n\nJam Buka: ${terdekat.jam_operasional}`;
-        if (terdekat.kontak) info += `\nKontak: ${terdekat.kontak}`;
-        if (terdekat.jenis_diterima) info += `\n\nTerima: ${terdekat.jenis_diterima}`;
+        let info = `🏦 Bank Sampah terdekat:\n\n${terdekat.nama}\n(${jarakTerdekat.toFixed(2)} km)`;
         alert(info);
       }, 2100);
     }
   }, (err) => {
-    alert("Gagal mengambil lokasi. Pastikan GPS aktif dan izin diberikan.");
+    alert("Gagal mengambil lokasi.");
     btn.innerHTML = originalText;
   });
 }
@@ -792,7 +1028,7 @@ function prosesLacak() {
   const hasilContainer = document.getElementById('hasilLacak');
   if (!keyword) { alert("Masukkan nama lokasi!"); return; }
   const hasil = dataTitik.filter(t => t.nama.toLowerCase().includes(keyword));
-  if (hasil.length === 0) { hasilContainer.innerHTML = `<p style="color:#ef4444; font-size:13px;">Laporan dengan nama "${keyword}" tidak ditemukan.</p>`; return; }
+  if (hasil.length === 0) { hasilContainer.innerHTML = `<p style="color:#ef4444; font-size:13px;">Laporan tidak ditemukan.</p>`; return; }
   hasilContainer.innerHTML = '';
   hasil.forEach(t => {
     let statusText, statusColor;
@@ -809,7 +1045,6 @@ function prosesLacak() {
     hasilContainer.innerHTML += `
       <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
         <div style="font-weight:bold; font-size:13px; margin-bottom:4px;">${t.nama}</div>
-        <div style="font-size:11px; color:#64748b; margin-bottom:4px;">Wilayah: ${t.wilayah}</div>
         <div style="font-size:12px; font-weight:bold; color:${statusColor};">Status: ${statusText}</div>
       </div>
     `;
@@ -834,16 +1069,9 @@ function renderGrafik() {
     type: 'doughnut',
     data: {
       labels: labels.length > 0 ? labels : ['Belum Ada Data'],
-      datasets: [{
-        data: dataValues.length > 0 ? dataValues : [1],
-        backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff'
-      }]
+      datasets: [{ data: dataValues.length > 0 ? dataValues : [1], backgroundColor: bgColors, borderWidth: 2, borderColor: '#ffffff' }]
     },
-    options: { 
-      responsive: true, 
-      maintainAspectRatio: false, /* PENTING: Mematikan aspek rasio otomatis agar tidak melar */
-      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } 
-    }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
   });
 }
 
@@ -875,12 +1103,9 @@ async function toggleChoropleth() {
   isChoroplethMode = !isChoroplethMode;
   const btn = document.getElementById('btnChoropleth');
   if (isChoroplethMode) { 
-    btn.style.background = '#ef4444'; 
-    btn.innerHTML = '📍 Sembunyikan Batas'; 
-    await muatChoropleth(); 
+    btn.style.background = '#ef4444'; btn.innerHTML = '📍 Sembunyikan Batas'; await muatChoropleth(); 
   } else { 
-    btn.style.background = '#8b5cf6'; 
-    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah'; 
+    btn.style.background = '#8b5cf6'; btn.innerHTML = '🗺️ Tampilkan Batas Wilayah'; 
     if (choroplethLayer) { map.removeLayer(choroplethLayer); choroplethLayer = null; } 
   }
 }
@@ -890,23 +1115,15 @@ async function muatChoropleth() {
   try {
     const promises = daftarFileGeoJSON.map(file => fetch(file).then(res => res.json()));
     const hasilFetch = await Promise.all(promises);
-
     let semuaFitur = [];
-    hasilFetch.forEach(geojson => {
-      if (geojson.features) {
-        semuaFitur.push(...geojson.features);
-      }
-    });
-
+    hasilFetch.forEach(geojson => { if (geojson.features) semuaFitur.push(...geojson.features); });
     const dataGabungan = { type: 'FeatureCollection', features: semuaFitur };
 
     let skorKecamatan = {};
     const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis');
     approvedData.forEach(t => {
       let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
-      if (t.kecamatan) {
-        skorKecamatan[t.kecamatan] = (skorKecamatan[t.kecamatan] || 0) + nilai;
-      }
+      if (t.kecamatan) skorKecamatan[t.kecamatan] = (skorKecamatan[t.kecamatan] || 0) + nilai;
     });
 
     choroplethLayer = L.geoJSON(dataGabungan, {
@@ -914,19 +1131,13 @@ async function muatChoropleth() {
         let props = feature.properties;
         let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || "";
         let namaKecClean = namaKec.replace(/Kecamatan /gi, '').trim();
-        
         let namaData = "";
         for (let key in skorKecamatan) {
           if (namaKecClean.toLowerCase() === key.toLowerCase() || namaKecClean.toLowerCase().includes(key.toLowerCase())) { namaData = key; break; }
         }
-
         let skor = namaData ? skorKecamatan[namaData] : 0;
         let fillColor = '#e2e8f0';
-        if (skor >= 6) fillColor = '#ef4444'; 
-        else if (skor >= 3) fillColor = '#f59e0b'; 
-        else if (skor >= 1) fillColor = '#10b981'; 
-        else if (namaKecClean) fillColor = '#cbd5e1'; 
-
+        if (skor >= 6) fillColor = '#ef4444'; else if (skor >= 3) fillColor = '#f59e0b'; else if (skor >= 1) fillColor = '#10b981'; else if (namaKecClean) fillColor = '#cbd5e1'; 
         return { fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6 };
       },
       onEachFeature: function (feature, layer) {
@@ -937,16 +1148,8 @@ async function muatChoropleth() {
         layer.bindPopup(`<b>Kec. ${namaKec}</b><br><small>${namaKab}</small>`);
       }
     }).addTo(map);
-    
     map.fitBounds(choroplethLayer.getBounds());
-  } catch (error) {
-    console.error("Gagal memuat batas wilayah:", error);
-    alert("Gagal memuat peta batas wilayah. Pastikan keenam file .json sudah di-upload ke GitHub dan namanya sesuai.");
-    isChoroplethMode = false;
-    const btn = document.getElementById('btnChoropleth'); 
-    btn.style.background = '#8b5cf6'; 
-    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah';
-  }
+  } catch (error) { console.error("Gagal memuat batas wilayah:", error); }
 }
 
 function ubahFormKategori() {
@@ -959,7 +1162,6 @@ function ubahFormKategori() {
   const labelNama = document.getElementById('labelNama');
   const inNama = document.getElementById('inNama');
 
-  // Reset semua dulu
   divJenis.style.display = 'none';
   divBank.style.display = 'none';
 
@@ -1006,6 +1208,8 @@ function buatMarker(titik) {
   if (titik.is_approved === false) pendingHTML = `<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu ACC</span></div>`;
 
   let popupContent = "";
+  const btnRute = `<button onclick="buatRute(${titik.lat}, ${titik.lng})" style="width:100%; margin-top:8px; padding:8px; background:#3b82f6; color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">🛣️ Rute ke Sini</button>`;
+
   if (isFasilitas) {
     popupContent = `<div class="popup-row"><span>Tipe</span><span class="badge fasilitas">Tempat Sampah</span></div><div class="popup-row"><span>Ukuran</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis || '-'}</span></div>`;
   } else if (isBankSampah) {
@@ -1032,7 +1236,7 @@ function buatMarker(titik) {
       <div class="popup-title">${titik.nama}</div>
       ${pendingHTML} ${popupContent}
       <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah} (${titik.kecamatan || ''})</b></div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b;font-style:italic">${titik.catatan || ''}</div>
+      ${btnRute}
     </div>`;
   return L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 270 });
 }
@@ -1048,14 +1252,6 @@ function keLokasiMenu(index) {
   }, 350);
 }
 
-function toggleHeatmap() {
-  isHeatmapMode = !isHeatmapMode;
-  const btn = document.getElementById('btnHeatmap');
-  if (isHeatmapMode) { btn.style.background = '#ef4444'; btn.innerHTML = '📍 Titik Biasa'; }
-  else { btn.style.background = '#f97316'; btn.innerHTML = '🔥 Peta Panas (Heatmap)'; }
-  renderSemua(currentFilter);
-}
-
 function renderSemua(filter = 'all') {
   currentFilter = filter;
   cluster.clearLayers();
@@ -1064,21 +1260,17 @@ function renderSemua(filter = 'all') {
   list.innerHTML = '';
   
   let dataFilter = [...dataTitik];
-  // Filter severity HANYA untuk krisis
   if (filter !== 'all') {
     dataFilter = dataFilter.filter(t => t.kategori === 'krisis' && t.kritis === filter);
   }
-  // Search
   if (currentSearch) {
     dataFilter = dataFilter.filter(t => t.nama.toLowerCase().includes(currentSearch) || t.wilayah.toLowerCase().includes(currentSearch));
   }
-  // Toggle visibility
   const showFasilitas = document.getElementById('toggleFasilitas')?.checked ?? true;
   const showBankSampah = document.getElementById('toggleBankSampah')?.checked ?? true;
   if (!showFasilitas) dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
   if (!showBankSampah) dataFilter = dataFilter.filter(t => t.kategori !== 'bank_sampah');
 
-  // Sort
   if (currentSort === 'nama_asc') dataFilter.sort((a, b) => a.nama.localeCompare(b.nama));
   else if (currentSort === 'kritis_tinggi') dataFilter.sort((a, b) => {
     const rank = k => k === 'Tinggi' ? 3 : (k === 'Sedang' ? 2 : 1);
@@ -1090,7 +1282,23 @@ function renderSemua(filter = 'all') {
   if (isHeatmapMode) {
     map.removeLayer(cluster);
     if (heatLayer) map.removeLayer(heatLayer);
-    const krisisData = dataFilter.filter(t => t.kategori === 'krisis');
+    
+    const timeFilter = document.getElementById('heatTimeFilter').value;
+    const now = new Date();
+    let krisisData = dataFilter.filter(t => t.kategori === 'krisis');
+
+    if (timeFilter !== 'all') {
+      krisisData = krisisData.filter(t => {
+        if (!t.created_at) return true;
+        const createdDate = new Date(t.created_at);
+        const diffHours = (now - createdDate) / (1000 * 60 * 60);
+        if (timeFilter === '24h') return diffHours <= 24;
+        if (timeFilter === '7d') return diffHours <= 24 * 7;
+        if (timeFilter === '30d') return diffHours <= 24 * 30;
+        return true;
+      });
+    }
+
     if (krisisData.length > 0) {
       const heatData = krisisData.map(t => [parseFloat(t.lat), parseFloat(t.lng), t.kritis === 'Tinggi' ? 1 : t.kritis === 'Sedang' ? 0.6 : 0.3]);
       heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
@@ -1162,7 +1370,6 @@ function updateStats() {
 function renderAnalisis() {
   const panel = document.getElementById('analysis-panel');
   panel.innerHTML = '';
-  
   let skorSampah = {};
   let totalPenduduk = 0;
   let totalSkor = 0;
@@ -1173,10 +1380,7 @@ function renderAnalisis() {
     skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai; 
     totalSkor += nilai;
   });
-
-  for (let key in dataPenduduk) {
-    totalPenduduk += parseInt(dataPenduduk[key]);
-  }
+  for (let key in dataPenduduk) { totalPenduduk += parseInt(dataPenduduk[key]); }
 
   let rasioProvinsi = totalPenduduk > 0 ? (totalSkor / (totalPenduduk / 100000)).toFixed(2) : "0.00";
   let warnaProv = rasioProvinsi > 1.5 ? '#ef4444' : (rasioProvinsi > 0.5 ? '#f59e0b' : '#10b981');
@@ -1193,7 +1397,6 @@ function renderAnalisis() {
     </div>
     <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 8px;">RINCIAN PER KABUPATEN/KOTA:</div>
   `;
-
   panel.innerHTML = htmlProv;
 
   for (let wilayah in dataPenduduk) {
@@ -1219,6 +1422,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => { curren
 document.getElementById('sortSelect').addEventListener('change', (e) => { currentSort = e.target.value; renderSemua(currentFilter); });
 document.querySelectorAll('.filter-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderSemua(btn.dataset.filter); }; });
 
+// ADMIN LOGIN TETAP SEPERTI SEBELUMNYA
 function bukaLoginAdmin() { document.getElementById('modalLogin').style.display = 'flex'; }
 function tutupLoginAdmin() { document.getElementById('modalLogin').style.display = 'none'; }
 function prosesLogin() {
@@ -1230,7 +1434,6 @@ function prosesLogin() {
     document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
     document.getElementById('adminPendudukBtn').style.display = 'block'; 
     
-    // MUNCULKAN OPSI BANK SAMPAH DI FORM
     document.getElementById('optBankSampah').style.display = 'block'; 
     
     ambilData(); 
@@ -1243,7 +1446,6 @@ function logoutAdmin() {
   document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()'); 
   document.getElementById('adminPendudukBtn').style.display = 'none'; 
   
-  // SEMBUNYIKAN KEMBALI OPSI BANK SAMPAH
   document.getElementById('optBankSampah').style.display = 'none';
   document.getElementById('inKategori').value = 'krisis'; 
   ubahFormKategori();
@@ -1346,16 +1548,15 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       lng: parseFloat(document.getElementById('inLng').value), 
       wilayah: document.getElementById('inWilayah').value, 
       kecamatan: document.getElementById('inKecamatan').value, 
-      jenis: kategori === 'bank_sampah' 
-        ? (document.getElementById('inJenisDiterima').value || 'Campuran')
-        : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
+      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
       kritis: document.getElementById('inKritis').value, 
       kategori: kategori, 
       status: statusValue, 
       is_approved: isApprovedValue, 
       catatan: document.getElementById('inCatatan').value, 
       alamat: "-", 
-      foto: fotoUrl 
+      foto: fotoUrl,
+      user_id: currentUser ? currentUser.id : null // SIMPAN ID USER
     };
     
     if (kategori === 'bank_sampah') {
@@ -1365,15 +1566,16 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
     }
     
     let error; 
-    if (isEditMode) { 
-      const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); 
-      error = result.error; 
-    } else { 
-      const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); 
-      error = result.error; 
-    }
+    if (isEditMode) { const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); error = result.error; } 
+    else { const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); error = result.error; }
     if (error) throw error;
-    alert(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : "✅ Dikirim! Menunggu ACC."));
+    
+    // JIKA BUKAN EDIT (Laporan Baru) DAN USER SUDAH LOGIN, TAMBAH POIN KE DB
+    if (!isEditMode && currentUser) {
+       await tambahPoinKeDB(10); // Dapat 10 poin per laporan baru
+    }
+
+    alert(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : (currentUser ? "✅ Dikirim! Menunggu ACC. (+10 Poin)" : "✅ Dikirim! Menunggu ACC. (Login untuk dapat poin)")));
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } tutupModal(); ambilData(); 
   } catch (error) { alert("❌ Gagal: " + error.message); } finally { btnKirimLaporan.textContent = 'Kirim Data'; btnSubmit.disabled = false; }
 };
@@ -1392,7 +1594,8 @@ async function ambilData() {
   } catch (err) { console.log("Error koneksi:", err); }
 }
 
-renderSemua(currentFilter); renderAnalisis(); ambilData();
+// INISIALISASI AWAL
+renderSemua(currentFilter); renderAnalisis(); ambilData(); cekSesiUser();
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => { ambilData(); }).subscribe();
 supabaseClient.channel('schema-db-changes-penduduk').on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); }).subscribe();
