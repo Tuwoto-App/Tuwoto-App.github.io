@@ -6,8 +6,9 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=26">
-  <meta name="theme-color" content="#059669">
+  <link rel="manifest" href="manifest.json?v=29">
+  <!-- TEMA WARNA PUTIH -->
+  <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
   <!-- Pustaka CSS & Leaflet -->
@@ -380,8 +381,30 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.6.0 (Admin Terintegrasi)</div>
-          <!-- ... about content ... -->
+          <div class="about-version">Versi 1.6.2 (Perbaikan Tentang)</div>
+
+          <div class="about-card">
+            <h4>📖 Filosofi Nama</h4>
+            <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH) untuk segera ditindaklanjuti.</p>
+          </div>
+
+          <div class="about-card">
+            <h4>🎯 Visi & Misi</h4>
+            <p>Menciptakan lingkungan Gorontalo yang bersih dan berkelanjutan melalui kolaborasi digital (Smart Waste Management) antara warga, petugas kebersihan, dan pemangku kebijakan.</p>
+          </div>
+
+          <div class="about-card">
+            <h4>💻 Teknologi</h4>
+            <p>Aplikasi ini dibangun menggunakan teknologi web modern tanpa memerlukan unduhan aplikasi besar (PWA).</p>
+            <div class="tech-tags">
+              <span class="tech-tag">PWA (Progressive Web App)</span>
+              <span class="tech-tag">Leaflet.js (GIS)</span>
+              <span class="tech-tag">Leaflet Routing Machine</span>
+              <span class="tech-tag">Supabase (Auth & DB)</span>
+              <span class="tech-tag">Chart.js</span>
+            </div>
+          </div>
+          
           <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">
             &copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.
           </div>
@@ -1508,7 +1531,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       catatan: document.getElementById('inCatatan').value, 
       alamat: "-", 
       foto: fotoUrl,
-      user_id: currentUser ? currentUser.id : null // SIMPAN ID USER
+      user_id: currentUser ? currentUser.id : null
     };
     
     if (kategori === 'bank_sampah') {
@@ -1522,9 +1545,8 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
     else { const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); error = result.error; }
     if (error) throw error;
     
-    // JIKA BUKAN EDIT (Laporan Baru) DAN USER SUDAH LOGIN, TAMBAH POIN KE DB
     if (!isEditMode && currentUser && !isAdmin) {
-       await tambahPoinKeDB(10); // Dapat 10 poin per laporan baru
+       await tambahPoinKeDB(10);
     }
 
     alert(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : (currentUser ? "✅ Dikirim! Menunggu ACC. (+10 Poin)" : "✅ Dikirim! Menunggu ACC. (Login untuk dapat poin)")));
@@ -1539,7 +1561,6 @@ function tutupQR() { document.getElementById('modalQR').style.display = 'none'; 
 async function ambilData() {
   try {
     let query = supabaseClient.from('titik_sampah').select('*'); 
-    // JIKA BUKAN ADMIN, HANYA TAMPILKAN YANG SUDAH DI-ACC
     if (!isAdmin) query = query.eq('is_approved', true);
     const { data: dataSampah, error: errSampah } = await query; 
     if (!errSampah) dataTitik = dataSampah || [];
