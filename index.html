@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=50">
+  <link rel="manifest" href="manifest.json?v=51">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -134,8 +134,9 @@
     .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
     .popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
 
-    #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 1001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
-    #bottomSheet.expanded ~ #laporBtn { bottom: 20px; opacity: 0; pointer-events: none; }
+    #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 2001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+    /* Tombol lapor selalu terlihat, tapi posisinya menyesuaikan */
+    #bottomSheet.expanded ~ #laporBtn { bottom: 20px; }
 
     /* MODAL BASE */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
@@ -326,8 +327,8 @@
           <p>Daftar atau masuk untuk mulai mengumpulkan poin, mendapatkan lencana, dan ikut serta dalam menjaga kebersihan Gorontalo.</p>
           <div class="form-group"><input type="email" id="inEmailUser" placeholder="Alamat Email"></div>
           <div class="form-group"><input type="password" id="inPassUser" placeholder="Password (min. 6 karakter)"></div>
-          <button class="btn-auth-main" onclick="prosesLoginWarga()">Masuk</button>
-          <button class="btn-auth-switch" onclick="prosesDaftarWarga()">Buat Akun Baru</button>
+          <button class="btn-auth-main" onclick="prosesLoginWarga(this)">Masuk</button>
+          <button class="btn-auth-switch" onclick="prosesDaftarWarga(this)">Buat Akun Baru</button>
         </div>
 
         <div id="profilSudahLogin" style="display:none;">
@@ -351,7 +352,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 3.1.0 (Smart & Lean)</div>
+          <div class="about-version">Versi 3.1.1 (Fixed)</div>
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
@@ -490,15 +491,6 @@
       <button type="submit" class="btn-submit" id="btnKirimBank">Kirim Pendaftaran</button>
       <button type="button" class="btn-cancel" onclick="tutupDaftarBank()">Batal</button>
     </form>
-  </div>
-</div>
-
-<!-- MODAL JADWAL TRUK -->
-<div id="modalJadwal" class="modal-overlay">
-  <div class="modal-content" style="text-align: left;">
-    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="truck"></i> Jadwal Truk Sampah</h2>
-    <div id="jadwalContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
-    <button type="button" class="btn-cancel" onclick="document.getElementById('modalJadwal').style.display='none'">Tutup</button>
   </div>
 </div>
 
@@ -738,15 +730,22 @@ const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
-L.control.locate({
-  position: 'topright',
-  strings: { title: "Tunjukkan Lokasi Saya" },
-  locateOptions: { enableHighAccuracy: true }
-}).addTo(map);
+if (L.control.locate) {
+  L.control.locate({
+    position: 'topright',
+    strings: { title: "Tunjukkan Lokasi Saya" },
+    locateOptions: { enableHighAccuracy: true }
+  }).addTo(map);
+}
 
-// PENTING: MaxClusterRadius diatur agar laporan krisis berdekatan bergabung, 
-// namun karena kita pisahkan kategori saat render, ini hanya berlaku untuk krisis.
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
+
+const datalistKec = document.getElementById('listKecamatan');
+listKecamatanGorontalo.forEach(kec => {
+  let option = document.createElement('option');
+  option.value = kec;
+  datalistKec.appendChild(option);
+});
 
 // ================= AI LOCATION (REVERSE GEOCODE) =================
 async function reverseGeocode(lat, lng) {
@@ -754,7 +753,7 @@ async function reverseGeocode(lat, lng) {
   inputNama.value = "Mendeteksi nama jalan...";
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-      headers: { 'Accept-Language': 'id' } // Minta hasil dalam bahasa Indonesia
+      headers: { 'Accept-Language': 'id' }
     });
     const data = await res.json();
     if(data && data.display_name) {
@@ -830,7 +829,7 @@ function showToast(message, type = 'info') {
   if(type === 'success') iconName = 'check-circle';
   if(type === 'error') iconName = 'x-circle';
   if(type === 'warning') iconName = 'alert-triangle';
-  if(type === 'ai') iconName = 'sparkles'; // Ikon khusus AI
+  if(type === 'ai') iconName = 'sparkles';
   
   toast.innerHTML = `<i data-lucide="${iconName}" class="lucide"></i> <span>${message.replace(/\n/g, '<br>')}</span>`;
   container.appendChild(toast);
@@ -841,7 +840,7 @@ function showToast(message, type = 'info') {
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 300);
-  }, 4000); // Sedikit lebih lama untuk AI Tips
+  }, 4000);
 }
 
 function customConfirm(message, callback, title = "Konfirmasi") {
@@ -902,30 +901,6 @@ function buatRute(lat, lng) {
     document.getElementById('bottomSheet').classList.remove('expanded');
     map.closePopup();
   });
-}
-
-function bukaJadwalTruk() {
-  const container = document.getElementById('jadwalContainer');
-  container.innerHTML = '';
-  for (let wilayah in jadwalTrukData) {
-    container.innerHTML += `
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:8px; margin-bottom:8px;">
-        <div style="font-weight:bold; font-size:13px; color:#0f172a; margin-bottom:4px;">${wilayah}</div>
-        <div style="font-size:12px; color:#64748b;">${jadwalTrukData[wilayah]}</div>
-      </div>
-    `;
-  }
-  document.getElementById('modalJadwal').style.display = 'flex';
-}
-
-function toggleHeatmap() {
-  isHeatmapMode = !isHeatmapMode;
-  const btn = document.getElementById('btnHeatmap');
-  if (isHeatmapMode) { btn.style.background = '#ef4444'; btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Titik Biasa'; }
-  else { btn.style.background = '#f97316'; btn.innerHTML = '<i data-lucide="flame" class="lucide-sm"></i> Peta Panas'; }
-  lucide.createIcons();
-  renderSemua(currentFilter);
-  tutupFilter();
 }
 
 function generateEduGrid() {
@@ -1088,6 +1063,42 @@ function renderGrafik() {
   });
 }
 
+function renderLeaderboard() {
+  const panel = document.getElementById('leaderboard-panel');
+  if (!panel) return;
+
+  const dataSelesai = dataTitik.filter(t => t.status === 'Sudah Ditangani' && t.kategori === 'krisis');
+  let skorWilayah = {};
+  
+  dataSelesai.forEach(t => {
+    let lokasi = t.kecamatan || t.wilayah;
+    if (lokasi) {
+      skorWilayah[lokasi] = (skorWilayah[lokasi] || 0) + 1;
+    }
+  });
+
+  const sorted = Object.entries(skorWilayah).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  if (sorted.length === 0) {
+    panel.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Belum ada laporan yang selesai.</p>';
+    return;
+  }
+
+  let html = '';
+  sorted.forEach((item, index) => {
+    let rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+    let medal = index === 0 ? '1' : index === 1 ? '2' : index === 2 ? '3' : `${index + 1}`;
+    html += `
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank ${rankClass}">${medal}</div>
+        <div class="leaderboard-name">Kec. ${item[0]}</div>
+        <div class="leaderboard-score">${item[1]} Selesai</div>
+      </div>
+    `;
+  });
+  panel.innerHTML = html;
+}
+
 async function kompresGambar(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -1152,6 +1163,7 @@ function ubahFormKategori() {
 }
 
 function buatMarker(titik) {
+  if (!titik.lat || !titik.lng) return null;
   const isFasilitas = titik.kategori === 'fasilitas';
   const isBankSampah = titik.kategori === 'bank_sampah';
   const warnaClass = (titik.is_approved === false) ? 'pending' : (titik.kritis || 'rendah').toLowerCase();
@@ -1222,8 +1234,12 @@ function keLokasiMenu(index) {
 
 function renderSemua(filter = 'all') {
   currentFilter = filter;
+  
+  // Bersihkan layer peta dengan benar
+  petaMarkers.forEach(m => { map.removeLayer(m); });
+  petaMarkers = [];
   cluster.clearLayers();
-  petaMarkers = []; 
+  
   const list = document.getElementById('list');
   list.innerHTML = '';
   
@@ -1254,15 +1270,16 @@ function renderSemua(filter = 'all') {
 
   if (dataForMap.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
 
-  // PETA: Cluster hanya untuk Krisis. Fasilitas & Bank Sampah direct.
   dataForMap.forEach((titik) => { 
     const marker = buatMarker(titik); 
-    if (titik.kategori === 'krisis') {
-      cluster.addLayer(marker); 
-    } else {
-      map.addLayer(marker); // Tidak masuk cluster
+    if (marker) {
+      if (titik.kategori === 'krisis') {
+        cluster.addLayer(marker); 
+      } else {
+        map.addLayer(marker); // Tidak masuk cluster
+      }
+      petaMarkers.push(marker); 
     }
-    petaMarkers.push(marker); 
   });
   map.addLayer(cluster);
 
@@ -1383,7 +1400,7 @@ document.getElementById('laporBtn').onclick = () => {
   document.getElementById('divStatus').style.display = 'none'; 
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-  document.getElementById('inNama').value = ""; // Reset nama lokasi
+  document.getElementById('inNama').value = ""; 
   
   updateSelectDisplay('inKategori');
   updateSelectDisplay('inJenis');
@@ -1413,7 +1430,6 @@ function mulaiPilihPeta() {
   showToast("Geser pin di peta untuk memilih lokasi.", "info"); 
   document.getElementById('map').style.cursor = 'crosshair';
   
-  // Set default map view to current lat/lng or center
   const lat = parseFloat(document.getElementById('inLat').value) || map.getCenter().lat;
   const lng = parseFloat(document.getElementById('inLng').value) || map.getCenter().lng;
   
@@ -1427,7 +1443,6 @@ function mulaiPilihPeta() {
 
   map.setView([lat, lng], 17);
   
-  // Tombol konfirmasi peta
   const btnKonfirmPeta = document.createElement('button');
   btnKonfirmPeta.innerText = "Konfirmasi Lokasi Ini";
   btnKonfirmPeta.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:var(--primary); color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
@@ -1513,11 +1528,233 @@ async function ambilData() {
     const { data: dataSampah, error: errSampah } = await query; 
     if (!errSampah) dataTitik = dataSampah || [];
     
-    renderSemua(currentFilter);
+    renderSemua(currentFilter); 
+    renderLeaderboard();
     if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
     lucide.createIcons(); 
   } catch (err) { console.log("Error koneksi:", err); }
 }
+
+// PERBAIKAN LOGIN & REGISTER
+async function prosesLoginWarga(btnElement) {
+  const email = document.getElementById('inEmailUser').value;
+  const pass = document.getElementById('inPassUser').value;
+  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
+  
+  btnElement.innerText = "Memproses...";
+  
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    showToast("❌ Gagal Login: " + error.message, "error");
+    btnElement.innerText = "Masuk";
+  } else {
+    showToast("✅ Berhasil Login!", "success");
+    document.getElementById('inEmailUser').value = '';
+    document.getElementById('inPassUser').value = '';
+    currentUser = data.user;
+    await ambilDataUser();
+    updateUIProfil();
+  }
+}
+
+async function prosesDaftarWarga(btnElement) {
+  const email = document.getElementById('inEmailUser').value;
+  const pass = document.getElementById('inPassUser').value;
+  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
+  if(pass.length < 6) { showToast("Password minimal 6 karakter!", "warning"); return; }
+  
+  btnElement.innerText = "Memproses...";
+  
+  const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
+  if (error) {
+    showToast("❌ Gagal Daftar: " + error.message, "error");
+    btnElement.innerText = "Buat Akun Baru";
+  } else {
+    showToast("✅ Pendaftaran Berhasil! Silakan login.", "success");
+    btnElement.innerText = "Buat Akun Baru";
+  }
+}
+
+async function logoutWarga() {
+  customConfirm("Keluar dari akun Anda saat ini?", async () => {
+    await supabaseClient.auth.signOut();
+    currentUser = null;
+    currentUserPoints = 0;
+    currentUserRole = 'warga';
+    isAdmin = false;
+    updateUIProfil();
+    ambilData(); 
+    showToast("Anda telah keluar.", "info");
+  }, "Logout");
+}
+
+async function ambilDataUser() {
+  if(!currentUser) return;
+  const { data, error } = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
+  if (data) {
+    currentUserPoints = data.total_poin;
+    currentUserRole = data.role || 'warga';
+  } else {
+    currentUserPoints = 0;
+    currentUserRole = 'warga';
+  }
+  
+  if (currentUserRole === 'admin') {
+    isAdmin = true;
+    document.getElementById('optBankSampah').style.display = 'block'; 
+    document.getElementById('divKategoriAdmin').style.display = 'block';
+    document.getElementById('divStatus').style.display = 'block';
+  } else {
+    isAdmin = false;
+    document.getElementById('optBankSampah').style.display = 'none'; 
+    document.getElementById('divKategoriAdmin').style.display = 'none';
+    document.getElementById('divStatus').style.display = 'none';
+    document.getElementById('inKategori').value = 'krisis';
+    document.getElementById('inStatus').value = 'Belum Ditangani';
+    ubahFormKategori();
+  }
+  
+  ambilData(); 
+}
+
+async function tambahPoinKeDB(jumlah) {
+  if (!currentUser) return;
+  const newPoin = currentUserPoints + jumlah;
+  const { error } = await supabaseClient.from('profiles').update({ total_poin: newPoin }).eq('id', currentUser.id);
+  if (!error) {
+    currentUserPoints = newPoin;
+    updateUIProfil();
+  }
+}
+
+function updateUIProfil() {
+  const divBelum = document.getElementById('profilBelumLogin');
+  const divSudah = document.getElementById('profilSudahLogin');
+  
+  if (currentUser) {
+    divBelum.style.display = 'none';
+    divSudah.style.display = 'block';
+    document.getElementById('profilEmailText').innerText = currentUser.email + (isAdmin ? " (ADMIN)" : "");
+    renderProfilLencana();
+    
+    if (isAdmin) {
+      document.getElementById('divPoinBox').style.display = 'none';
+      document.getElementById('divProgressContainer').style.display = 'none';
+    } else {
+      document.getElementById('divPoinBox').style.display = 'inline-block';
+      document.getElementById('divProgressContainer').style.display = 'block';
+    }
+  } else {
+    divBelum.style.display = 'block';
+    divSudah.style.display = 'none';
+  }
+}
+
+function renderProfilLencana() {
+  if(isAdmin) return; 
+
+  const imgBadge = document.getElementById('profilBadge');
+  const txtTitle = document.getElementById('profilLevelTitle');
+  const txtDesc = document.getElementById('profilLevelDesc');
+  const txtPoin = document.getElementById('profilTotalPoin');
+  const bar = document.getElementById('profilProgressBar');
+  const txtProgress = document.getElementById('profilProgressText');
+
+  txtPoin.innerText = currentUserPoints;
+
+  let levelData = {};
+
+  if (currentUserPoints <= 50) {
+    levelData = { title: "Tunas", desc: "Warga Baru Peduli Sampah", src: "badge1.png", next: 50 };
+  } else if (currentUserPoints <= 150) {
+    levelData = { title: "Peduli", desc: "Mulai Aktif Melapor", src: "badge2.png", next: 150 };
+  } else if (currentUserPoints <= 300) {
+    levelData = { title: "Pejuang", desc: "Pejuang Kebersihan Lingkungan", src: "badge3.png", next: 300 };
+  } else if (currentUserPoints <= 500) {
+    levelData = { title: "Pahlawan", desc: "Pahlawan Bumi Gorontalo", src: "badge4.png", next: 500 };
+  } else {
+    levelData = { title: "Legenda", desc: "Legenda Tuwoto", src: "badge5.png", next: 1000 };
+  }
+
+  imgBadge.src = levelData.src;
+  txtTitle.innerText = levelData.title;
+  txtDesc.innerText = levelData.desc;
+
+  let prevTarget = 0;
+  if (currentUserPoints > 50 && currentUserPoints <= 150) prevTarget = 50;
+  else if (currentUserPoints > 150 && currentUserPoints <= 300) prevTarget = 150;
+  else if (currentUserPoints > 300 && currentUserPoints <= 500) prevTarget = 300;
+  else if (currentUserPoints > 500) prevTarget = 500;
+
+  let percent = ((currentUserPoints - prevTarget) / (levelData.next - prevTarget)) * 100;
+  if (percent > 100) percent = 100;
+  
+  bar.style.width = percent + '%';
+  
+  if (currentUserPoints >= 1000) {
+     txtProgress.innerText = "Level Maksimal Tercapai!";
+  } else {
+     txtProgress.innerText = `${currentUserPoints}/${levelData.next} Poin menuju level berikutnya`;
+  }
+}
+
+async function mintaIzinNotifikasi() {
+  if (!currentUser) { showToast("Silakan login terlebih dahulu.", "warning"); return; }
+  
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast("HP/Browser ini tidak mendukung notifikasi.", "error");
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast("Izin notifikasi ditolak. Silakan izinkan lewat pengaturan browser.", "warning");
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('BDFAQP490-cIPINZemy6EqYaQUBuOsF7IVf4hUweGFRdH_7DiWw9c-FIg1OVi7yQesJb7yokG3jc3J6la-H3b_4')
+    });
+
+    const { error } = await supabaseClient.from('push_subscriptions').upsert({
+      user_id: currentUser.id,
+      subscription: subscription
+    }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+    showToast("✅ Notifikasi HP berhasil diaktifkan!", "success");
+  } catch (err) {
+    console.error(err);
+    showToast("Gagal mengaktifkan notifikasi: " + err.message, "error");
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') {
+    currentUser = session.user;
+    ambilDataUser().then(() => updateUIProfil());
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentUserPoints = 0;
+    currentUserRole = 'warga';
+    isAdmin = false;
+    updateUIProfil();
+  }
+});
 
 // INISIALISASI AWAL
 lucide.createIcons(); 
