@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=34">
+  <link rel="manifest" href="manifest.json?v=40">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -328,6 +328,7 @@
         <div class="toggle-row">
           <label><input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)"> 🗑️ Tampilkan Tempat Sampah (RT/RW)</label>
           <label><input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)"> 🏦 Tampilkan Bank Sampah</label>
+          <label><input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)"> ✅ Tampilkan yang Sudah Ditangani</label>
         </div>
 
         <details class="menu-accordion">
@@ -430,7 +431,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.8.0 (Push Notification)</div>
+          <div class="about-version">Versi 1.9.0 (Filter Selesai)</div>
 
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
@@ -1424,16 +1425,27 @@ function renderSemua(filter = 'all') {
   }
   const showFasilitas = document.getElementById('toggleFasilitas')?.checked ?? true;
   const showBankSampah = document.getElementById('toggleBankSampah')?.checked ?? true;
+  const showSelesai = document.getElementById('toggleSelesai')?.checked ?? false; // Default: Sembunyikan yang selesai
+
   if (!showFasilitas) dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
   if (!showBankSampah) dataFilter = dataFilter.filter(t => t.kategori !== 'bank_sampah');
 
-  if (currentSort === 'nama_asc') dataFilter.sort((a, b) => a.nama.localeCompare(b.nama));
-  else if (currentSort === 'kritis_tinggi') dataFilter.sort((a, b) => {
+  // 1. Untuk Heatmap: Gunakan semua data (termasuk yang sudah selesai)
+  let dataForHeatmap = [...dataFilter];
+
+  // 2. Untuk Peta & List: Filter yang sudah selesai (jika toggle dicentang, tampilkan)
+  let dataForMap = [...dataFilter];
+  if (!showSelesai) {
+    dataForMap = dataForMap.filter(t => t.status !== 'Sudah Ditangani');
+  }
+
+  if (currentSort === 'nama_asc') dataForMap.sort((a, b) => a.nama.localeCompare(b.nama));
+  else if (currentSort === 'kritis_tinggi') dataForMap.sort((a, b) => {
     const rank = k => k === 'Tinggi' ? 3 : (k === 'Sedang' ? 2 : 1);
     return rank(b.kritis) - rank(a.kritis);
   });
 
-  if (dataFilter.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
+  if (dataForMap.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
 
   if (isHeatmapMode) {
     map.removeLayer(cluster);
@@ -1441,7 +1453,7 @@ function renderSemua(filter = 'all') {
     
     const timeFilter = document.getElementById('heatTimeFilter').value;
     const now = new Date();
-    let krisisData = dataFilter.filter(t => t.kategori === 'krisis');
+    let krisisData = dataForHeatmap.filter(t => t.kategori === 'krisis');
 
     if (timeFilter !== 'all') {
       krisisData = krisisData.filter(t => {
@@ -1461,7 +1473,7 @@ function renderSemua(filter = 'all') {
     }
   } else {
     if (heatLayer) map.removeLayer(heatLayer);
-    dataFilter.forEach((titik) => { 
+    dataForMap.forEach((titik) => { 
       const marker = buatMarker(titik); 
       cluster.addLayer(marker); 
       petaMarkers.push(marker); 
@@ -1469,7 +1481,7 @@ function renderSemua(filter = 'all') {
     map.addLayer(cluster);
   }
 
-  dataFilter.forEach((titik, index) => {
+  dataForMap.forEach((titik, index) => {
     const div = document.createElement('div');
     div.className = 'item';
     const isBank = titik.kategori === 'bank_sampah';
@@ -1517,7 +1529,7 @@ function renderSemua(filter = 'all') {
 }
 
 function updateStats() {
-  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis');
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis' && t.status !== 'Sudah Ditangani'); // Hanya hitung yang belum selesai
   document.getElementById('statTinggi').textContent = approvedData.filter(t => t.kritis === 'Tinggi').length;
   document.getElementById('statSedang').textContent = approvedData.filter(t => t.kritis === 'Sedang').length;
   document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
