@@ -6,8 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=29">
-  <!-- TEMA WARNA PUTIH -->
+  <link rel="manifest" href="manifest.json?v=30">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -381,7 +380,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.0.0</div>
+          <div class="about-version">Versi 1.6.3 (Upload & Kamera)</div>
 
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
@@ -513,7 +512,8 @@
         </div>
         <div class="form-group">
           <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
-          <input type="file" id="inFoto" accept="image/*" capture="environment" style="padding: 8px; background: #f8fafc;">
+          <!-- CAPTURE DIHAPUS agar user bisa memilih antara Kamera atau Galeri -->
+          <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
           <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
         </div>
         <div class="form-group">
