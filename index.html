@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=42">
+  <link rel="manifest" href="manifest.json?v=44">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -19,7 +19,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    :root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; }
+    :root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; --wa: #25D366; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
@@ -45,7 +45,6 @@
 
     .sheet-content { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     
-    /* --- TAMPILAN STATISTIK INTERAKTIF --- */
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 12px 16px; }
     .stat { padding: 10px 6px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
     .stat:active { transform: scale(0.95); }
@@ -67,19 +66,14 @@
     .tab-content { display: none; flex-direction: column; flex: 1; overflow-y: auto; }
     .tab-content.active { display: flex; }
 
-    /* --- TOMBOL AKSI HORIZONTAL SCROLL --- */
     .action-scroll { display: flex; gap: 8px; padding: 0 16px 10px 16px; overflow-x: auto; scrollbar-width: none; }
     .action-scroll::-webkit-scrollbar { display: none; }
-    .btn-action { 
-      flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; 
-      display: flex; align-items: center; gap: 6px; font-size: 11px; white-space: nowrap;
-      border: 1px solid #e2e8f0; background: white; color: var(--teks);
-    }
+    .btn-action { flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; white-space: nowrap; border: 1px solid #e2e8f0; background: white; color: var(--teks); }
     .btn-action.blue { background: #e0f2fe; border-color: #bae6fd; color: #0369a1; }
     .btn-action.green { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
     .btn-action.purple { background: #fdf4ff; border-color: #f5d0fe; color: #a21caf; }
+    .btn-action.yellow { background: #fffbeb; border-color: #fde047; color: #b45309; }
 
-    /* --- SEARCH & FILTER BAR --- */
     .search-filter-bar { padding: 0 16px 10px 16px; display: flex; gap: 8px; }
     .search-filter-bar input { flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #f8fafc; }
     .btn-filter-open { padding: 10px 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; }
@@ -87,7 +81,6 @@
     .list-title { padding: 8px 16px 6px 16px; font-size: 11px; font-weight: 800; color: var(--teks-muted); text-transform: uppercase; background: transparent; }
     .list { flex: 1; overflow-y: auto; padding: 0 16px 30px 16px; }
     
-    /* --- KARTU LAPORAN COMPACT --- */
     .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 12px; background: white; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
     .item-info { flex: 1; padding-right: 10px; }
     .item-title { font-size: 13px; font-weight: 800; color: var(--teks); margin-bottom: 6px; line-height: 1.3; }
@@ -103,9 +96,11 @@
     .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-    .btn-lihat-icon { width: 40px; height: 40px; border-radius: 50%; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 18px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; }
-    .btn-lihat-icon:active { background: #bae6fd; }
-    
+    .item-actions { display: flex; flex-direction: column; gap: 6px; }
+    .btn-icon { width: 36px; height: 36px; border-radius: 50%; border: none; font-size: 16px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    .btn-icon.map { background: #e0f2fe; color: #0369a1; }
+    .btn-icon.share { background: #dcfce7; color: #166534; }
+
     .admin-actions-compact { display: flex; gap: 4px; margin-top: 8px; }
     .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: bold; }
     .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: bold; }
@@ -136,15 +131,12 @@
     #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 1001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
     #bottomSheet.expanded ~ #laporBtn { bottom: 20px; opacity: 0; pointer-events: none; }
 
-    /* --- MODAL FILTER (BOTTOM SHEET) --- */
+    /* MODAL FILTER */
     #modalFilter .modal-content { text-align: left; padding: 20px; border-radius: 20px 20px 0 0; position: absolute; bottom: 0; max-width: 100%; }
     .filter-group { margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
     .filter-group h4 { font-size: 12px; margin-bottom: 10px; color: var(--teks-muted); text-transform: uppercase; }
     .filter-checkbox { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .filter-checkbox input { width: 18px; height: 18px; }
-    
-    .filter-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-    .filter-btn-tool { padding: 10px; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; color: white; text-align: center; }
 
     /* MODAL BASE */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
@@ -181,6 +173,15 @@
     .edu-section-text { font-size: 13px; line-height: 1.5; color: #475569; }
 
     #chart-container { width: 100%; max-width: 320px; height: 320px; margin: 0 auto 20px auto; position: relative; }
+
+    /* LEADERBOARD */
+    .leaderboard-item { display: flex; align-items: center; gap: 10px; background: white; padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+    .leaderboard-rank { font-size: 18px; font-weight: 800; color: #cbd5e1; width: 25px; }
+    .leaderboard-rank.gold { color: #f59e0b; }
+    .leaderboard-rank.silver { color: #94a3b8; }
+    .leaderboard-rank.bronze { color: #b45309; }
+    .leaderboard-name { flex: 1; font-size: 13px; font-weight: bold; }
+    .leaderboard-score { font-size: 12px; font-weight: bold; color: var(--primary); }
 
     .about-container { padding: 20px; text-align: center; }
     .about-logo { width: 100px; height: 100px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -254,7 +255,6 @@
     </div>
 
     <div class="sheet-content">
-      <!-- STATISTIK INTERAKTIF -->
       <div class="stats">
         <div class="stat tinggi" onclick="filterDariStat('Tinggi')" id="statBoxTinggi"><div class="stat-num" id="statTinggi">0</div><div class="stat-label">Tinggi</div></div>
         <div class="stat sedang" onclick="filterDariStat('Sedang')" id="statBoxSedang"><div class="stat-num" id="statSedang">0</div><div class="stat-label">Sedang</div></div>
@@ -275,8 +275,9 @@
         <div class="action-scroll">
           <button class="btn-action blue" onclick="cariTerdekat()">📍 Cari TPS</button>
           <button class="btn-action green" onclick="cariBankTerdekat()">🏦 Cari Bank</button>
-          <button class="btn-action purple" onclick="bukaLacak()">🔍 Lacak Laporan</button>
-          <button class="btn-action" onclick="bukaJadwalTruk()">🚛 Jadwal Truk</button>
+          <button class="btn-action purple" onclick="bukaLacak()">🔍 Lacak</button>
+          <button class="btn-action yellow" onclick="bukaHargaSampah()">💰 Harga Sampah</button>
+          <button class="btn-action" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarBank()">🏦 Daftar Bank Sampah</button>
         </div>
 
         <!-- SEARCH BAR & TOMBOL FILTER -->
@@ -295,6 +296,10 @@
           <div id="chart-container">
             <canvas id="myChart"></canvas>
           </div>
+          
+          <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">🏆 Papan Skor Wilayah (Laporan Selesai)</h3>
+          <div id="leaderboard-panel" style="margin-bottom:20px;"></div>
+
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">📈 Rasio Sampah vs Penduduk</h3>
           <div id="analysis-panel"></div>
         </div>
@@ -337,7 +342,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 2.0.0 (UI/UX Content First)</div>
+          <div class="about-version">Versi 2.1.0 (Aksi Warga)</div>
           <div class="about-card">
             <h4>📖 Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
@@ -408,6 +413,73 @@
     </div>
   </div>
 
+  <!-- MODAL HARGA SAMPAH -->
+  <div id="modalHarga" class="modal-overlay" onclick="if(event.target===this) tutupHarga()">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">💰 Panduan Harga Sampah</h2>
+      <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Harga acuan rata-rata di Gorontalo (bisa berubah sewaktu-waktu).</p>
+      
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Plastik (PET/Botol)</span><span style="color:var(--primary);">Rp 3.000 - Rp 4.000 /kg</span></div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kardus / Kertas</span><span style="color:var(--primary);">Rp 1.500 - Rp 2.500 /kg</span></div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kaleng / Logam</span><span style="color:var(--primary);">Rp 5.000 - Rp 8.000 /kg</span></div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Botol Kaca</span><span style="color:var(--primary);">Rp 500 - Rp 1.000 /kg</span></div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Elektronik (E-Waste)</span><span style="color:var(--primary);">Sesuai Kesepakatan</span></div>
+      </div>
+      
+      <button type="button" class="btn-cancel" onclick="tutupHarga()">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL DAFTAR BANK SAMPAH -->
+  <div id="modalDaftarBank" class="modal-overlay" onclick="if(event.target===this) tutupDaftarBank()">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">🏦 Daftarkan Bank Sampah</h2>
+      <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Khusus untuk Pengurus Bank Sampah. Data akan diverifikasi Admin.</p>
+      
+      <form id="formDaftarBank">
+        <div class="form-group">
+          <label>Nama Bank Sampah</label>
+          <input type="text" id="bankNama" required placeholder="Contoh: Bank Sampah Melati RW 05">
+        </div>
+        <div class="form-group">
+          <label>Kecamatan</label>
+          <input type="text" id="bankKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan...">
+        </div>
+        <div class="form-group">
+          <label>Jam Operasional</label>
+          <input type="text" id="bankJam" required placeholder="Contoh: Senin-Sabtu 08.00-16.00">
+        </div>
+        <div class="form-group">
+          <label>Kontak (WA/HP)</label>
+          <input type="text" id="bankKontak" required placeholder="Contoh: 0812-3456-7890">
+        </div>
+        <div class="form-group">
+          <label>Jenis Sampah Diterima</label>
+          <input type="text" id="bankJenis" required placeholder="Contoh: Plastik, Kertas, Kaleng">
+        </div>
+        <div class="form-group">
+          <label>Lokasi (Koordinat)</label>
+          <button type="button" onclick="ambilLokasiBank()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; color:#0369a1; font-weight:bold; cursor:pointer;">📍 Ambil Titik Lokasi Otomatis</button>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <input type="number" step="any" id="bankLat" required placeholder="Lat" style="flex:1;">
+            <input type="number" step="any" id="bankLng" required placeholder="Lng" style="flex:1;">
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="btnKirimBank">Kirim Pendaftaran</button>
+        <button type="button" class="btn-cancel" onclick="tutupDaftarBank()">Batal</button>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL JADWAL TRUK -->
   <div id="modalJadwal" class="modal-overlay">
     <div class="modal-content" style="text-align: left;">
@@ -441,7 +513,7 @@
           <select id="inKategori" required onchange="ubahFormKategori()">
             <option value="krisis">🚨 Krisis Sampah</option>
             <option value="fasilitas">🗑️ Tambah Tempat Sampah</option>
-            <option value="bank_sampah" id="optBankSampah" style="display:none;">🏦 Bank Sampah</option>
+            <option value="bank_sampah" id="optBankSampah" style="display:none;">🏦 Bank Sampah (Admin)</option>
           </select>
         </div>
         <div class="form-group">
@@ -727,30 +799,128 @@ function eksekusiConfirm() {
   }
 }
 
-// ================= FITUR FILTER BARU =================
+// ================= FITUR BARU (TAHAP 1, 2, 3) =================
+function shareKeWA(nama, status) {
+  const urlWeb = "https://tuwoto-app.github.io/";
+  let text = `Halo! Saya baru saja melaporkan/melihat data di Tuwoto.\n\nLokasi: *${nama}*\nStatus: ${status}\n\nYuk bantu pantau kebersihan lingkungan kita dengan membuka aplikasi Tuwoto: ${urlWeb}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function bukaHargaSampah() {
+  document.getElementById('modalHarga').style.display = 'flex';
+}
+function tutupHarga() {
+  document.getElementById('modalHarga').style.display = 'none';
+}
+
+function bukaDaftarBank() {
+  document.getElementById('modalDaftarBank').style.display = 'flex';
+}
+function tutupDaftarBank() {
+  document.getElementById('modalDaftarBank').style.display = 'none';
+}
+
+function ambilLokasiBank() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      document.getElementById('bankLat').value = pos.coords.latitude;
+      document.getElementById('bankLng').value = pos.coords.longitude;
+      showToast("Titik lokasi berhasil diambil!", "success");
+    }, () => showToast("Gagal mengambil GPS.", "error"));
+  }
+}
+
+document.getElementById('formDaftarBank').onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnKirimBank');
+  btn.textContent = "Mengirim..."; btn.disabled = true;
+  
+  const dataBank = {
+    nama: document.getElementById('bankNama').value,
+    lat: parseFloat(document.getElementById('bankLat').value),
+    lng: parseFloat(document.getElementById('bankLng').value),
+    wilayah: "Kota Gorontalo", // Hardcode sementara
+    kecamatan: document.getElementById('bankKecamatan').value,
+    kategori: 'bank_sampah',
+    kritis: 'Sedang', // Default kapasitas
+    jenis: document.getElementById('bankJenis').value,
+    status: 'Belum Ditangani',
+    is_approved: false, // Harus di-ACC Admin
+    catatan: "Didaftarkan mandiri oleh pengurus.",
+    alamat: "-",
+    jam_operasional: document.getElementById('bankJam').value,
+    kontak: document.getElementById('bankKontak').value,
+    jenis_diterima: document.getElementById('bankJenis').value,
+    foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah' // Placeholder
+  };
+
+  const { error } = await supabaseClient.from('titik_sampah').insert([dataBank]);
+  if (error) {
+    showToast("Gagal mendaftar: " + error.message, "error");
+    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
+  } else {
+    showToast("✅ Pendaftaran berhasil! Menunggu verifikasi Admin.", "success");
+    tutupDaftarBank();
+    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
+    document.getElementById('formDaftarBank').reset();
+  }
+};
+
+function renderLeaderboard() {
+  const panel = document.getElementById('leaderboard-panel');
+  if (!panel) return;
+
+  const dataSelesai = dataTitik.filter(t => t.status === 'Sudah Ditangani' && t.kategori === 'krisis');
+  let skorWilayah = {};
+  
+  dataSelesai.forEach(t => {
+    if (t.kecamatan) {
+      skorWilayah[t.kecamatan] = (skorWilayah[t.kecamatan] || 0) + 1;
+    }
+  });
+
+  const sorted = Object.entries(skorWilayah).sort((a, b) => b[1] - a[1]).slice(0, 5); // Ambil Top 5
+
+  if (sorted.length === 0) {
+    panel.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Belum ada laporan yang selesai.</p>';
+    return;
+  }
+
+  let html = '';
+  sorted.forEach((item, index) => {
+    let rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+    let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+    html += `
+      <div class="leaderboard-item">
+        <div class="leaderboard-rank ${rankClass}">${medal}</div>
+        <div class="leaderboard-name">Kec. ${item[0]}</div>
+        <div class="leaderboard-score">${item[1]} Selesai</div>
+      </div>
+    `;
+  });
+  panel.innerHTML = html;
+}
+
 function bukaFilter() {
   document.getElementById('modalFilter').style.display = 'flex';
 }
 function tutupFilter() {
   document.getElementById('modalFilter').style.display = 'none';
-  renderSemua(currentFilter); // Render ulang saat filter ditutup
+  renderSemua(currentFilter);
 }
 function filterDariStat(kategori) {
-  // Reset class active
   document.getElementById('statBoxTinggi').classList.remove('active-filter');
   document.getElementById('statBoxSedang').classList.remove('active-filter');
   document.getElementById('statBoxRendah').classList.remove('active-filter');
 
-  // Toggle filter
   if (currentFilter === kategori) {
-    currentFilter = 'all'; // Jika diklik lagi, kembalikan ke semua
+    currentFilter = 'all';
   } else {
     currentFilter = kategori;
     if(kategori === 'Tinggi') document.getElementById('statBoxTinggi').classList.add('active-filter');
     if(kategori === 'Sedang') document.getElementById('statBoxSedang').classList.add('active-filter');
     if(kategori === 'Rendah') document.getElementById('statBoxRendah').classList.add('active-filter');
   }
-  
   renderSemua(currentFilter);
 }
 
@@ -1001,7 +1171,7 @@ function switchTab(tabName, btnElement) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tabName).classList.add('active');
   if(btnElement) btnElement.classList.add('active');
-  if(tabName === 'analisis') renderGrafik();
+  if(tabName === 'analisis') { renderGrafik(); renderLeaderboard(); }
   if(tabName === 'profil') updateUIProfil();
 }
 
@@ -1340,6 +1510,7 @@ function buatMarker(titik) {
 
   let popupContent = "";
   const btnRute = `<button onclick="buatRute(${titik.lat}, ${titik.lng})" style="width:100%; margin-top:8px; padding:8px; background:#3b82f6; color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">🛣️ Rute ke Sini</button>`;
+  const btnShare = `<button onclick="shareKeWA('${titik.nama}', '${titik.status || 'Aktif'}')" style="width:100%; margin-top:6px; padding:8px; background:var(--wa); color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">📱 Bagikan ke WA</button>`;
 
   if (isFasilitas) {
     popupContent = `<div class="popup-row"><span>Tipe</span><span class="badge fasilitas">Tempat Sampah</span></div><div class="popup-row"><span>Ukuran</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis || '-'}</span></div>`;
@@ -1368,6 +1539,7 @@ function buatMarker(titik) {
       ${pendingHTML} ${popupContent}
       <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah} (${titik.kecamatan || ''})</b></div>
       ${btnRute}
+      ${btnShare}
     </div>`;
   return L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 270 });
 }
@@ -1485,7 +1657,10 @@ function renderSemua(filter = 'all') {
         <div class="item-meta">${pendingHTML}${badgeHTML}${statusBadge}</div>
         ${adminHTML}
       </div>
-      <button class="btn-lihat-icon" onclick="keLokasiMenu(${index})">📍</button>
+      <div class="item-actions">
+        <button class="btn-icon map" onclick="keLokasiMenu(${index})">📍</button>
+        <button class="btn-icon share" onclick="shareKeWA('${titik.nama}', '${titik.status || 'Aktif'}')">📱</button>
+      </div>
     `;
     list.appendChild(div);
   });
@@ -1717,7 +1892,7 @@ async function ambilData() {
       dataPenduduk = {}; 
       dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; }); 
     }
-    renderSemua(currentFilter); renderAnalisis(); 
+    renderSemua(currentFilter); renderAnalisis(); renderLeaderboard();
     if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
   } catch (err) { console.log("Error koneksi:", err); }
 }
