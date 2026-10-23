@@ -6,19 +6,16 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=51">
+  <link rel="manifest" href="manifest.json?v=52">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
-  <!-- Pustaka CSS & Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- Lucide Icons (SVG) -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
@@ -32,7 +29,6 @@
 
     #app { position: relative; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
     #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
     .leaflet-top.leaflet-right { top: 75px; }
 
     .floating-header { position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; }
@@ -134,9 +130,38 @@
     .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
     .popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
 
-    #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 2001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
-    /* Tombol lapor selalu terlihat, tapi posisinya menyesuaikan */
-    #bottomSheet.expanded ~ #laporBtn { bottom: 20px; }
+    /* TOMBOL LAPOR - Selalu Terlihat Saat di Tab Lokasi, Tersembunyi di Tab Lain */
+    #laporBtn { 
+      position: absolute; 
+      bottom: 160px; 
+      right: 20px; 
+      z-index: 1001; 
+      background: var(--merah); 
+      color: white; 
+      border: none; 
+      padding: 12px 20px; 
+      border-radius: 30px; 
+      font-size: 14px; 
+      font-weight: bold; 
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      transition: all 0.3s ease;
+    }
+    /* Sembunyikan saat bottom sheet full expanded */
+    #bottomSheet.expanded ~ #laporBtn { 
+      opacity: 0; 
+      pointer-events: none; 
+      transform: translateY(100px);
+    }
+    /* Class untuk sembunyi saat pindah tab */
+    #laporBtn.hidden-by-tab {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(100px);
+    }
 
     /* MODAL BASE */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
@@ -152,7 +177,6 @@
     #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; display:flex; justify-content:center; align-items:center; gap:4px;}
     #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
 
-    /* CUSTOM SELECT STYLE */
     .custom-select-trigger {
       width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
       font-family: inherit; font-size: 14px; background: white; color: var(--teks);
@@ -174,7 +198,6 @@
        border-color: var(--primary); border-width: 6px;
     }
 
-    /* EDUKASI */
     .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
     .edu-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     .edu-card:active { transform: scale(0.95); background: #f8fafc; }
@@ -193,7 +216,6 @@
 
     #chart-container { width: 100%; max-width: 320px; height: 320px; margin: 0 auto 20px auto; position: relative; }
 
-    /* LEADERBOARD */
     .leaderboard-item { display: flex; align-items: center; gap: 10px; background: white; padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0; }
     .leaderboard-rank { font-size: 18px; font-weight: 800; color: #cbd5e1; width: 25px; }
     .leaderboard-rank.gold { color: #f59e0b; }
@@ -212,7 +234,6 @@
     .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .tech-tag { background: #f1f5f9; color: #334155; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
 
-    /* PROFIL & LENCANA */
     .profile-card { margin: 16px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px 20px; text-align: center; position: relative; overflow: hidden; }
     .profile-badge-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); animation: float 3s ease-in-out infinite; }
     @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
@@ -229,7 +250,6 @@
     .btn-auth-main { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
     .btn-auth-switch { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
-    /* TOAST */
     .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 30000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 350px; }
     .toast { padding: 12px 16px; border-radius: 10px; color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-20px); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); pointer-events: auto; word-break: break-word; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -285,7 +305,6 @@
       </div>
 
       <div id="tab-lokasi" class="tab-content active">
-        
         <div class="action-scroll">
           <button class="btn-action blue" onclick="cariTerdekat()"><i data-lucide="map-pin" class="lucide-sm"></i> Cari TPS</button>
           <button class="btn-action green" onclick="cariBankTerdekat()"><i data-lucide="landmark" class="lucide-sm"></i> Cari Bank</button>
@@ -309,7 +328,6 @@
           <div id="chart-container">
             <canvas id="myChart"></canvas>
           </div>
-          
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">Papan Skor Wilayah (Selesai)</h3>
           <div id="leaderboard-panel" style="margin-bottom:20px;"></div>
         </div>
@@ -352,7 +370,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 3.1.1 (Fixed)</div>
+          <div class="about-version">Versi 3.1.2 (Fixed)</div>
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
@@ -376,24 +394,17 @@
   </div>
 </div>
 
-<!-- ========================================== -->
 <!-- SEMUA MODAL DIPINDAHKAN KE SINI (DI LUAR #app) -->
-<!-- ========================================== -->
-
-<!-- MODAL CUSTOM SELECT -->
 <div id="modalSelect" class="modal-overlay" style="z-index: 20000 !important;" onclick="if(event.target===this) tutupCustomSelect()">
   <div class="modal-content" style="text-align: left; padding: 0; border-radius: 16px; z-index: 20001;">
     <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #e2e8f0;">
       <h2 style="margin:0; font-size: 16px;" id="customSelectTitle">Pilih Opsi</h2>
       <button onclick="tutupCustomSelect()" style="background:none; border:none; cursor:pointer; padding: 4px;"><i data-lucide="x"></i></button>
     </div>
-    <div id="customSelectBody" style="max-height: 60vh; overflow-y: auto;">
-      <!-- Options will be injected here -->
-    </div>
+    <div id="customSelectBody" style="max-height: 60vh; overflow-y: auto;"></div>
   </div>
 </div>
 
-<!-- MODAL FILTER (BOTTOM SHEET) -->
 <div id="modalFilter" class="modal-overlay" onclick="if(event.target===this) tutupFilter()">
   <div class="modal-content">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -401,15 +412,15 @@
       <button onclick="tutupFilter()" style="background:none; border:none; cursor:pointer;"><i data-lucide="x"></i></button>
     </div>
     
-    <div class="filter-group">
-      <h4>Tampilkan Data</h4>
-      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="trash-2" class="lucide-sm"></i> Tempat Sampah (RT/RW)</span> <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)"></label>
-      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span> <input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)"></label>
-      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="check-circle" class="lucide-sm"></i> Laporan Selesai</span> <input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)"></label>
+    <div class="filter-group" style="text-align:left; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+      <h4 style="font-size:12px; margin-bottom:10px; color:var(--teks-muted); text-transform:uppercase;">Tampilkan Data</h4>
+      <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:600; cursor:pointer;"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="trash-2" class="lucide-sm"></i> Tempat Sampah (RT/RW)</span> <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)" style="width:18px;height:18px;"></label>
+      <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:600; cursor:pointer;"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span> <input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)" style="width:18px;height:18px;"></label>
+      <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:13px; font-weight:600; cursor:pointer;"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="check-circle" class="lucide-sm"></i> Laporan Selesai</span> <input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)" style="width:18px;height:18px;"></label>
     </div>
 
-    <div class="filter-group">
-      <h4>Urutkan Berdasarkan</h4>
+    <div class="filter-group" style="text-align:left; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+      <h4 style="font-size:12px; margin-bottom:10px; color:var(--teks-muted); text-transform:uppercase;">Urutkan Berdasarkan</h4>
       <select id="sortSelect" style="display:none;">
         <option value="default">Terbaru</option>
         <option value="nama_asc">Nama (A-Z)</option>
@@ -418,8 +429,8 @@
       <div class="custom-select-trigger" onclick="openCustomSelect('sortSelect', 'Urutkan Berdasarkan')" id="sortSelect_display">Terbaru</div>
     </div>
 
-    <div class="filter-group" style="border:none;">
-      <h4>Menu Admin</h4>
+    <div class="filter-group" style="text-align:left; border:none;">
+      <h4 style="font-size:12px; margin-bottom:10px; color:var(--teks-muted); text-transform:uppercase;">Menu Admin</h4>
       <button onclick="bukaQR()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:white; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="qr-code" class="lucide-sm"></i> QR Code Aplikasi</button>
     </div>
     
@@ -427,12 +438,10 @@
   </div>
 </div>
 
-<!-- MODAL HARGA SAMPAH -->
 <div id="modalHarga" class="modal-overlay" onclick="if(event.target===this) tutupHarga()">
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="banknote"></i> Panduan Harga Sampah</h2>
     <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Harga acuan rata-rata di Gorontalo (bisa berubah sewaktu-waktu).</p>
-    
     <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
       <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Plastik (PET/Botol)</span><span style="color:var(--primary);">Rp 3.000 - Rp 4.000 /kg</span></div>
     </div>
@@ -448,38 +457,20 @@
     <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
       <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Elektronik (E-Waste)</span><span style="color:var(--primary);">Sesuai Kesepakatan</span></div>
     </div>
-    
     <button type="button" class="btn-cancel" onclick="tutupHarga()">Tutup</button>
   </div>
 </div>
 
-<!-- MODAL DAFTAR BANK SAMPAH -->
 <div id="modalDaftarBank" class="modal-overlay" onclick="if(event.target===this) tutupDaftarBank()">
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="landmark"></i> Daftarkan Bank Sampah</h2>
     <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Khusus untuk Pengurus Bank Sampah. Data akan diverifikasi Admin.</p>
-    
     <form id="formDaftarBank">
-      <div class="form-group">
-        <label>Nama Bank Sampah</label>
-        <input type="text" id="bankNama" required placeholder="Contoh: Bank Sampah Melati RW 05">
-      </div>
-      <div class="form-group">
-        <label>Kecamatan</label>
-        <input type="text" id="bankKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan...">
-      </div>
-      <div class="form-group">
-        <label>Jam Operasional</label>
-        <input type="text" id="bankJam" required placeholder="Contoh: Senin-Sabtu 08.00-16.00">
-      </div>
-      <div class="form-group">
-        <label>Kontak (WA/HP)</label>
-        <input type="text" id="bankKontak" required placeholder="Contoh: 0812-3456-7890">
-      </div>
-      <div class="form-group">
-        <label>Jenis Sampah Diterima</label>
-        <input type="text" id="bankJenis" required placeholder="Contoh: Plastik, Kertas, Kaleng">
-      </div>
+      <div class="form-group"><label>Nama Bank Sampah</label><input type="text" id="bankNama" required placeholder="Contoh: Bank Sampah Melati RW 05"></div>
+      <div class="form-group"><label>Kecamatan</label><input type="text" id="bankKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan..."></div>
+      <div class="form-group"><label>Jam Operasional</label><input type="text" id="bankJam" required placeholder="Contoh: Senin-Sabtu 08.00-16.00"></div>
+      <div class="form-group"><label>Kontak (WA/HP)</label><input type="text" id="bankKontak" required placeholder="Contoh: 0812-3456-7890"></div>
+      <div class="form-group"><label>Jenis Sampah Diterima</label><input type="text" id="bankJenis" required placeholder="Contoh: Plastik, Kertas, Kaleng"></div>
       <div class="form-group">
         <label>Lokasi (Koordinat)</label>
         <button type="button" onclick="ambilLokasiBank()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; color:#0369a1; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil Titik Lokasi</button>
@@ -494,7 +485,6 @@
   </div>
 </div>
 
-<!-- MODAL CUSTOM CONFIRM -->
 <div id="modalConfirm" class="modal-overlay">
   <div class="modal-content" style="max-width: 320px; text-align: center; padding: 25px 20px;">
     <div id="confirmIcon" style="margin-bottom: 10px; display:flex; justify-content:center;"><i data-lucide="alert-triangle" style="width:40px; height:40px; color:var(--merah);"></i></div>
@@ -507,14 +497,12 @@
   </div>
 </div>
 
-<!-- MODAL LAPORAN (SMART & RINGKAS) -->
 <div id="modalLapor" class="modal-overlay">
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;" id="judulForm"><i data-lucide="camera"></i> Lapor Cepat</h2>
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
       
-      <!-- Hanya Admin yang melihat ini -->
       <div class="form-group" id="divKategoriAdmin" style="display:none;">
         <label>Kategori Data (Admin)</label>
         <select id="inKategori" style="display:none;">
@@ -524,36 +512,26 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
-      
-      <!-- Wajib: Foto -->
       <div class="form-group">
         <label>Foto Bukti <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
         <input type="file" id="inFoto" accept="image/*" style="padding: 10px; background: #f8fafc; border: 1px dashed #cbd5e1;">
         <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
       </div>
-
-      <!-- Wajib: Lokasi (Tombol Besar) -->
       <div class="form-group">
         <label>Lokasi</label>
         <button type="button" id="locBtn" onclick="ambilLokasiGPS()" style="padding:12px; font-size:14px;"><i data-lucide="map-pin"></i> Ambil Lokasi GPS Saya</button>
         <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()" style="padding:12px; font-size:14px; margin-top:6px;"><i data-lucide="map"></i> Pilih Manual di Peta</button>
       </div>
-
-      <!-- Auto-filled: Nama Lokasi (Readonly) -->
       <div class="form-group">
         <label>Nama Jalan / Daerah (Otomatis)</label>
         <input type="text" id="inNama" required placeholder="Sedang mendeteksi lokasi..." readonly style="background:#e2e8f0; color:#475569; font-weight:bold; border:none;">
       </div>
-
-      <!-- Tersembunyi (Diisi Sistem) -->
       <div style="display:none;">
         <input type="number" step="any" id="inLat">
         <input type="number" step="any" id="inLng">
         <input type="text" id="inKecamatan">
         <input type="text" id="inWilayah" value="Kota Gorontalo">
       </div>
-
-      <!-- Opsional: Detail -->
       <div class="form-group" id="divJenisSampah">
         <label>Jenis Sampah (Opsional)</label>
         <select id="inJenis" style="display:none;">
@@ -567,7 +545,6 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">Campuran (Default)</div>
       </div>
-      
       <div class="form-group" id="divKritis">
         <label id="labelKritis">Tingkat Kekritisan</label>
         <select id="inKritis" style="display:none;">
@@ -577,8 +554,6 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Sedang (Default)</div>
       </div>
-
-      <!-- Khusus Admin -->
       <div class="form-group" id="divStatus" style="display:none;">
         <label>Status Penanganan (Admin)</label>
         <select id="inStatus" style="display:none;">
@@ -587,49 +562,32 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inStatus', 'Pilih Status')" id="inStatus_display">Belum Ditangani</div>
       </div>
-
-      <!-- Khusus Bank Sampah -->
       <div id="divBankSampah" style="display:none;">
-        <div class="form-group">
-          <label>Jam Operasional</label>
-          <input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00">
-        </div>
-        <div class="form-group">
-          <label>Kontak Pengurus</label>
-          <input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890">
-        </div>
-        <div class="form-group">
-          <label>Jenis Sampah Diterima</label>
-          <input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas">
-        </div>
+        <div class="form-group"><label>Jam Operasional</label><input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00"></div>
+        <div class="form-group"><label>Kontak Pengurus</label><input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890"></div>
+        <div class="form-group"><label>Jenis Sampah Diterima</label><input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas"></div>
       </div>
-
       <div class="form-group">
         <label>Catatan (Opsional)</label>
         <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
       </div>
-      
       <button type="submit" class="btn-submit" id="btnKirimLaporan" style="padding:15px; font-size:16px;"><i data-lucide="send"></i> Kirim Laporan Sekarang</button>
       <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
     </form>
   </div>
 </div>
 
-<!-- MODAL LACAK LAPORAN -->
 <div id="modalLacak" class="modal-overlay">
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="search"></i> Lacak Status Laporan</h2>
     <p style="font-size: 12px; color: #64748b; margin-bottom: 15px; text-align: center;">Masukkan nama lokasi yang Anda laporkan sebelumnya.</p>
-    <div class="form-group">
-      <input type="text" id="inCariLaporan" placeholder="Contoh: TPS Pasar Sentral" style="text-align:center;">
-    </div>
+    <div class="form-group"><input type="text" id="inCariLaporan" placeholder="Contoh: TPS Pasar Sentral" style="text-align:center;"></div>
     <button type="button" class="btn-submit" onclick="prosesLacak()">Cari Laporan</button>
     <button type="button" class="btn-cancel" onclick="tutupLacak()">Batal</button>
     <div id="hasilLacak" style="margin-top: 15px; text-align: center;"></div>
   </div>
 </div>
 
-<!-- MODAL EDUKASI -->
 <div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
   <div class="modal-content">
     <div class="edu-header" id="eduHeader">
@@ -654,7 +612,6 @@
   </div>
 </div>
 
-<!-- MODAL QR CODE -->
 <div id="modalQR" class="modal-overlay">
   <div class="modal-content">
     <h2 style="display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="qr-code"></i> Scan Aplikasi Tuwoto</h2>
@@ -665,7 +622,8 @@
 
 <div id="toastContainer" class="toast-container"></div>
 
-<!-- Pustaka JavaScript -->
+<datalist id="listKecamatan"></datalist>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -694,19 +652,8 @@ const edukasiSampah = {
   "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
 };
 
-const jadwalTrukData = {
-  "Kota Gorontalo": "Senin & Kamis (08:00 - 12:00 WITA)",
-  "Kab. Gorontalo": "Selasa & Jumat (08:00 - 12:00 WITA)",
-  "Bone Bolango": "Rabu & Sabtu (08:00 - 12:00 WITA)",
-  "Pohuwato": "Senin & Jumat (07:00 - 11:00 WITA)",
-  "Boalemo": "Selasa & Sabtu (08:00 - 12:00 WITA)",
-  "Gorontalo Utara": "Rabu & Minggu (08:00 - 12:00 WITA)"
-};
-
-// SVG Icons for Leaflet Markers (diambil dari Lucide)
 const svgTrash = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
 const svgBank = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>`;
-// Logo WhatsApp Custom
 const waIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`;
 
 let currentUser = null;
@@ -715,7 +662,8 @@ let currentUserRole = 'warga';
 let confirmCallback = null;
 
 let dataTitik = [];
-let petaMarkers = []; 
+let markerMap = new Map(); // PENGGANTI petaMarkers - track marker by titik.id
+let nonClusterMarkers = [];
 let userMarker = null; 
 let isAdmin = false; 
 let tempMarker = null;
@@ -725,12 +673,13 @@ let myChart = null;
 let currentFilter = 'all';
 let currentSearch = '';
 let currentSort = 'default';
+let currentTab = 'lokasi';
 
 const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
-if (L.control.locate) {
+if (typeof L.control.locate === 'function') {
   L.control.locate({
     position: 'topright',
     strings: { title: "Tunjukkan Lokasi Saya" },
@@ -740,33 +689,36 @@ if (L.control.locate) {
 
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
+// Isi datalist kecamatan
 const datalistKec = document.getElementById('listKecamatan');
-listKecamatanGorontalo.forEach(kec => {
-  let option = document.createElement('option');
-  option.value = kec;
-  datalistKec.appendChild(option);
-});
+if (datalistKec) {
+  listKecamatanGorontalo.forEach(function(kec) {
+    let option = document.createElement('option');
+    option.value = kec;
+    datalistKec.appendChild(option);
+  });
+}
 
 // ================= AI LOCATION (REVERSE GEOCODE) =================
-async function reverseGeocode(lat, lng) {
+function reverseGeocode(lat, lng) {
   const inputNama = document.getElementById('inNama');
   inputNama.value = "Mendeteksi nama jalan...";
-  try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-      headers: { 'Accept-Language': 'id' }
-    });
-    const data = await res.json();
-    if(data && data.display_name) {
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', {
+    headers: { 'Accept-Language': 'id' }
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data && data.display_name) {
       let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Tidak Diketahui";
       let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
-      
       inputNama.value = namaLokasi;
       if (kecamatan) document.getElementById('inKecamatan').value = kecamatan;
     }
-  } catch(e) {
+  })
+  .catch(function(e) {
     console.log("Geocode gagal:", e);
     inputNama.value = "Lokasi Dipilih";
-  }
+  });
 }
 
 function updateKoordinat(lat, lng) {
@@ -775,28 +727,26 @@ function updateKoordinat(lat, lng) {
   reverseGeocode(lat, lng);
 }
 
-// ================= SISTEM CUSTOM SELECT =================
+// ================= CUSTOM SELECT =================
 function openCustomSelect(selectId, title) {
   const selectEl = document.getElementById(selectId);
   const currentVal = selectEl.value;
   const options = Array.from(selectEl.options);
   
   let html = '';
-  options.forEach(opt => {
-    if(opt.style.display === 'none') return;
+  options.forEach(function(opt) {
+    if (opt.style.display === 'none') return;
     let isSelected = opt.value === currentVal;
-    html += `
-      <label class="custom-option" onclick="pilihOpsi('${selectId}', '${opt.value}')">
-        <span>${opt.text}</span>
-        <input type="radio" name="customSelectRadio" ${isSelected ? 'checked' : ''} readonly>
-      </label>
-    `;
+    html += '<label class="custom-option" onclick="pilihOpsi(\'' + selectId + '\', \'' + opt.value + '\')">' +
+            '<span>' + opt.text + '</span>' +
+            '<input type="radio" name="customSelectRadio" ' + (isSelected ? 'checked' : '') + ' readonly>' +
+            '</label>';
   });
   
   document.getElementById('customSelectTitle').innerText = title;
   document.getElementById('customSelectBody').innerHTML = html;
   document.getElementById('modalSelect').style.display = 'flex';
-  lucide.createIcons();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function pilihOpsi(selectId, value) {
@@ -819,31 +769,33 @@ function tutupCustomSelect() {
   document.getElementById('modalSelect').style.display = 'none';
 }
 
-// ================= SISTEM TOAST & KONFIRMASI =================
-function showToast(message, type = 'info') {
+// ================= TOAST & CONFIRM =================
+function showToast(message, type) {
+  if (!type) type = 'info';
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
+  toast.className = 'toast ' + type;
   
   let iconName = 'info';
-  if(type === 'success') iconName = 'check-circle';
-  if(type === 'error') iconName = 'x-circle';
-  if(type === 'warning') iconName = 'alert-triangle';
-  if(type === 'ai') iconName = 'sparkles';
+  if (type === 'success') iconName = 'check-circle';
+  if (type === 'error') iconName = 'x-circle';
+  if (type === 'warning') iconName = 'alert-triangle';
+  if (type === 'ai') iconName = 'sparkles';
   
-  toast.innerHTML = `<i data-lucide="${iconName}" class="lucide"></i> <span>${message.replace(/\n/g, '<br>')}</span>`;
+  toast.innerHTML = '<i data-lucide="' + iconName + '" class="lucide"></i> <span>' + message.replace(/\n/g, '<br>') + '</span>';
   container.appendChild(toast);
   
-  lucide.createIcons();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
   
-  setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => {
+  setTimeout(function() { toast.classList.add('show'); }, 10);
+  setTimeout(function() {
     toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
+    setTimeout(function() { toast.remove(); }, 300);
   }, 4000);
 }
 
-function customConfirm(message, callback, title = "Konfirmasi") {
+function customConfirm(message, callback, title) {
+  if (!title) title = "Konfirmasi";
   document.getElementById('confirmMessage').innerHTML = message;
   document.getElementById('confirmTitle').innerText = title;
   document.getElementById('modalConfirm').style.display = 'flex';
@@ -863,7 +815,7 @@ function eksekusiConfirm() {
   }
 }
 
-// ================= FITUR PETA & UI =================
+// ================= FITUR UI =================
 function toggleSheet() {
   document.getElementById('bottomSheet').classList.toggle('expanded');
   const icon = document.querySelector('.drag-text i');
@@ -871,23 +823,34 @@ function toggleSheet() {
 }
 
 function switchTab(tabName, btnElement) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  currentTab = tabName;
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
   document.getElementById('tab-' + tabName).classList.add('active');
-  if(btnElement) btnElement.classList.add('active');
-  if(tabName === 'analisis') { renderGrafik(); renderLeaderboard(); }
-  if(tabName === 'profil') updateUIProfil();
+  if (btnElement) btnElement.classList.add('active');
+  
+  // KONTROL VISIBILITAS TOMBOL LAPOR
+  const laporBtn = document.getElementById('laporBtn');
+  if (tabName === 'lokasi') {
+    laporBtn.classList.remove('hidden-by-tab');
+  } else {
+    laporBtn.classList.add('hidden-by-tab');
+  }
+  
+  if (tabName === 'analisis') { 
+    renderGrafik(); 
+    renderLeaderboard(); 
+  }
+  if (tabName === 'profil') updateUIProfil();
 }
 
 function buatRute(lat, lng) {
   if (!navigator.geolocation) { showToast("HP Anda tidak mendukung GPS.", "error"); return; }
-  navigator.geolocation.getCurrentPosition((pos) => {
+  navigator.geolocation.getCurrentPosition(function(pos) {
     const userLat = pos.coords.latitude;
     const userLng = pos.coords.longitude;
     
-    if (routingControl) {
-      map.removeControl(routingControl);
-    }
+    if (routingControl) { map.removeControl(routingControl); }
 
     routingControl = L.Routing.control({
       waypoints: [ L.latLng(userLat, userLng), L.latLng(lat, lng) ],
@@ -910,8 +873,8 @@ function generateEduGrid() {
     let data = edukasiSampah[key];
     let card = document.createElement('div');
     card.className = 'edu-card';
-    card.onclick = () => bukaEdukasi(key);
-    card.innerHTML = `<span class="edu-card-icon">${data.icon}</span><div class="edu-card-title">${data.title}</div>`;
+    card.onclick = function() { bukaEdukasi(key); };
+    card.innerHTML = '<span class="edu-card-icon">' + data.icon + '</span><div class="edu-card-title">' + data.title + '</div>';
     grid.appendChild(card);
   }
 }
@@ -927,7 +890,7 @@ function bukaEdukasi(jenisSampah) {
   document.getElementById('eduDampak').innerHTML = data.dampak;
   document.getElementById('eduSolusi').innerHTML = data.solusi;
   document.getElementById('modalEdukasi').style.display = 'flex';
-  lucide.createIcons();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 function tutupEdukasi() { document.getElementById('modalEdukasi').style.display = 'none'; }
 
@@ -944,32 +907,36 @@ function cariTerdekat() {
   if (!navigator.geolocation) { showToast("HP Anda tidak mendukung GPS.", "error"); return; }
   const btn = document.querySelector('.btn-action.blue');
   btn.innerHTML = '<i data-lucide="loader" class="lucide-sm"></i> Mencari...';
-  lucide.createIcons();
-  navigator.geolocation.getCurrentPosition((pos) => {
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  navigator.geolocation.getCurrentPosition(function(pos) {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
-    const fasilitas = dataTitik.filter(t => t.kategori === 'fasilitas' && t.is_approved !== false);
-    if (fasilitas.length === 0) { showToast("Belum ada data Tempat Sampah.", "warning"); btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Cari TPS'; lucide.createIcons(); return; }
+    const fasilitas = dataTitik.filter(function(t) { return t.kategori === 'fasilitas' && t.is_approved !== false; });
+    if (fasilitas.length === 0) { 
+      showToast("Belum ada data Tempat Sampah.", "warning"); 
+      btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Cari TPS'; 
+      if (typeof lucide !== 'undefined') lucide.createIcons(); 
+      return; 
+    }
     let terdekat = null; let jarakTerdekat = Infinity;
-    fasilitas.forEach(f => {
+    fasilitas.forEach(function(f) {
       const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
       if (jarak < jarakTerdekat) { jarakTerdekat = jarak; terdekat = f; }
     });
     btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Cari TPS';
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     if (terdekat) {
       document.getElementById('bottomSheet').classList.remove('expanded');
       map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 });
-      setTimeout(() => {
-        const index = dataTitik.findIndex(t => t.id === terdekat.id);
-        const marker = petaMarkers[index];
+      setTimeout(function() {
+        const marker = markerMap.get(terdekat.id);
         if (marker) marker.openPopup();
-        showToast(`Tempat sampah terdekat: ${terdekat.nama} (${jarakTerdekat.toFixed(2)} km)`, "success");
+        showToast('Tempat sampah terdekat: ' + terdekat.nama + ' (' + jarakTerdekat.toFixed(2) + ' km)', "success");
       }, 2100);
     }
-  }, (err) => {
+  }, function(err) {
     showToast("Gagal mengambil lokasi.", "error");
     btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Cari TPS';
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   });
 }
 
@@ -978,33 +945,31 @@ function cariBankTerdekat() {
   const btn = document.querySelector('.btn-action.green');
   const originalText = btn.innerHTML;
   btn.innerHTML = '<i data-lucide="loader" class="lucide-sm"></i> Mencari...';
-  lucide.createIcons();
-  navigator.geolocation.getCurrentPosition((pos) => {
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  navigator.geolocation.getCurrentPosition(function(pos) {
     const userLat = pos.coords.latitude; const userLng = pos.coords.longitude;
-    const banks = dataTitik.filter(t => t.kategori === 'bank_sampah' && t.is_approved !== false);
+    const banks = dataTitik.filter(function(t) { return t.kategori === 'bank_sampah' && t.is_approved !== false; });
     btn.innerHTML = originalText;
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     if (banks.length === 0) { showToast("Belum ada Bank Sampah.", "warning"); return; }
     let terdekat = null; let jarakTerdekat = Infinity;
-    banks.forEach(f => {
+    banks.forEach(function(f) {
       const jarak = hitungJarak(userLat, userLng, parseFloat(f.lat), parseFloat(f.lng));
       if (jarak < jarakTerdekat) { jarakTerdekat = jarak; terdekat = f; }
     });
     if (terdekat) {
       document.getElementById('bottomSheet').classList.remove('expanded');
       map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 });
-      setTimeout(() => {
-        const index = dataTitik.findIndex(t => t.id === terdekat.id);
-        const marker = petaMarkers[index];
+      setTimeout(function() {
+        const marker = markerMap.get(terdekat.id);
         if (marker) marker.openPopup();
-        let info = `🏦 Bank Sampah terdekat:\n\n${terdekat.nama}\n(${jarakTerdekat.toFixed(2)} km)`;
-        showToast(info, "info");
+        showToast('Bank Sampah terdekat: ' + terdekat.nama + ' (' + jarakTerdekat.toFixed(2) + ' km)', "info");
       }, 2100);
     }
-  }, (err) => {
+  }, function(err) {
     showToast("Gagal mengambil lokasi.", "error");
     btn.innerHTML = originalText;
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   });
 }
 
@@ -1015,10 +980,10 @@ function prosesLacak() {
   const keyword = document.getElementById('inCariLaporan').value.toLowerCase();
   const hasilContainer = document.getElementById('hasilLacak');
   if (!keyword) { showToast("Masukkan nama lokasi!", "warning"); return; }
-  const hasil = dataTitik.filter(t => t.nama.toLowerCase().includes(keyword));
-  if (hasil.length === 0) { hasilContainer.innerHTML = `<p style="color:#ef4444; font-size:13px;">Laporan tidak ditemukan.</p>`; return; }
+  const hasil = dataTitik.filter(function(t) { return t.nama && t.nama.toLowerCase().indexOf(keyword) !== -1; });
+  if (hasil.length === 0) { hasilContainer.innerHTML = '<p style="color:#ef4444; font-size:13px;">Laporan tidak ditemukan.</p>'; return; }
   hasilContainer.innerHTML = '';
-  hasil.forEach(t => {
+  hasil.forEach(function(t) {
     let statusText, statusColor;
     if (t.kategori === 'bank_sampah') {
       statusText = "Bank Sampah Aktif"; statusColor = "#10b981";
@@ -1030,12 +995,10 @@ function prosesLacak() {
       statusText = t.status || "Belum Ditangani";
       statusColor = t.status === "Sudah Ditangani" ? "#10b981" : "#ef4444";
     }
-    hasilContainer.innerHTML += `
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">
-        <div style="font-weight:bold; font-size:13px; margin-bottom:4px;">${t.nama}</div>
-        <div style="font-size:12px; font-weight:bold; color:${statusColor};">Status: ${statusText}</div>
-      </div>
-    `;
+    hasilContainer.innerHTML += '<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; margin-bottom:8px; text-align:left;">' +
+      '<div style="font-weight:bold; font-size:13px; margin-bottom:4px;">' + t.nama + '</div>' +
+      '<div style="font-size:12px; font-weight:bold; color:' + statusColor + ';">Status: ' + statusText + '</div>' +
+      '</div>';
   });
 }
 
@@ -1043,8 +1006,8 @@ function renderGrafik() {
   const canvas = document.getElementById('myChart');
   if (!canvas) return;
   let hitungJenis = {};
-  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis');
-  approvedData.forEach(t => {
+  const approvedData = dataTitik.filter(function(t) { return t.is_approved !== false && t.kategori === 'krisis'; });
+  approvedData.forEach(function(t) {
     let jenis = t.jenis || 'Campuran';
     hitungJenis[jenis] = (hitungJenis[jenis] || 0) + 1;
   });
@@ -1067,17 +1030,15 @@ function renderLeaderboard() {
   const panel = document.getElementById('leaderboard-panel');
   if (!panel) return;
 
-  const dataSelesai = dataTitik.filter(t => t.status === 'Sudah Ditangani' && t.kategori === 'krisis');
+  const dataSelesai = dataTitik.filter(function(t) { return t.status === 'Sudah Ditangani' && t.kategori === 'krisis'; });
   let skorWilayah = {};
   
-  dataSelesai.forEach(t => {
+  dataSelesai.forEach(function(t) {
     let lokasi = t.kecamatan || t.wilayah;
-    if (lokasi) {
-      skorWilayah[lokasi] = (skorWilayah[lokasi] || 0) + 1;
-    }
+    if (lokasi) { skorWilayah[lokasi] = (skorWilayah[lokasi] || 0) + 1; }
   });
 
-  const sorted = Object.entries(skorWilayah).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const sorted = Object.entries(skorWilayah).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
 
   if (sorted.length === 0) {
     panel.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Belum ada laporan yang selesai.</p>';
@@ -1085,28 +1046,26 @@ function renderLeaderboard() {
   }
 
   let html = '';
-  sorted.forEach((item, index) => {
+  sorted.forEach(function(item, index) {
     let rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
-    let medal = index === 0 ? '1' : index === 1 ? '2' : index === 2 ? '3' : `${index + 1}`;
-    html += `
-      <div class="leaderboard-item">
-        <div class="leaderboard-rank ${rankClass}">${medal}</div>
-        <div class="leaderboard-name">Kec. ${item[0]}</div>
-        <div class="leaderboard-score">${item[1]} Selesai</div>
-      </div>
-    `;
+    let medal = index + 1;
+    html += '<div class="leaderboard-item">' +
+      '<div class="leaderboard-rank ' + rankClass + '">' + medal + '</div>' +
+      '<div class="leaderboard-name">Kec. ' + item[0] + '</div>' +
+      '<div class="leaderboard-score">' + item[1] + ' Selesai</div>' +
+      '</div>';
   });
   panel.innerHTML = html;
 }
 
-async function kompresGambar(file) {
-  return new Promise((resolve) => {
+function kompresGambar(file) {
+  return new Promise(function(resolve) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = (event) => {
+    reader.onload = function(event) {
       const img = new Image();
       img.src = event.target.result;
-      img.onload = () => {
+      img.onload = function() {
         const canvas = document.createElement('canvas');
         const MAX_WIDTH = 800;
         const scale = MAX_WIDTH / img.width;
@@ -1114,7 +1073,7 @@ async function kompresGambar(file) {
         canvas.height = img.height * scale;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob((blob) => {
+        canvas.toBlob(function(blob) {
           const compressedFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
           resolve(compressedFile);
         }, 'image/jpeg', 0.7);
@@ -1130,31 +1089,26 @@ function ubahFormKategori() {
   const divJenis = document.getElementById('divJenisSampah');
   const divBank = document.getElementById('divBankSampah');
   const catatan = document.getElementById('inCatatan');
-  const labelNama = document.getElementById('labelNama');
-  const inNama = document.getElementById('inNama');
 
   divJenis.style.display = 'none';
   divBank.style.display = 'none';
 
   if (kat === 'fasilitas') {
     document.getElementById('inJenis').required = false;
-    labelNama.innerText = "Nama Tempat Sampah / RT"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Ukuran Tempat Sampah"; 
-    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang (Default)</option><option value="Besar">Besar</option>`;
+    selectKritis.innerHTML = '<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang</option><option value="Besar">Besar</option>';
     catatan.placeholder = "Kondisi bak / butuh perbaikan";
   } else if (kat === 'bank_sampah') {
     document.getElementById('inJenis').required = false;
     divBank.style.display = 'block';
-    labelNama.innerText = "Nama Bank Sampah"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Kapasitas Bank Sampah"; 
-    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang (Default)</option><option value="Besar">Besar</option>`;
+    selectKritis.innerHTML = '<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang</option><option value="Besar">Besar</option>';
     catatan.placeholder = "Info tambahan (opsional)";
   } else {
     document.getElementById('inJenis').required = true;
     divJenis.style.display = 'block';
-    labelNama.innerText = "Nama Jalan / Daerah (Otomatis)"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Tingkat Kekritisan"; 
-    selectKritis.innerHTML = `<option value="Tinggi">Tinggi</option><option value="Sedang" selected>Sedang (Default)</option><option value="Rendah">Rendah</option>`;
+    selectKritis.innerHTML = '<option value="Tinggi">Tinggi</option><option value="Sedang" selected>Sedang</option><option value="Rendah">Rendah</option>';
     catatan.placeholder = "Sudah 3 hari belum diangkut";
   }
   
@@ -1163,392 +1117,165 @@ function ubahFormKategori() {
 }
 
 function buatMarker(titik) {
-  if (!titik.lat || !titik.lng) return null;
+  const lat = parseFloat(titik.lat);
+  const lng = parseFloat(titik.lng);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  
   const isFasilitas = titik.kategori === 'fasilitas';
   const isBankSampah = titik.kategori === 'bank_sampah';
   const warnaClass = (titik.is_approved === false) ? 'pending' : (titik.kritis || 'rendah').toLowerCase();
   
   let icon;
   if (isFasilitas) {
-    icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-fasilitas">${svgTrash}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] });
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-fasilitas">' + svgTrash + '</div>', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] });
   } else if (isBankSampah) {
-    icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-bank-sampah">${svgBank}</div>`, iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-bank-sampah">' + svgBank + '</div>', iconSize: [32, 32], iconAnchor: [16, 16], popupAnchor: [0, -16] });
   } else {
-    icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pulse ${warnaClass}"></div>`, iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-pulse ' + warnaClass + '"></div>', iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10] });
   }
 
   const fotoUrl = titik.foto ? titik.foto : 'https://via.placeholder.com/400x200?text=Foto+Belum+Ada';
   const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
   let pendingHTML = '';
-  if (titik.is_approved === false) pendingHTML = `<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu ACC</span></div>`;
+  if (titik.is_approved === false) pendingHTML = '<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu ACC</span></div>';
 
   let popupContent = "";
-  const btnRute = `<button onclick="buatRute(${titik.lat}, ${titik.lng})" style="width:100%; margin-top:8px; padding:8px; background:#3b82f6; color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="navigation" class="lucide-sm"></i> Rute ke Sini</button>`;
-  const btnShare = `<button onclick="shareKeWA('${titik.nama}', '${titik.status || 'Aktif'}')" style="width:100%; margin-top:6px; padding:8px; background:var(--wa); color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;">${waIcon} Bagikan ke WA</button>`;
+  const btnRute = '<button onclick="buatRute(' + lat + ', ' + lng + ')" style="width:100%; margin-top:8px; padding:8px; background:#3b82f6; color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">Rute ke Sini</button>';
+  const btnShare = '<button onclick="shareKeWA(\'' + titik.nama.replace(/'/g, "\\'") + '\', \'' + (titik.status || 'Aktif') + '\')" style="width:100%; margin-top:6px; padding:8px; background:#25D366; color:white; border:none; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">Bagikan ke WA</button>';
 
   if (isFasilitas) {
-    popupContent = `<div class="popup-row"><span>Tipe</span><span class="badge fasilitas"><i data-lucide="trash-2" class="lucide-sm"></i> Tempat Sampah</span></div><div class="popup-row"><span>Ukuran</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis || '-'}</span></div>`;
+    popupContent = '<div class="popup-row"><span>Tipe</span><span class="badge fasilitas">Tempat Sampah</span></div><div class="popup-row"><span>Ukuran</span><span class="badge ' + (warnaClass === 'pending' ? 'sedang' : warnaClass) + '">' + (titik.kritis || '-') + '</span></div>';
   } else if (isBankSampah) {
     const kapClass = (titik.kritis || 'sedang').toLowerCase();
-    popupContent = `
-      <div class="popup-row"><span>Tipe</span><span class="badge bank-sampah"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span></div>
-      <div class="popup-row"><span>Kapasitas</span><span class="badge bank-${kapClass}">${titik.kritis || '-'}</span></div>
-      ${titik.jam_operasional ? `<div class="popup-row"><span>Jam Buka</span><b style="font-size:11px;">${titik.jam_operasional}</b></div>` : ''}
-      ${titik.kontak ? `<div class="popup-row"><span>Kontak</span><b style="font-size:11px;">${titik.kontak}</b></div>` : ''}
-      ${titik.jenis_diterima ? `<div style="margin-top:6px;padding:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;font-size:11px;color:#065f46;"><b>♻️ Menerima:</b><br>${titik.jenis_diterima}</div>` : ''}
-    `;
+    popupContent = '<div class="popup-row"><span>Tipe</span><span class="badge bank-sampah">Bank Sampah</span></div>' +
+      '<div class="popup-row"><span>Kapasitas</span><span class="badge bank-' + kapClass + '">' + (titik.kritis || '-') + '</span></div>' +
+      (titik.jam_operasional ? '<div class="popup-row"><span>Jam Buka</span><b style="font-size:11px;">' + titik.jam_operasional + '</b></div>' : '') +
+      (titik.kontak ? '<div class="popup-row"><span>Kontak</span><b style="font-size:11px;">' + titik.kontak + '</b></div>' : '') +
+      (titik.jenis_diterima ? '<div style="margin-top:6px;padding:8px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;font-size:11px;color:#065f46;"><b>Menerima:</b><br>' + titik.jenis_diterima + '</div>' : '');
   } else {
-    popupContent = `
-      <div class="popup-row"><span>Jenis</span><b>${titik.jenis || '-'}</b></div>
-      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis}</span></div>
-      <div class="popup-row"><span>Status</span><span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span></div>
-      <button onclick="bukaEdukasi('${titik.jenis}')" style="width:100%; margin-top:8px; padding:6px; background:#fffbeb; border:1px solid #f59e0b; border-radius:6px; font-size:12px; font-weight:bold; color:#b45309; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="lightbulb" class="lucide-sm"></i> Pelajari Jenis Ini</button>
-    `;
+    popupContent = '<div class="popup-row"><span>Jenis</span><b>' + (titik.jenis || '-') + '</b></div>' +
+      '<div class="popup-row"><span>Kekritisan</span><span class="badge ' + (warnaClass === 'pending' ? 'sedang' : warnaClass) + '">' + titik.kritis + '</span></div>' +
+      '<div class="popup-row"><span>Status</span><span class="badge-status ' + statusClass + '">' + (titik.status || 'Belum Ditangani') + '</span></div>' +
+      '<button onclick="bukaEdukasi(\'' + titik.jenis + '\')" style="width:100%; margin-top:8px; padding:6px; background:#fffbeb; border:1px solid #f59e0b; border-radius:6px; font-size:12px; font-weight:bold; color:#b45309; cursor:pointer;">Pelajari Jenis Ini</button>';
   }
 
-  const popupHTML = `
-    <img class="popup-img" src="${fotoUrl}" onerror="this.src='https://via.placeholder.com/400x200?text=Foto+Error'">
-    <div class="popup-body">
-      <div class="popup-title">${titik.nama}</div>
-      ${pendingHTML} ${popupContent}
-      <div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>${titik.wilayah} (${titik.kecamatan || ''})</b></div>
-      ${btnRute}
-      ${btnShare}
-    </div>`;
+  const popupHTML = '<img class="popup-img" src="' + fotoUrl + '" onerror="this.src=\'https://via.placeholder.com/400x200?text=Foto+Error\'">' +
+    '<div class="popup-body">' +
+    '<div class="popup-title">' + titik.nama + '</div>' +
+    pendingHTML + popupContent +
+    '<div class="popup-row" style="margin-top:6px;"><span>Wilayah</span><b>' + titik.wilayah + ' (' + (titik.kecamatan || '') + ')</b></div>' +
+    btnRute + btnShare +
+    '</div>';
   
-  let marker = L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 270 });
-  marker.on('popupopen', function() { lucide.createIcons(); });
+  let marker = L.marker([lat, lng], { icon: icon }).bindPopup(popupHTML, { maxWidth: 270 });
+  marker.on('popupopen', function() { if (typeof lucide !== 'undefined') lucide.createIcons(); });
   return marker;
 }
 
-function keLokasiMenu(index) {
-  document.getElementById('bottomSheet').classList.remove('expanded');
-  const marker = petaMarkers[index];
-  if (!marker) return;
-  const lat = marker.getLatLng().lat; const lng = marker.getLatLng().lng;
-  setTimeout(() => {
-    map.invalidateSize(); map.flyTo([lat, lng], 16, { duration: 1.5 }); 
-    setTimeout(() => { marker.openPopup(); }, 1600);
-  }, 350);
+function shareKeWA(nama, status) {
+  const urlWeb = "https://tuwoto-app.github.io/";
+  let text = 'Halo! Saya baru saja melaporkan/melihat data di Tuwoto.\n\nLokasi: *' + nama + '*\nStatus: ' + status + '\n\nYuk bantu pantau kebersihan lingkungan kita dengan membuka aplikasi Tuwoto: ' + urlWeb;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
-function renderSemua(filter = 'all') {
-  currentFilter = filter;
-  
-  // Bersihkan layer peta dengan benar
-  petaMarkers.forEach(m => { map.removeLayer(m); });
-  petaMarkers = [];
-  cluster.clearLayers();
-  
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  
-  let dataFilter = [...dataTitik];
-  if (filter !== 'all') {
-    dataFilter = dataFilter.filter(t => t.kategori === 'krisis' && t.kritis === filter);
+function bukaHargaSampah() { document.getElementById('modalHarga').style.display = 'flex'; }
+function tutupHarga() { document.getElementById('modalHarga').style.display = 'none'; }
+
+function bukaDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'flex'; }
+function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'none'; }
+
+function ambilLokasiBank() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      document.getElementById('bankLat').value = pos.coords.latitude;
+      document.getElementById('bankLng').value = pos.coords.longitude;
+      showToast("Titik lokasi berhasil diambil!", "success");
+    }, function() { showToast("Gagal mengambil GPS.", "error"); });
   }
-  if (currentSearch) {
-    dataFilter = dataFilter.filter(t => t.nama.toLowerCase().includes(currentSearch) || t.wilayah.toLowerCase().includes(currentSearch));
-  }
-  const showFasilitas = document.getElementById('toggleFasilitas')?.checked ?? true;
-  const showBankSampah = document.getElementById('toggleBankSampah')?.checked ?? true;
-  const showSelesai = document.getElementById('toggleSelesai')?.checked ?? false;
-
-  if (!showFasilitas) dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
-  if (!showBankSampah) dataFilter = dataFilter.filter(t => t.kategori !== 'bank_sampah');
-
-  let dataForMap = [...dataFilter];
-  if (!showSelesai) {
-    dataForMap = dataForMap.filter(t => t.status !== 'Sudah Ditangani');
-  }
-
-  if (currentSort === 'nama_asc') dataForMap.sort((a, b) => a.nama.localeCompare(b.nama));
-  else if (currentSort === 'kritis_tinggi') dataForMap.sort((a, b) => {
-    const rank = k => k === 'Tinggi' ? 3 : (k === 'Sedang' ? 2 : 1);
-    return rank(b.kritis) - rank(a.kritis);
-  });
-
-  if (dataForMap.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
-
-  dataForMap.forEach((titik) => { 
-    const marker = buatMarker(titik); 
-    if (marker) {
-      if (titik.kategori === 'krisis') {
-        cluster.addLayer(marker); 
-      } else {
-        map.addLayer(marker); // Tidak masuk cluster
-      }
-      petaMarkers.push(marker); 
-    }
-  });
-  map.addLayer(cluster);
-
-  dataForMap.forEach((titik, index) => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    const isBank = titik.kategori === 'bank_sampah';
-    const isFas = titik.kategori === 'fasilitas';
-    const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
-    const pendingHTML = (titik.is_approved === false) ? `<span class="badge-status status-pending">Pending</span>` : '';
-
-    let badgeHTML = '';
-    if (isBank) {
-      badgeHTML = `<span class="badge bank-sampah"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span>`;
-    } else if (isFas) {
-      badgeHTML = `<span class="badge fasilitas"><i data-lucide="trash-2" class="lucide-sm"></i> ${titik.kritis || ''}</span>`;
-    } else {
-      badgeHTML = `<span class="badge ${(titik.kritis||'rendah').toLowerCase()}">${titik.kritis}</span>`;
-    }
-    
-    const statusBadge = (!isBank && !isFas) ? `<span class="badge-status ${statusClass}">${titik.status || 'Belum'}</span>` : '';
-    
-    let adminHTML = '';
-    if (isAdmin) {
-      let tombolAcc = '';
-      if (titik.is_approved === false) tombolAcc = `<button class="btn-admin-acc" onclick="setujuiData('${titik.id}')"><i data-lucide="check" class="lucide-sm"></i> ACC</button>`;
-      else if (titik.status !== 'Sudah Ditangani' && !isBank && !isFas) tombolAcc = `<button class="btn-admin-selesai" onclick="tandaiSelesai('${titik.id}')"><i data-lucide="check-circle" class="lucide-sm"></i> Selesai</button>`;
-      adminHTML = `<div class="admin-actions-compact">${tombolAcc}<button class="btn-admin-edit" onclick="bukaEdit('${titik.id}')"><i data-lucide="edit" class="lucide-sm"></i> Edit</button><button class="btn-admin-hapus" onclick="hapusData('${titik.id}')"><i data-lucide="trash" class="lucide-sm"></i> Hapus</button></div>`;
-    }
-
-    div.innerHTML = `
-      <div class="item-info">
-        <div class="item-title">${titik.nama}</div>
-        <div class="item-meta">${pendingHTML}${badgeHTML}${statusBadge}</div>
-        ${adminHTML}
-      </div>
-      <div class="item-actions">
-        <button class="btn-icon map" onclick="keLokasiMenu(${index})"><i data-lucide="map-pin" class="lucide-sm"></i></button>
-        <button class="btn-icon share" onclick="shareKeWA('${titik.nama}', '${titik.status || 'Aktif'}')">${waIcon}</button>
-      </div>
-    `;
-    list.appendChild(div);
-  });
-
-  updateStats();
-  lucide.createIcons(); 
 }
 
-function updateStats() {
-  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis' && t.status !== 'Sudah Ditangani');
-  document.getElementById('statTinggi').textContent = approvedData.filter(t => t.kritis === 'Tinggi').length;
-  document.getElementById('statSedang').textContent = approvedData.filter(t => t.kritis === 'Sedang').length;
-  document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
-}
-
-document.getElementById('searchInput').addEventListener('input', (e) => { currentSearch = e.target.value.toLowerCase(); renderSemua(currentFilter); });
-document.getElementById('sortSelect').addEventListener('change', (e) => { currentSort = e.target.value; renderSemua(currentFilter); });
-
-async function setujuiData(id) { 
-  customConfirm("Setujui data laporan ini?", async () => {
-    const { error } = await supabaseClient.from('titik_sampah').update({ is_approved: true }).eq('id', id); 
-    if (error) showToast("Gagal: " + error.message, "error"); 
-    else { showToast("✅ Disetujui.", "success"); ambilData(); } 
-  }, "Setujui Data");
-}
-
-async function tandaiSelesai(id) { 
-  customConfirm("Tandai laporan ini sebagai Selesai Ditangani?", async () => {
-    const { error } = await supabaseClient.from('titik_sampah').update({ status: 'Sudah Ditangani' }).eq('id', id); 
-    if (error) showToast("Gagal: " + error.message, "error"); 
-    else { showToast("✅ Selesai.", "success"); ambilData(); } 
-  }, "Tandai Selesai");
-}
-
-function bukaEdit(id) {
-  const data = dataTitik.find(t => t.id == id); if (!data) return;
-  document.getElementById('judulForm').innerHTML = '<i data-lucide="edit"></i> Edit Data'; 
-  document.getElementById('editId').value = data.id;
-  document.getElementById('inKategori').value = data.kategori || 'krisis'; ubahFormKategori();
-  document.getElementById('inNama').value = data.nama; document.getElementById('inLat').value = data.lat; document.getElementById('inLng').value = data.lng; document.getElementById('inWilayah').value = data.wilayah;
-  document.getElementById('inKecamatan').value = data.kecamatan || "";
-  if (data.kategori === 'krisis') document.getElementById('inJenis').value = data.jenis;
-  document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
-  
-  if (data.kategori === 'bank_sampah') {
-    document.getElementById('inJam').value = data.jam_operasional || '';
-    document.getElementById('inKontak').value = data.kontak || '';
-    document.getElementById('inJenisDiterima').value = data.jenis_diterima || '';
-  }
-  document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
-  document.getElementById('divAntiBot').style.display = 'none';
-  document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
-  
-  updateSelectDisplay('inKategori');
-  updateSelectDisplay('inJenis');
-  updateSelectDisplay('inKritis');
-  updateSelectDisplay('inWilayah');
-  updateSelectDisplay('inStatus');
-
-  document.getElementById('modalLapor').style.display = 'flex';
-  lucide.createIcons();
-}
-
-async function hapusData(id) { 
-  customConfirm("Hapus data ini secara permanen?", async () => {
-    const { error } = await supabaseClient.from('titik_sampah').delete().eq('id', id); 
-    if (error) showToast("Gagal: " + error.message, "error"); 
-    else { showToast("✅ Dihapus.", "success"); ambilData(); } 
-  }, "Hapus Data");
-}
-
-document.getElementById('laporBtn').onclick = () => {
-  document.getElementById('formLaporan').reset(); 
-  document.getElementById('judulForm').innerHTML = '<i data-lucide="camera"></i> Lapor Cepat'; 
-  document.getElementById('editId').value = "";
-  document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
-  document.getElementById('inFoto').required = true; document.getElementById('labelFotoWajib').style.display = 'inline'; document.getElementById('infoFotoLama').style.display = 'none';
-  document.getElementById('divStatus').style.display = 'none'; 
-  document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
-  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-  document.getElementById('inNama').value = ""; 
-  
-  updateSelectDisplay('inKategori');
-  updateSelectDisplay('inJenis');
-  updateSelectDisplay('inKritis');
-  updateSelectDisplay('inWilayah');
-  updateSelectDisplay('inStatus');
-
-  document.getElementById('modalLapor').style.display = 'flex';
-  lucide.createIcons();
-};
-
-function tutupModal() { document.getElementById('modalLapor').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } }
-
-function ambilLokasiGPS() { 
-  if (navigator.geolocation) { 
-    navigator.geolocation.getCurrentPosition((position) => { 
-      const lat = position.coords.latitude; 
-      const lng = position.coords.longitude;
-      updateKoordinat(lat, lng);
-      showToast("GPS berhasil diambil! Mendeteksi nama jalan...", "success"); 
-    }, (error) => { showToast("Gagal mengambil GPS.", "error"); }); 
-  } else showToast("Perangkat tidak mendukung GPS.", "error"); 
-}
-
-function mulaiPilihPeta() {
-  document.getElementById('modalLapor').style.display = 'none'; 
-  showToast("Geser pin di peta untuk memilih lokasi.", "info"); 
-  document.getElementById('map').style.cursor = 'crosshair';
-  
-  const lat = parseFloat(document.getElementById('inLat').value) || map.getCenter().lat;
-  const lng = parseFloat(document.getElementById('inLng').value) || map.getCenter().lng;
-  
-  if (tempMarker) map.removeLayer(tempMarker); 
-  tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin Ini</b>").openPopup();
-  
-  tempMarker.on('dragend', function(e) {
-    const newLatLng = e.target.getLatLng();
-    updateKoordinat(newLatLng.lat, newLatLng.lng);
-  });
-
-  map.setView([lat, lng], 17);
-  
-  const btnKonfirmPeta = document.createElement('button');
-  btnKonfirmPeta.innerText = "Konfirmasi Lokasi Ini";
-  btnKonfirmPeta.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:var(--primary); color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
-  btnKonfirmPeta.onclick = () => {
-    document.getElementById('map').style.cursor = '';
-    map.removeLayer(tempMarker);
-    tempMarker = null;
-    btnKonfirmPeta.remove();
-    document.getElementById('modalLapor').style.display = 'flex';
-  };
-  document.getElementById('app').appendChild(btnKonfirmPeta);
-}
-
-document.getElementById('formLaporan').onsubmit = async (e) => {
+document.getElementById('formDaftarBank').onsubmit = async function(e) {
   e.preventDefault();
-  if (!document.getElementById('inNama').value) { showToast("Ambil Lokasi Terlebih Dahulu", "warning"); return; }
+  const btn = document.getElementById('btnKirimBank');
+  btn.textContent = "Mengirim..."; btn.disabled = true;
+  
+  const dataBank = {
+    nama: document.getElementById('bankNama').value,
+    lat: parseFloat(document.getElementById('bankLat').value),
+    lng: parseFloat(document.getElementById('bankLng').value),
+    wilayah: "Kota Gorontalo",
+    kecamatan: document.getElementById('bankKecamatan').value,
+    kategori: 'bank_sampah',
+    kritis: 'Sedang',
+    jenis: document.getElementById('bankJenis').value,
+    status: 'Belum Ditangani',
+    is_approved: false,
+    catatan: "Didaftarkan mandiri oleh pengurus.",
+    alamat: "-",
+    jam_operasional: document.getElementById('bankJam').value,
+    kontak: document.getElementById('bankKontak').value,
+    jenis_diterima: document.getElementById('bankJenis').value,
+    foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah'
+  };
 
-  const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
-  const btnSubmit = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); const kategori = document.getElementById('inKategori').value;
-  btnSubmit.textContent = 'Memproses...'; btnSubmit.disabled = true;
-  let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false; 
-  if (isEditMode) { const dataLama = dataTitik.find(t => t.id == editId); if (dataLama) { fotoUrl = dataLama.foto; isApprovedValue = dataLama.is_approved; } statusValue = document.getElementById('inStatus').value; }
-  else { if (isAdmin) isApprovedValue = true; }
-  try {
-    if (fileInput.files.length > 0) {
-      btnSubmit.textContent = 'Kompres Foto...';
-      const file = fileInput.files[0]; 
-      const compressedFile = await kompresGambar(file);
-      
-      btnSubmit.textContent = 'Upload...';
-      const fileName = `${Date.now()}_${compressedFile.name.replace(/\s/g, '_')}`; 
-      const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('foto_sampah').upload(fileName, compressedFile); 
-      if (uploadError) throw uploadError; 
-      const { data: publicUrlData } = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); 
-      fotoUrl = publicUrlData.publicUrl; 
-    }
-    
-    const dataBaru = { 
-      nama: document.getElementById('inNama').value, 
-      lat: parseFloat(document.getElementById('inLat').value), 
-      lng: parseFloat(document.getElementById('inLng').value), 
-      wilayah: document.getElementById('inWilayah').value, 
-      kecamatan: document.getElementById('inKecamatan').value, 
-      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
-      kritis: document.getElementById('inKritis').value, 
-      kategori: kategori, 
-      status: statusValue, 
-      is_approved: isApprovedValue, 
-      catatan: document.getElementById('inCatatan').value, 
-      alamat: "-", 
-      foto: fotoUrl,
-      user_id: currentUser ? currentUser.id : null
-    };
-    
-    if (kategori === 'bank_sampah') {
-      dataBaru.jam_operasional = document.getElementById('inJam').value || null;
-      dataBaru.kontak = document.getElementById('inKontak').value || null;
-      dataBaru.jenis_diterima = document.getElementById('inJenisDiterima').value || null;
-    }
-    
-    let error; 
-    if (isEditMode) { const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); error = result.error; } 
-    else { const result = await supabaseClient.from('titik_sampah').insert([dataBaru]); error = result.error; }
-    if (error) throw error;
-    
-    if (!isEditMode && currentUser && !isAdmin) {
-       await tambahPoinKeDB(10);
-    }
-
-    showToast(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : (currentUser ? "✅ Dikirim! Menunggu ACC. (+10 Poin)" : "✅ Dikirim! Menunggu ACC. (Login untuk dapat poin)")), "success");
-    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } tutupModal(); ambilData(); 
-  } catch (error) { showToast("❌ Gagal: " + error.message, "error"); } finally { btnKirimLaporan.textContent = 'Kirim Laporan Sekarang'; btnSubmit.disabled = false; }
+  const result = await supabaseClient.from('titik_sampah').insert([dataBank]);
+  if (result.error) {
+    showToast("Gagal mendaftar: " + result.error.message, "error");
+    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
+  } else {
+    showToast("Pendaftaran berhasil! Menunggu verifikasi Admin.", "success");
+    tutupDaftarBank();
+    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
+    document.getElementById('formDaftarBank').reset();
+  }
 };
 
-let qrGenerated = false;
-function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://tuwoto-app.github.io/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } tutupFilter(); }
-function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
+function bukaFilter() { document.getElementById('modalFilter').style.display = 'flex'; }
+function tutupFilter() { document.getElementById('modalFilter').style.display = 'none'; renderSemua(currentFilter); }
+function filterDariStat(kategori) {
+  document.getElementById('statBoxTinggi').classList.remove('active-filter');
+  document.getElementById('statBoxSedang').classList.remove('active-filter');
+  document.getElementById('statBoxRendah').classList.remove('active-filter');
 
-async function ambilData() {
-  try {
-    let query = supabaseClient.from('titik_sampah').select('*'); 
-    if (!isAdmin) query = query.eq('is_approved', true);
-    const { data: dataSampah, error: errSampah } = await query; 
-    if (!errSampah) dataTitik = dataSampah || [];
-    
-    renderSemua(currentFilter); 
-    renderLeaderboard();
-    if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
-    lucide.createIcons(); 
-  } catch (err) { console.log("Error koneksi:", err); }
+  if (currentFilter === kategori) {
+    currentFilter = 'all';
+  } else {
+    currentFilter = kategori;
+    if (kategori === 'Tinggi') document.getElementById('statBoxTinggi').classList.add('active-filter');
+    if (kategori === 'Sedang') document.getElementById('statBoxSedang').classList.add('active-filter');
+    if (kategori === 'Rendah') document.getElementById('statBoxRendah').classList.add('active-filter');
+  }
+  renderSemua(currentFilter);
 }
 
-// PERBAIKAN LOGIN & REGISTER
+async function cekSesiUser() {
+  const sess = await supabaseClient.auth.getSession();
+  const session = sess.data.session;
+  if (session) {
+    currentUser = session.user;
+    await ambilDataUser();
+  } else {
+    currentUser = null;
+    currentUserPoints = 0;
+    currentUserRole = 'warga';
+    isAdmin = false;
+  }
+  updateUIProfil();
+}
+
 async function prosesLoginWarga(btnElement) {
   const email = document.getElementById('inEmailUser').value;
   const pass = document.getElementById('inPassUser').value;
-  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
+  if (!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
   
-  btnElement.innerText = "Memproses...";
+  if (btnElement) btnElement.innerText = "Memproses...";
   
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
   if (error) {
-    showToast("❌ Gagal Login: " + error.message, "error");
-    btnElement.innerText = "Masuk";
+    showToast("Gagal Login: " + error.message, "error");
+    if (btnElement) btnElement.innerText = "Masuk";
   } else {
-    showToast("✅ Berhasil Login!", "success");
+    showToast("Berhasil Login!", "success");
     document.getElementById('inEmailUser').value = '';
     document.getElementById('inPassUser').value = '';
     currentUser = data.user;
@@ -1560,23 +1287,23 @@ async function prosesLoginWarga(btnElement) {
 async function prosesDaftarWarga(btnElement) {
   const email = document.getElementById('inEmailUser').value;
   const pass = document.getElementById('inPassUser').value;
-  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
-  if(pass.length < 6) { showToast("Password minimal 6 karakter!", "warning"); return; }
+  if (!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
+  if (pass.length < 6) { showToast("Password minimal 6 karakter!", "warning"); return; }
   
-  btnElement.innerText = "Memproses...";
+  if (btnElement) btnElement.innerText = "Memproses...";
   
-  const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
+  const { data, error } = await supabaseClient.auth.signUp({ email: email, password: pass });
   if (error) {
-    showToast("❌ Gagal Daftar: " + error.message, "error");
-    btnElement.innerText = "Buat Akun Baru";
+    showToast("Gagal Daftar: " + error.message, "error");
+    if (btnElement) btnElement.innerText = "Buat Akun Baru";
   } else {
-    showToast("✅ Pendaftaran Berhasil! Silakan login.", "success");
-    btnElement.innerText = "Buat Akun Baru";
+    showToast("Pendaftaran Berhasil! Silakan login.", "success");
+    if (btnElement) btnElement.innerText = "Buat Akun Baru";
   }
 }
 
 async function logoutWarga() {
-  customConfirm("Keluar dari akun Anda saat ini?", async () => {
+  customConfirm("Keluar dari akun Anda saat ini?", async function() {
     await supabaseClient.auth.signOut();
     currentUser = null;
     currentUserPoints = 0;
@@ -1589,7 +1316,7 @@ async function logoutWarga() {
 }
 
 async function ambilDataUser() {
-  if(!currentUser) return;
+  if (!currentUser) return;
   const { data, error } = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
   if (data) {
     currentUserPoints = data.total_poin;
@@ -1651,7 +1378,7 @@ function updateUIProfil() {
 }
 
 function renderProfilLencana() {
-  if(isAdmin) return; 
+  if (isAdmin) return; 
 
   const imgBadge = document.getElementById('profilBadge');
   const txtTitle = document.getElementById('profilLevelTitle');
@@ -1694,7 +1421,7 @@ function renderProfilLencana() {
   if (currentUserPoints >= 1000) {
      txtProgress.innerText = "Level Maksimal Tercapai!";
   } else {
-     txtProgress.innerText = `${currentUserPoints}/${levelData.next} Poin menuju level berikutnya`;
+     txtProgress.innerText = currentUserPoints + '/' + levelData.next + ' Poin menuju level berikutnya';
   }
 }
 
@@ -1725,7 +1452,7 @@ async function mintaIzinNotifikasi() {
     }, { onConflict: 'user_id' });
 
     if (error) throw error;
-    showToast("✅ Notifikasi HP berhasil diaktifkan!", "success");
+    showToast("Notifikasi HP berhasil diaktifkan!", "success");
   } catch (err) {
     console.error(err);
     showToast("Gagal mengaktifkan notifikasi: " + err.message, "error");
@@ -1743,10 +1470,10 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange(function(event, session) {
   if (event === 'SIGNED_IN') {
     currentUser = session.user;
-    ambilDataUser().then(() => updateUIProfil());
+    ambilDataUser().then(function() { updateUIProfil(); });
   } else if (event === 'SIGNED_OUT') {
     currentUser = null;
     currentUserPoints = 0;
@@ -1756,20 +1483,415 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// INISIALISASI AWAL
-lucide.createIcons(); 
-renderSemua(currentFilter); ambilData(); cekSesiUser();
+// ================= RENDER MAP & LIST =================
+function renderSemua(filter) {
+  if (!filter) filter = 'all';
+  currentFilter = filter;
+  
+  // Bersihkan marker lama dengan aman
+  cluster.clearLayers();
+  nonClusterMarkers.forEach(function(m) { map.removeLayer(m); });
+  nonClusterMarkers = [];
+  markerMap.clear();
+  
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  
+  let dataFilter = dataTitik.slice();
+  if (filter !== 'all') {
+    dataFilter = dataFilter.filter(function(t) { return t.kategori === 'krisis' && t.kritis === filter; });
+  }
+  if (currentSearch) {
+    dataFilter = dataFilter.filter(function(t) { 
+      return (t.nama && t.nama.toLowerCase().indexOf(currentSearch) !== -1) || 
+             (t.wilayah && t.wilayah.toLowerCase().indexOf(currentSearch) !== -1); 
+    });
+  }
+  
+  const toggleFas = document.getElementById('toggleFasilitas');
+  const toggleBank = document.getElementById('toggleBankSampah');
+  const toggleSel = document.getElementById('toggleSelesai');
+  const showFasilitas = toggleFas ? toggleFas.checked : true;
+  const showBankSampah = toggleBank ? toggleBank.checked : true;
+  const showSelesai = toggleSel ? toggleSel.checked : false;
 
-supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => { ambilData(); }).subscribe();
+  if (!showFasilitas) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'fasilitas'; });
+  if (!showBankSampah) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'bank_sampah'; });
+
+  let dataForMap = dataFilter.slice();
+  if (!showSelesai) {
+    dataForMap = dataForMap.filter(function(t) { return t.status !== 'Sudah Ditangani'; });
+  }
+
+  if (currentSort === 'nama_asc') {
+    dataForMap.sort(function(a, b) { return (a.nama || '').localeCompare(b.nama || ''); });
+  } else if (currentSort === 'kritis_tinggi') {
+    dataForMap.sort(function(a, b) {
+      const rank = function(k) { return k === 'Tinggi' ? 3 : (k === 'Sedang' ? 2 : 1); };
+      return rank(b.kritis) - rank(a.kritis);
+    });
+  }
+
+  if (dataForMap.length === 0) {
+    list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>';
+  }
+
+  // Render marker ke peta
+  dataForMap.forEach(function(titik) { 
+    const marker = buatMarker(titik); 
+    if (marker) {
+      if (titik.kategori === 'krisis') {
+        cluster.addLayer(marker);
+      } else {
+        map.addLayer(marker);
+        nonClusterMarkers.push(marker);
+      }
+      markerMap.set(titik.id, marker);
+    }
+  });
+  map.addLayer(cluster);
+
+  // Render list item
+  dataForMap.forEach(function(titik) {
+    const div = document.createElement('div');
+    div.className = 'item';
+    const isBank = titik.kategori === 'bank_sampah';
+    const isFas = titik.kategori === 'fasilitas';
+    const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
+    const pendingHTML = (titik.is_approved === false) ? '<span class="badge-status status-pending">Pending</span>' : '';
+
+    let badgeHTML = '';
+    if (isBank) {
+      badgeHTML = '<span class="badge bank-sampah">Bank Sampah</span>';
+    } else if (isFas) {
+      badgeHTML = '<span class="badge fasilitas">' + (titik.kritis || '') + '</span>';
+    } else {
+      badgeHTML = '<span class="badge ' + (titik.kritis||'rendah').toLowerCase() + '">' + titik.kritis + '</span>';
+    }
+    
+    const statusBadge = (!isBank && !isFas) ? '<span class="badge-status ' + statusClass + '">' + (titik.status || 'Belum') + '</span>' : '';
+    
+    let adminHTML = '';
+    if (isAdmin) {
+      let tombolAcc = '';
+      if (titik.is_approved === false) {
+        tombolAcc = '<button class="btn-admin-acc" onclick="setujuiData(\'' + titik.id + '\')">ACC</button>';
+      } else if (titik.status !== 'Sudah Ditangani' && !isBank && !isFas) {
+        tombolAcc = '<button class="btn-admin-selesai" onclick="tandaiSelesai(\'' + titik.id + '\')">Selesai</button>';
+      }
+      adminHTML = '<div class="admin-actions-compact">' + tombolAcc + 
+        '<button class="btn-admin-edit" onclick="bukaEdit(\'' + titik.id + '\')">Edit</button>' +
+        '<button class="btn-admin-hapus" onclick="hapusData(\'' + titik.id + '\')">Hapus</button></div>';
+    }
+
+    div.innerHTML = 
+      '<div class="item-info">' +
+        '<div class="item-title">' + titik.nama + '</div>' +
+        '<div class="item-meta">' + pendingHTML + badgeHTML + statusBadge + '</div>' +
+        adminHTML +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button class="btn-icon map" onclick="keLokasiMenu(\'' + titik.id + '\')"><i data-lucide="map-pin" class="lucide-sm"></i></button>' +
+        '<button class="btn-icon share" onclick="shareKeWA(\'' + titik.nama.replace(/'/g, "\\'") + '\', \'' + (titik.status || 'Aktif') + '\')">' + waIcon + '</button>' +
+      '</div>';
+    list.appendChild(div);
+  });
+
+  updateStats();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function keLokasiMenu(id) {
+  document.getElementById('bottomSheet').classList.remove('expanded');
+  const marker = markerMap.get(id);
+  if (!marker) return;
+  const latLng = marker.getLatLng();
+  setTimeout(function() {
+    map.invalidateSize(); 
+    map.flyTo([latLng.lat, latLng.lng], 16, { duration: 1.5 }); 
+    setTimeout(function() { marker.openPopup(); }, 1600);
+  }, 350);
+}
+
+function updateStats() {
+  const approvedData = dataTitik.filter(function(t) { return t.is_approved !== false && t.kategori === 'krisis' && t.status !== 'Sudah Ditangani'; });
+  document.getElementById('statTinggi').textContent = approvedData.filter(function(t) { return t.kritis === 'Tinggi'; }).length;
+  document.getElementById('statSedang').textContent = approvedData.filter(function(t) { return t.kritis === 'Sedang'; }).length;
+  document.getElementById('statRendah').textContent = approvedData.filter(function(t) { return t.kritis === 'Rendah'; }).length;
+}
+
+document.getElementById('searchInput').addEventListener('input', function(e) { 
+  currentSearch = e.target.value.toLowerCase(); 
+  renderSemua(currentFilter); 
+});
+document.getElementById('sortSelect').addEventListener('change', function(e) { 
+  currentSort = e.target.value; 
+  renderSemua(currentFilter); 
+});
+
+async function setujuiData(id) { 
+  customConfirm("Setujui data laporan ini?", async function() {
+    const { error } = await supabaseClient.from('titik_sampah').update({ is_approved: true }).eq('id', id); 
+    if (error) showToast("Gagal: " + error.message, "error"); 
+    else { showToast("Disetujui.", "success"); ambilData(); } 
+  }, "Setujui Data");
+}
+
+async function tandaiSelesai(id) { 
+  customConfirm("Tandai laporan ini sebagai Selesai Ditangani?", async function() {
+    const { error } = await supabaseClient.from('titik_sampah').update({ status: 'Sudah Ditangani' }).eq('id', id); 
+    if (error) showToast("Gagal: " + error.message, "error"); 
+    else { showToast("Selesai.", "success"); ambilData(); } 
+  }, "Tandai Selesai");
+}
+
+function bukaEdit(id) {
+  const data = dataTitik.find(function(t) { return t.id == id; }); 
+  if (!data) return;
+  document.getElementById('judulForm').innerHTML = 'Edit Data'; 
+  document.getElementById('editId').value = data.id;
+  document.getElementById('inKategori').value = data.kategori || 'krisis'; 
+  ubahFormKategori();
+  document.getElementById('inNama').value = data.nama; 
+  document.getElementById('inLat').value = data.lat; 
+  document.getElementById('inLng').value = data.lng; 
+  document.getElementById('inWilayah').value = data.wilayah;
+  document.getElementById('inKecamatan').value = data.kecamatan || "";
+  if (data.kategori === 'krisis') document.getElementById('inJenis').value = data.jenis;
+  document.getElementById('inKritis').value = data.kritis; 
+  document.getElementById('inCatatan').value = data.catatan;
+  
+  if (data.kategori === 'bank_sampah') {
+    document.getElementById('inJam').value = data.jam_operasional || '';
+    document.getElementById('inKontak').value = data.kontak || '';
+    document.getElementById('inJenisDiterima').value = data.jenis_diterima || '';
+  }
+  document.getElementById('divStatus').style.display = 'block'; 
+  document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
+  
+  // TIDAK ADA LAGI REFERENSI KE divAntiBot / inVerifikasi
+  document.getElementById('inFoto').required = false; 
+  document.getElementById('labelFotoWajib').style.display = 'none'; 
+  document.getElementById('infoFotoLama').style.display = 'block';
+  
+  updateSelectDisplay('inKategori');
+  updateSelectDisplay('inJenis');
+  updateSelectDisplay('inKritis');
+  updateSelectDisplay('inStatus');
+
+  document.getElementById('modalLapor').style.display = 'flex';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function hapusData(id) { 
+  customConfirm("Hapus data ini secara permanen?", async function() {
+    const { error } = await supabaseClient.from('titik_sampah').delete().eq('id', id); 
+    if (error) showToast("Gagal: " + error.message, "error"); 
+    else { showToast("Dihapus.", "success"); ambilData(); } 
+  }, "Hapus Data");
+}
+
+document.getElementById('laporBtn').onclick = function() {
+  document.getElementById('formLaporan').reset(); 
+  document.getElementById('judulForm').innerHTML = '<i data-lucide="camera"></i> Lapor Cepat'; 
+  document.getElementById('editId').value = "";
+  document.getElementById('inKategori').value = 'krisis'; 
+  ubahFormKategori();
+  document.getElementById('inFoto').required = true; 
+  document.getElementById('labelFotoWajib').style.display = 'inline'; 
+  document.getElementById('infoFotoLama').style.display = 'none';
+  document.getElementById('divStatus').style.display = 'none'; 
+  document.getElementById('inJam').value = ''; 
+  document.getElementById('inKontak').value = ''; 
+  document.getElementById('inJenisDiterima').value = '';
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+  document.getElementById('inNama').value = ""; 
+  
+  updateSelectDisplay('inKategori');
+  updateSelectDisplay('inJenis');
+  updateSelectDisplay('inKritis');
+  updateSelectDisplay('inStatus');
+
+  document.getElementById('modalLapor').style.display = 'flex';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+function tutupModal() { document.getElementById('modalLapor').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } }
+
+function ambilLokasiGPS() { 
+  if (navigator.geolocation) { 
+    navigator.geolocation.getCurrentPosition(function(position) { 
+      const lat = position.coords.latitude; 
+      const lng = position.coords.longitude;
+      updateKoordinat(lat, lng);
+      showToast("GPS berhasil diambil! Mendeteksi nama jalan...", "success"); 
+    }, function(error) { showToast("Gagal mengambil GPS.", "error"); }); 
+  } else showToast("Perangkat tidak mendukung GPS.", "error"); 
+}
+
+function mulaiPilihPeta() {
+  document.getElementById('modalLapor').style.display = 'none'; 
+  showToast("Geser pin di peta untuk memilih lokasi.", "info"); 
+  document.getElementById('map').style.cursor = 'crosshair';
+  
+  const lat = parseFloat(document.getElementById('inLat').value) || map.getCenter().lat;
+  const lng = parseFloat(document.getElementById('inLng').value) || map.getCenter().lng;
+  
+  if (tempMarker) map.removeLayer(tempMarker); 
+  tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin Ini</b>").openPopup();
+  
+  tempMarker.on('dragend', function(e) {
+    const newLatLng = e.target.getLatLng();
+    updateKoordinat(newLatLng.lat, newLatLng.lng);
+  });
+
+  map.setView([lat, lng], 17);
+  
+  const btnKonfirmPeta = document.createElement('button');
+  btnKonfirmPeta.innerText = "Konfirmasi Lokasi Ini";
+  btnKonfirmPeta.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:#059669; color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
+  btnKonfirmPeta.onclick = function() {
+    document.getElementById('map').style.cursor = '';
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+    btnKonfirmPeta.remove();
+    document.getElementById('modalLapor').style.display = 'flex';
+  };
+  document.getElementById('app').appendChild(btnKonfirmPeta);
+}
+
+document.getElementById('formLaporan').onsubmit = async function(e) {
+  e.preventDefault();
+  if (!document.getElementById('inNama').value) { showToast("Ambil Lokasi Terlebih Dahulu", "warning"); return; }
+
+  const editId = document.getElementById('editId').value; 
+  const isEditMode = editId !== "";
+  const btnSubmit = document.getElementById('btnKirimLaporan'); 
+  const fileInput = document.getElementById('inFoto'); 
+  const kategori = document.getElementById('inKategori').value;
+  btnSubmit.textContent = 'Memproses...'; 
+  btnSubmit.disabled = true;
+  let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false; 
+  if (isEditMode) { 
+    const dataLama = dataTitik.find(function(t) { return t.id == editId; }); 
+    if (dataLama) { 
+      fotoUrl = dataLama.foto; 
+      isApprovedValue = dataLama.is_approved; 
+    } 
+    statusValue = document.getElementById('inStatus').value; 
+  } else { 
+    if (isAdmin) isApprovedValue = true; 
+  }
+  try {
+    if (fileInput.files.length > 0) {
+      btnSubmit.textContent = 'Kompres Foto...';
+      const file = fileInput.files[0]; 
+      const compressedFile = await kompresGambar(file);
+      
+      btnSubmit.textContent = 'Upload...';
+      const fileName = Date.now() + '_' + compressedFile.name.replace(/\s/g, '_'); 
+      const uploadResult = await supabaseClient.storage.from('foto_sampah').upload(fileName, compressedFile); 
+      if (uploadResult.error) throw uploadResult.error; 
+      const publicUrlData = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); 
+      fotoUrl = publicUrlData.data.publicUrl; 
+    }
+    
+    const dataBaru = { 
+      nama: document.getElementById('inNama').value, 
+      lat: parseFloat(document.getElementById('inLat').value), 
+      lng: parseFloat(document.getElementById('inLng').value), 
+      wilayah: document.getElementById('inWilayah').value, 
+      kecamatan: document.getElementById('inKecamatan').value, 
+      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
+      kritis: document.getElementById('inKritis').value, 
+      kategori: kategori, 
+      status: statusValue, 
+      is_approved: isApprovedValue, 
+      catatan: document.getElementById('inCatatan').value, 
+      alamat: "-", 
+      foto: fotoUrl,
+      user_id: currentUser ? currentUser.id : null
+    };
+    
+    if (kategori === 'bank_sampah') {
+      dataBaru.jam_operasional = document.getElementById('inJam').value || null;
+      dataBaru.kontak = document.getElementById('inKontak').value || null;
+      dataBaru.jenis_diterima = document.getElementById('inJenisDiterima').value || null;
+    }
+    
+    let result; 
+    if (isEditMode) { 
+      result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId); 
+    } else { 
+      result = await supabaseClient.from('titik_sampah').insert([dataBaru]); 
+    }
+    if (result.error) throw result.error;
+    
+    if (!isEditMode && currentUser && !isAdmin) {
+      await tambahPoinKeDB(10);
+    }
+
+    showToast(isEditMode ? "Diperbarui!" : (isAdmin ? "Ditambahkan!" : (currentUser ? "Dikirim! Menunggu ACC. (+10 Poin)" : "Dikirim! Menunggu ACC. (Login untuk dapat poin)")), "success");
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
+    tutupModal(); 
+    ambilData(); 
+  } catch (error) { 
+    showToast("Gagal: " + error.message, "error"); 
+  } finally { 
+    btnKirimLaporan.textContent = 'Kirim Laporan Sekarang'; 
+    btnSubmit.disabled = false; 
+  }
+};
+
+let qrGenerated = false;
+function bukaQR() { 
+  document.getElementById('modalQR').style.display = 'flex'; 
+  if (!qrGenerated) { 
+    const linkWebsite = "https://tuwoto-app.github.io/"; 
+    new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); 
+    qrGenerated = true; 
+  } 
+  tutupFilter(); 
+}
+function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
+
+async function ambilData() {
+  try {
+    let query = supabaseClient.from('titik_sampah').select('*'); 
+    if (!isAdmin) query = query.eq('is_approved', true);
+    const result = await query; 
+    if (result.error) {
+      console.log("Fetch error:", result.error);
+      showToast("Gagal memuat data: " + result.error.message, "error");
+      return;
+    }
+    dataTitik = result.data || [];
+    console.log("Data loaded:", dataTitik.length, "items");
+    
+    renderSemua(currentFilter); 
+    renderLeaderboard();
+    if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
+    if (typeof lucide !== 'undefined') lucide.createIcons(); 
+  } catch (err) { 
+    console.log("Error koneksi:", err); 
+    showToast("Error: " + err.message, "error");
+  }
+}
+
+// INISIALISASI
+if (typeof lucide !== 'undefined') lucide.createIcons(); 
+renderSemua(currentFilter); 
+ambilData(); 
+cekSesiUser();
+
+supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, function(payload) { ambilData(); }).subscribe();
 </script>
 
-<!-- MENGAKTIFKAN SERVICE WORKER PWA -->
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(registration => {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js').then(function(registration) {
         console.log('Service Worker aktif:', registration.scope);
-      }).catch(error => {
+      }).catch(function(error) {
         console.log('Service Worker gagal:', error);
       });
     });
