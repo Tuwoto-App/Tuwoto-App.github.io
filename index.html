@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=47">
+  <link rel="manifest" href="manifest.json?v=48">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -137,16 +137,9 @@
     #laporBtn { position: absolute; bottom: 160px; right: 20px; z-index: 1001; background: var(--merah); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
     #bottomSheet.expanded ~ #laporBtn { bottom: 20px; opacity: 0; pointer-events: none; }
 
-    /* MODAL FILTER */
-    #modalFilter .modal-content { text-align: left; padding: 20px; border-radius: 20px 20px 0 0; position: absolute; bottom: 0; max-width: 100%; }
-    .filter-group { margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-    .filter-group h4 { font-size: 12px; margin-bottom: 10px; color: var(--teks-muted); text-transform: uppercase; }
-    .filter-checkbox { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .filter-checkbox input { width: 18px; height: 18px; }
-
     /* MODAL BASE */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; z-index: 10002; }
     .modal-content h2 { font-size: 18px; margin-bottom: 15px; color: var(--teks); }
     .form-group { margin-bottom: 12px; text-align: left; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--teks-muted); }
@@ -239,7 +232,7 @@
     .btn-auth-switch { width: 100%; background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
 
     /* TOAST */
-    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 20000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 350px; }
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 30000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 350px; }
     .toast { padding: 12px 16px; border-radius: 10px; color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-20px); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); pointer-events: auto; word-break: break-word; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #10b981; }
@@ -261,8 +254,6 @@
 
 <div id="app">
   <div id="map"></div>
-
-  <div id="toastContainer" class="toast-container"></div>
 
   <div class="floating-header">
     <img src="icon.png" alt="Logo Tuwoto" onerror="this.src='https://via.placeholder.com/32?text=T'">
@@ -366,7 +357,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 2.4.0 (Custom Select)</div>
+          <div class="about-version">Versi 2.5.0 (Fix Z-Index)</div>
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
@@ -388,331 +379,336 @@
 
     </div>
   </div>
+</div>
 
-  <!-- MODAL CUSTOM SELECT -->
-  <div id="modalSelect" class="modal-overlay" onclick="if(event.target===this) tutupCustomSelect()">
-    <div class="modal-content" style="text-align: left; padding: 0; border-radius: 16px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #e2e8f0;">
-        <h2 style="margin:0; font-size: 16px;" id="customSelectTitle">Pilih Opsi</h2>
-        <button onclick="tutupCustomSelect()" style="background:none; border:none; cursor:pointer; padding: 4px;"><i data-lucide="x"></i></button>
-      </div>
-      <div id="customSelectBody" style="max-height: 60vh; overflow-y: auto;">
-        <!-- Options will be injected here -->
-      </div>
+<!-- ========================================== -->
+<!-- SEMUA MODAL DIPINDAHKAN KE SINI (DI LUAR #app) -->
+<!-- ========================================== -->
+
+<!-- MODAL CUSTOM SELECT (Z-Index Tertinggi) -->
+<div id="modalSelect" class="modal-overlay" style="z-index: 20000 !important;" onclick="if(event.target===this) tutupCustomSelect()">
+  <div class="modal-content" style="text-align: left; padding: 0; border-radius: 16px; z-index: 20001;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #e2e8f0;">
+      <h2 style="margin:0; font-size: 16px;" id="customSelectTitle">Pilih Opsi</h2>
+      <button onclick="tutupCustomSelect()" style="background:none; border:none; cursor:pointer; padding: 4px;"><i data-lucide="x"></i></button>
+    </div>
+    <div id="customSelectBody" style="max-height: 60vh; overflow-y: auto;">
+      <!-- Options will be injected here -->
     </div>
   </div>
+</div>
 
-  <!-- MODAL FILTER (BOTTOM SHEET) -->
-  <div id="modalFilter" class="modal-overlay" onclick="if(event.target===this) tutupFilter()">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="margin:0; display:flex; align-items:center; gap:8px;"><i data-lucide="settings"></i> Filter & Alat Peta</h2>
-        <button onclick="tutupFilter()" style="background:none; border:none; cursor:pointer;"><i data-lucide="x"></i></button>
-      </div>
-      
-      <div class="filter-group">
-        <h4>Tampilkan Data</h4>
-        <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="trash-2" class="lucide-sm"></i> Tempat Sampah (RT/RW)</span> <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)"></label>
-        <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span> <input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)"></label>
-        <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="check-circle" class="lucide-sm"></i> Laporan Selesai</span> <input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)"></label>
-      </div>
+<!-- MODAL FILTER (BOTTOM SHEET) -->
+<div id="modalFilter" class="modal-overlay" onclick="if(event.target===this) tutupFilter()">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h2 style="margin:0; display:flex; align-items:center; gap:8px;"><i data-lucide="settings"></i> Filter & Alat Peta</h2>
+      <button onclick="tutupFilter()" style="background:none; border:none; cursor:pointer;"><i data-lucide="x"></i></button>
+    </div>
+    
+    <div class="filter-group">
+      <h4>Tampilkan Data</h4>
+      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="trash-2" class="lucide-sm"></i> Tempat Sampah (RT/RW)</span> <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)"></label>
+      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="landmark" class="lucide-sm"></i> Bank Sampah</span> <input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)"></label>
+      <label class="filter-checkbox"><span style="display:flex; align-items:center; gap:6px;"><i data-lucide="check-circle" class="lucide-sm"></i> Laporan Selesai</span> <input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)"></label>
+    </div>
 
-      <div class="filter-group">
-        <h4>Urutkan Berdasarkan</h4>
-        <select id="sortSelect" style="display:none;">
-          <option value="default">Terbaru</option>
-          <option value="nama_asc">Nama (A-Z)</option>
-          <option value="kritis_tinggi">Paling Kritis</option>
+    <div class="filter-group">
+      <h4>Urutkan Berdasarkan</h4>
+      <select id="sortSelect" style="display:none;">
+        <option value="default">Terbaru</option>
+        <option value="nama_asc">Nama (A-Z)</option>
+        <option value="kritis_tinggi">Paling Kritis</option>
+      </select>
+      <div class="custom-select-trigger" onclick="openCustomSelect('sortSelect', 'Urutkan Berdasarkan')" id="sortSelect_display">Terbaru</div>
+    </div>
+
+    <div class="filter-group">
+      <h4>Alat Peta</h4>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <div style="flex:1;">
+          <select id="heatTimeFilter" style="display:none;">
+            <option value="all">Semua Waktu</option>
+            <option value="24h">24 Jam Terakhir</option>
+            <option value="7d">7 Hari Terakhir</option>
+            <option value="30d">1 Bulan Terakhir</option>
+          </select>
+          <div class="custom-select-trigger" onclick="openCustomSelect('heatTimeFilter', 'Pilih Waktu')" id="heatTimeFilter_display">Semua Waktu</div>
+        </div>
+        <button id="btnHeatmap" onclick="toggleHeatmap()" style="flex:1; background:#f97316; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="flame" class="lucide-sm"></i> Peta Panas</button>
+      </div>
+      <button id="btnChoropleth" onclick="toggleChoropleth()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map" class="lucide-sm"></i> Batas Wilayah</button>
+    </div>
+
+    <div class="filter-group" style="border:none;">
+      <h4>Menu Admin</h4>
+      <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#64748b; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:none; justify-content:center; align-items:center; gap:4px;"><i data-lucide="users" class="lucide-sm"></i> Kelola Penduduk</button>
+      <button onclick="bukaQR()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:white; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="qr-code" class="lucide-sm"></i> QR Code Aplikasi</button>
+    </div>
+    
+    <button type="button" class="btn-submit" onclick="tutupFilter()">Terapkan & Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL HARGA SAMPAH -->
+<div id="modalHarga" class="modal-overlay" onclick="if(event.target===this) tutupHarga()">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="banknote"></i> Panduan Harga Sampah</h2>
+    <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Harga acuan rata-rata di Gorontalo (bisa berubah sewaktu-waktu).</p>
+    
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Plastik (PET/Botol)</span><span style="color:var(--primary);">Rp 3.000 - Rp 4.000 /kg</span></div>
+    </div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kardus / Kertas</span><span style="color:var(--primary);">Rp 1.500 - Rp 2.500 /kg</span></div>
+    </div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kaleng / Logam</span><span style="color:var(--primary);">Rp 5.000 - Rp 8.000 /kg</span></div>
+    </div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Botol Kaca</span><span style="color:var(--primary);">Rp 500 - Rp 1.000 /kg</span></div>
+    </div>
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Elektronik (E-Waste)</span><span style="color:var(--primary);">Sesuai Kesepakatan</span></div>
+    </div>
+    
+    <button type="button" class="btn-cancel" onclick="tutupHarga()">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL DAFTAR BANK SAMPAH -->
+<div id="modalDaftarBank" class="modal-overlay" onclick="if(event.target===this) tutupDaftarBank()">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="landmark"></i> Daftarkan Bank Sampah</h2>
+    <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Khusus untuk Pengurus Bank Sampah. Data akan diverifikasi Admin.</p>
+    
+    <form id="formDaftarBank">
+      <div class="form-group">
+        <label>Nama Bank Sampah</label>
+        <input type="text" id="bankNama" required placeholder="Contoh: Bank Sampah Melati RW 05">
+      </div>
+      <div class="form-group">
+        <label>Kecamatan</label>
+        <input type="text" id="bankKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan...">
+      </div>
+      <div class="form-group">
+        <label>Jam Operasional</label>
+        <input type="text" id="bankJam" required placeholder="Contoh: Senin-Sabtu 08.00-16.00">
+      </div>
+      <div class="form-group">
+        <label>Kontak (WA/HP)</label>
+        <input type="text" id="bankKontak" required placeholder="Contoh: 0812-3456-7890">
+      </div>
+      <div class="form-group">
+        <label>Jenis Sampah Diterima</label>
+        <input type="text" id="bankJenis" required placeholder="Contoh: Plastik, Kertas, Kaleng">
+      </div>
+      <div class="form-group">
+        <label>Lokasi (Koordinat)</label>
+        <button type="button" onclick="ambilLokasiBank()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; color:#0369a1; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil Titik Lokasi</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="number" step="any" id="bankLat" required placeholder="Lat" style="flex:1;">
+          <input type="number" step="any" id="bankLng" required placeholder="Lng" style="flex:1;">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" id="btnKirimBank">Kirim Pendaftaran</button>
+      <button type="button" class="btn-cancel" onclick="tutupDaftarBank()">Batal</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL JADWAL TRUK -->
+<div id="modalJadwal" class="modal-overlay">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="truck"></i> Jadwal Truk Sampah</h2>
+    <div id="jadwalContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
+    <button type="button" class="btn-cancel" onclick="document.getElementById('modalJadwal').style.display='none'">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL CUSTOM CONFIRM -->
+<div id="modalConfirm" class="modal-overlay">
+  <div class="modal-content" style="max-width: 320px; text-align: center; padding: 25px 20px;">
+    <div id="confirmIcon" style="margin-bottom: 10px; display:flex; justify-content:center;"><i data-lucide="alert-triangle" style="width:40px; height:40px; color:var(--merah);"></i></div>
+    <h2 id="confirmTitle" style="margin-bottom: 8px; font-size: 16px;">Konfirmasi</h2>
+    <p id="confirmMessage" style="font-size: 13px; color: var(--teks-muted); margin-bottom: 20px; line-height: 1.5;"></p>
+    <div style="display: flex; gap: 10px;">
+      <button type="button" class="btn-cancel" style="margin: 0; padding: 10px; font-size: 14px;" onclick="tutupConfirm()">Batal</button>
+      <button type="button" class="btn-submit" style="margin: 0; padding: 10px; font-size: 14px; background: var(--merah);" onclick="eksekusiConfirm()">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LAPORAN -->
+<div id="modalLapor" class="modal-overlay">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;" id="judulForm"><i data-lucide="file-text"></i> Form Laporan</h2>
+    <form id="formLaporan">
+      <input type="hidden" id="editId" value="">
+      <div class="form-group">
+        <label>Kategori Data</label>
+        <select id="inKategori" style="display:none;">
+          <option value="krisis">Krisis Sampah</option>
+          <option value="fasilitas">Tambah Tempat Sampah</option>
+          <option value="bank_sampah" id="optBankSampah" style="display:none;">Bank Sampah (Admin)</option>
         </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('sortSelect', 'Urutkan Berdasarkan')" id="sortSelect_display">Terbaru</div>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
-
-      <div class="filter-group">
-        <h4>Alat Peta</h4>
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-          <div style="flex:1;">
-            <select id="heatTimeFilter" style="display:none;">
-              <option value="all">Semua Waktu</option>
-              <option value="24h">24 Jam Terakhir</option>
-              <option value="7d">7 Hari Terakhir</option>
-              <option value="30d">1 Bulan Terakhir</option>
-            </select>
-            <div class="custom-select-trigger" onclick="openCustomSelect('heatTimeFilter', 'Pilih Waktu')" id="heatTimeFilter_display">Semua Waktu</div>
-          </div>
-          <button id="btnHeatmap" onclick="toggleHeatmap()" style="flex:1; background:#f97316; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="flame" class="lucide-sm"></i> Peta Panas</button>
+      <div class="form-group">
+        <label id="labelNama">Nama Lokasi / TPS</label>
+        <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
+      </div>
+      <div class="form-group">
+        <label>Lokasi (Koordinat)</label>
+        <div style="display:flex; gap:8px;">
+          <input type="number" step="any" id="inLat" required placeholder="Latitude" style="flex:1;">
+          <input type="number" step="any" id="inLng" required placeholder="Longitude" style="flex:1;">
         </div>
-        <button id="btnChoropleth" onclick="toggleChoropleth()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map" class="lucide-sm"></i> Batas Wilayah</button>
+        <button type="button" id="locBtn" onclick="ambilLokasiGPS()"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil GPS</button>
+        <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()"><i data-lucide="map" class="lucide-sm"></i> Pilih di Peta</button>
       </div>
-
-      <div class="filter-group" style="border:none;">
-        <h4>Menu Admin</h4>
-        <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#64748b; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:none; justify-content:center; align-items:center; gap:4px;"><i data-lucide="users" class="lucide-sm"></i> Kelola Penduduk</button>
-        <button onclick="bukaQR()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:white; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="qr-code" class="lucide-sm"></i> QR Code Aplikasi</button>
+      <div class="form-group">
+        <label>Kabupaten / Kota</label>
+        <select id="inWilayah" style="display:none;">
+          <option value="">-- Pilih --</option>
+          <option value="Kota Gorontalo">Kota Gorontalo</option>
+          <option value="Kab. Gorontalo">Kab. Gorontalo</option>
+          <option value="Bone Bolango">Bone Bolango</option>
+          <option value="Pohuwato">Pohuwato</option>
+          <option value="Boalemo">Boalemo</option>
+          <option value="Gorontalo Utara">Gorontalo Utara</option>
+        </select>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inWilayah', 'Pilih Wilayah')" id="inWilayah_display">-- Pilih --</div>
+      </div>
+      <div class="form-group">
+        <label>Kecamatan</label>
+        <input type="text" id="inKecamatan" list="listKecamatan" required placeholder="Ketik atau pilih kecamatan...">
+        <datalist id="listKecamatan"></datalist>
+      </div>
+      <div class="form-group" id="divJenisSampah">
+        <label>Jenis Sampah Spesifik</label>
+        <select id="inJenis" style="display:none;">
+          <option value="">-- Pilih --</option>
+          <option value="Plastik">Plastik</option>
+          <option value="Kertas & Kardus">Kertas & Kardus</option>
+          <option value="Logam & Kaleng">Logam & Kaleng</option>
+          <option value="Kaca">Kaca</option>
+          <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
+          <option value="Karet">Karet</option>
+          <option value="Campuran">Campuran</option>
+        </select>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">-- Pilih --</div>
+      </div>
+      <div class="form-group" id="divKritis">
+        <label id="labelKritis">Tingkat Kekritisan</label>
+        <select id="inKritis" style="display:none;">
+          <option value="Tinggi">Tinggi</option>
+          <option value="Sedang">Sedang</option>
+          <option value="Rendah">Rendah</option>
+        </select>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Tinggi</div>
       </div>
       
-      <button type="button" class="btn-submit" onclick="tutupFilter()">Terapkan & Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL HARGA SAMPAH -->
-  <div id="modalHarga" class="modal-overlay" onclick="if(event.target===this) tutupHarga()">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="banknote"></i> Panduan Harga Sampah</h2>
-      <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Harga acuan rata-rata di Gorontalo (bisa berubah sewaktu-waktu).</p>
-      
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
-        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Plastik (PET/Botol)</span><span style="color:var(--primary);">Rp 3.000 - Rp 4.000 /kg</span></div>
-      </div>
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
-        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kardus / Kertas</span><span style="color:var(--primary);">Rp 1.500 - Rp 2.500 /kg</span></div>
-      </div>
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
-        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Kaleng / Logam</span><span style="color:var(--primary);">Rp 5.000 - Rp 8.000 /kg</span></div>
-      </div>
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
-        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Botol Kaca</span><span style="color:var(--primary);">Rp 500 - Rp 1.000 /kg</span></div>
-      </div>
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px;">
-        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold;"><span>Elektronik (E-Waste)</span><span style="color:var(--primary);">Sesuai Kesepakatan</span></div>
-      </div>
-      
-      <button type="button" class="btn-cancel" onclick="tutupHarga()">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL DAFTAR BANK SAMPAH -->
-  <div id="modalDaftarBank" class="modal-overlay" onclick="if(event.target===this) tutupDaftarBank()">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="landmark"></i> Daftarkan Bank Sampah</h2>
-      <p style="font-size: 11px; color: var(--teks-muted); text-align:center; margin-bottom:15px;">Khusus untuk Pengurus Bank Sampah. Data akan diverifikasi Admin.</p>
-      
-      <form id="formDaftarBank">
-        <div class="form-group">
-          <label>Nama Bank Sampah</label>
-          <input type="text" id="bankNama" required placeholder="Contoh: Bank Sampah Melati RW 05">
-        </div>
-        <div class="form-group">
-          <label>Kecamatan</label>
-          <input type="text" id="bankKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan...">
-        </div>
+      <div id="divBankSampah" style="display:none;">
         <div class="form-group">
           <label>Jam Operasional</label>
-          <input type="text" id="bankJam" required placeholder="Contoh: Senin-Sabtu 08.00-16.00">
+          <input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00 WITA">
         </div>
         <div class="form-group">
-          <label>Kontak (WA/HP)</label>
-          <input type="text" id="bankKontak" required placeholder="Contoh: 0812-3456-7890">
+          <label>Kontak Pengurus</label>
+          <input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890 (Bu Ani)">
         </div>
         <div class="form-group">
           <label>Jenis Sampah Diterima</label>
-          <input type="text" id="bankJenis" required placeholder="Contoh: Plastik, Kertas, Kaleng">
+          <input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas, Kaleng, Kaca">
         </div>
-        <div class="form-group">
-          <label>Lokasi (Koordinat)</label>
-          <button type="button" onclick="ambilLokasiBank()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; color:#0369a1; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil Titik Lokasi</button>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <input type="number" step="any" id="bankLat" required placeholder="Lat" style="flex:1;">
-            <input type="number" step="any" id="bankLng" required placeholder="Lng" style="flex:1;">
-          </div>
-        </div>
-        <button type="submit" class="btn-submit" id="btnKirimBank">Kirim Pendaftaran</button>
-        <button type="button" class="btn-cancel" onclick="tutupDaftarBank()">Batal</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL JADWAL TRUK -->
-  <div id="modalJadwal" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="truck"></i> Jadwal Truk Sampah</h2>
-      <div id="jadwalContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
-      <button type="button" class="btn-cancel" onclick="document.getElementById('modalJadwal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL CUSTOM CONFIRM -->
-  <div id="modalConfirm" class="modal-overlay">
-    <div class="modal-content" style="max-width: 320px; text-align: center; padding: 25px 20px;">
-      <div id="confirmIcon" style="margin-bottom: 10px; display:flex; justify-content:center;"><i data-lucide="alert-triangle" style="width:40px; height:40px; color:var(--merah);"></i></div>
-      <h2 id="confirmTitle" style="margin-bottom: 8px; font-size: 16px;">Konfirmasi</h2>
-      <p id="confirmMessage" style="font-size: 13px; color: var(--teks-muted); margin-bottom: 20px; line-height: 1.5;"></p>
-      <div style="display: flex; gap: 10px;">
-        <button type="button" class="btn-cancel" style="margin: 0; padding: 10px; font-size: 14px;" onclick="tutupConfirm()">Batal</button>
-        <button type="button" class="btn-submit" style="margin: 0; padding: 10px; font-size: 14px; background: var(--merah);" onclick="eksekusiConfirm()">Ya, Lanjutkan</button>
       </div>
-    </div>
-  </div>
 
-  <!-- MODAL LAPORAN -->
-  <div id="modalLapor" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;" id="judulForm"><i data-lucide="file-text"></i> Form Laporan</h2>
-      <form id="formLaporan">
-        <input type="hidden" id="editId" value="">
-        <div class="form-group">
-          <label>Kategori Data</label>
-          <select id="inKategori" style="display:none;">
-            <option value="krisis">Krisis Sampah</option>
-            <option value="fasilitas">Tambah Tempat Sampah</option>
-            <option value="bank_sampah" id="optBankSampah" style="display:none;">Bank Sampah (Admin)</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
-        </div>
-        <div class="form-group">
-          <label id="labelNama">Nama Lokasi / TPS</label>
-          <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
-        </div>
-        <div class="form-group">
-          <label>Lokasi (Koordinat)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="number" step="any" id="inLat" required placeholder="Latitude" style="flex:1;">
-            <input type="number" step="any" id="inLng" required placeholder="Longitude" style="flex:1;">
-          </div>
-          <button type="button" id="locBtn" onclick="ambilLokasiGPS()"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil GPS</button>
-          <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()"><i data-lucide="map" class="lucide-sm"></i> Pilih di Peta</button>
-        </div>
-        <div class="form-group">
-          <label>Kabupaten / Kota</label>
-          <select id="inWilayah" style="display:none;">
-            <option value="">-- Pilih --</option>
-            <option value="Kota Gorontalo">Kota Gorontalo</option>
-            <option value="Kab. Gorontalo">Kab. Gorontalo</option>
-            <option value="Bone Bolango">Bone Bolango</option>
-            <option value="Pohuwato">Pohuwato</option>
-            <option value="Boalemo">Boalemo</option>
-            <option value="Gorontalo Utara">Gorontalo Utara</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('inWilayah', 'Pilih Wilayah')" id="inWilayah_display">-- Pilih --</div>
-        </div>
-        <div class="form-group">
-          <label>Kecamatan</label>
-          <input type="text" id="inKecamatan" list="listKecamatan" required placeholder="Ketik atau pilih kecamatan...">
-          <datalist id="listKecamatan"></datalist>
-        </div>
-        <div class="form-group" id="divJenisSampah">
-          <label>Jenis Sampah Spesifik</label>
-          <select id="inJenis" style="display:none;">
-            <option value="">-- Pilih --</option>
-            <option value="Plastik">Plastik</option>
-            <option value="Kertas & Kardus">Kertas & Kardus</option>
-            <option value="Logam & Kaleng">Logam & Kaleng</option>
-            <option value="Kaca">Kaca</option>
-            <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
-            <option value="Karet">Karet</option>
-            <option value="Campuran">Campuran</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">-- Pilih --</div>
-        </div>
-        <div class="form-group" id="divKritis">
-          <label id="labelKritis">Tingkat Kekritisan</label>
-          <select id="inKritis" style="display:none;">
-            <option value="Tinggi">Tinggi</option>
-            <option value="Sedang">Sedang</option>
-            <option value="Rendah">Rendah</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Tinggi</div>
-        </div>
-        
-        <div id="divBankSampah" style="display:none;">
-          <div class="form-group">
-            <label>Jam Operasional</label>
-            <input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00 WITA">
-          </div>
-          <div class="form-group">
-            <label>Kontak Pengurus</label>
-            <input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890 (Bu Ani)">
-          </div>
-          <div class="form-group">
-            <label>Jenis Sampah Diterima</label>
-            <input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas, Kaleng, Kaca">
-          </div>
-        </div>
-
-        <div class="form-group" id="divStatus" style="display:none;">
-          <label>Status Penanganan (Admin)</label>
-          <select id="inStatus" style="display:none;">
-            <option value="Belum Ditangani">Belum Ditangani</option>
-            <option value="Sudah Ditangani">Sudah Ditangani</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('inStatus', 'Pilih Status')" id="inStatus_display">Belum Ditangani</div>
-        </div>
-        <div class="form-group">
-          <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
-          <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
-          <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
-        </div>
-        <div class="form-group">
-          <label>Catatan Tambahan</label>
-          <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
-        </div>
-        <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;" id="divAntiBot">
-          <label style="color:#b91c1c;">Verifikasi Anti-Bot: 3 + 4 = ?</label>
-          <input type="number" id="inVerifikasi" placeholder="Jawaban">
-        </div>
-        <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Data</button>
-        <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL LACAK LAPORAN -->
-  <div id="modalLacak" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="search"></i> Lacak Status Laporan</h2>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 15px; text-align: center;">Masukkan nama lokasi yang Anda laporkan sebelumnya.</p>
+      <div class="form-group" id="divStatus" style="display:none;">
+        <label>Status Penanganan (Admin)</label>
+        <select id="inStatus" style="display:none;">
+          <option value="Belum Ditangani">Belum Ditangani</option>
+          <option value="Sudah Ditangani">Sudah Ditangani</option>
+        </select>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inStatus', 'Pilih Status')" id="inStatus_display">Belum Ditangani</div>
+      </div>
       <div class="form-group">
-        <input type="text" id="inCariLaporan" placeholder="Contoh: TPS Pasar Sentral" style="text-align:center;">
+        <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
+        <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
+        <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
       </div>
-      <button type="button" class="btn-submit" onclick="prosesLacak()">Cari Laporan</button>
-      <button type="button" class="btn-cancel" onclick="tutupLacak()">Batal</button>
-      <div id="hasilLacak" style="margin-top: 15px; text-align: center;"></div>
-    </div>
-  </div>
-
-  <!-- MODAL EDUKASI -->
-  <div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
-    <div class="modal-content">
-      <div class="edu-header" id="eduHeader">
-        <button class="edu-close-btn" onclick="tutupEdukasi()"><i data-lucide="x"></i></button>
-        <span id="eduIcon" class="edu-header-icon">💡</span>
-        <div id="eduTitle" class="edu-header-title">Memuat...</div>
+      <div class="form-group">
+        <label>Catatan Tambahan</label>
+        <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
       </div>
-      <div class="edu-body">
-        <div class="edu-section">
-          <div class="edu-section-title" style="color: #f59e0b;"><i data-lucide="clock" class="lucide-sm"></i> Fakta Terurai</div>
-          <div id="eduFakta" class="edu-section-text">...</div>
-        </div>
-        <div class="edu-section">
-          <div class="edu-section-title" style="color: #ef4444;"><i data-lucide="alert-triangle" class="lucide-sm"></i> Dampak Buruk</div>
-          <div id="eduDampak" class="edu-section-text">...</div>
-        </div>
-        <div class="edu-section">
-          <div class="edu-section-title" style="color: #10b981;"><i data-lucide="refresh-cw" class="lucide-sm"></i> Solusi</div>
-          <div id="eduSolusi" class="edu-section-text">...</div>
-        </div>
+      <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;" id="divAntiBot">
+        <label style="color:#b91c1c;">Verifikasi Anti-Bot: 3 + 4 = ?</label>
+        <input type="number" id="inVerifikasi" placeholder="Jawaban">
       </div>
-    </div>
+      <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Data</button>
+      <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
+    </form>
   </div>
-
-  <!-- MODAL KELOLA PENDUDUK -->
-  <div id="modalPenduduk" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-      <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="users"></i> Kelola Penduduk</h2>
-      <div id="formPendudukContainer"></div>
-      <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL QR CODE -->
-  <div id="modalQR" class="modal-overlay">
-    <div class="modal-content">
-      <h2 style="display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="qr-code"></i> Scan Aplikasi Tuwoto</h2>
-      <div id="qrcode"></div>
-      <button type="button" class="btn-cancel" onclick="tutupQR()">Tutup</button>
-    </div>
-  </div>
-
 </div>
+
+<!-- MODAL LACAK LAPORAN -->
+<div id="modalLacak" class="modal-overlay">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="search"></i> Lacak Status Laporan</h2>
+    <p style="font-size: 12px; color: #64748b; margin-bottom: 15px; text-align: center;">Masukkan nama lokasi yang Anda laporkan sebelumnya.</p>
+    <div class="form-group">
+      <input type="text" id="inCariLaporan" placeholder="Contoh: TPS Pasar Sentral" style="text-align:center;">
+    </div>
+    <button type="button" class="btn-submit" onclick="prosesLacak()">Cari Laporan</button>
+    <button type="button" class="btn-cancel" onclick="tutupLacak()">Batal</button>
+    <div id="hasilLacak" style="margin-top: 15px; text-align: center;"></div>
+  </div>
+</div>
+
+<!-- MODAL EDUKASI -->
+<div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
+  <div class="modal-content">
+    <div class="edu-header" id="eduHeader">
+      <button class="edu-close-btn" onclick="tutupEdukasi()"><i data-lucide="x"></i></button>
+      <span id="eduIcon" class="edu-header-icon">💡</span>
+      <div id="eduTitle" class="edu-header-title">Memuat...</div>
+    </div>
+    <div class="edu-body">
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #f59e0b;"><i data-lucide="clock" class="lucide-sm"></i> Fakta Terurai</div>
+        <div id="eduFakta" class="edu-section-text">...</div>
+      </div>
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #ef4444;"><i data-lucide="alert-triangle" class="lucide-sm"></i> Dampak Buruk</div>
+        <div id="eduDampak" class="edu-section-text">...</div>
+      </div>
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #10b981;"><i data-lucide="refresh-cw" class="lucide-sm"></i> Solusi</div>
+        <div id="eduSolusi" class="edu-section-text">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KELOLA PENDUDUK -->
+<div id="modalPenduduk" class="modal-overlay">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="users"></i> Kelola Penduduk</h2>
+    <div id="formPendudukContainer"></div>
+    <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL QR CODE -->
+<div id="modalQR" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="qr-code"></i> Scan Aplikasi Tuwoto</h2>
+    <div id="qrcode"></div>
+    <button type="button" class="btn-cancel" onclick="tutupQR()">Tutup</button>
+  </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
 
 <!-- Pustaka JavaScript -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
