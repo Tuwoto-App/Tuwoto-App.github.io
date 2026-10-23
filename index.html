@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=48">
+  <link rel="manifest" href="manifest.json?v=50">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -147,12 +147,9 @@
     .form-group textarea { resize: vertical; height: 60px; }
     .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
     .btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
-    #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; }
-    #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+    #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; display:flex; justify-content:center; align-items:center; gap:4px;}
+    #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; display:flex; justify-content:center; align-items:center; gap:4px;}
     #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
-    .penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
-    .penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
 
     /* CUSTOM SELECT STYLE */
     .custom-select-trigger {
@@ -314,9 +311,6 @@
           
           <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">Papan Skor Wilayah (Selesai)</h3>
           <div id="leaderboard-panel" style="margin-bottom:20px;"></div>
-
-          <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--teks); margin-top:20px;">Rasio Sampah vs Penduduk</h3>
-          <div id="analysis-panel"></div>
         </div>
       </div>
 
@@ -357,7 +351,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 2.5.0 (Fix Z-Index)</div>
+          <div class="about-version">Versi 3.1.0 (Smart & Lean)</div>
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
@@ -385,7 +379,7 @@
 <!-- SEMUA MODAL DIPINDAHKAN KE SINI (DI LUAR #app) -->
 <!-- ========================================== -->
 
-<!-- MODAL CUSTOM SELECT (Z-Index Tertinggi) -->
+<!-- MODAL CUSTOM SELECT -->
 <div id="modalSelect" class="modal-overlay" style="z-index: 20000 !important;" onclick="if(event.target===this) tutupCustomSelect()">
   <div class="modal-content" style="text-align: left; padding: 0; border-radius: 16px; z-index: 20001;">
     <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #e2e8f0;">
@@ -423,26 +417,8 @@
       <div class="custom-select-trigger" onclick="openCustomSelect('sortSelect', 'Urutkan Berdasarkan')" id="sortSelect_display">Terbaru</div>
     </div>
 
-    <div class="filter-group">
-      <h4>Alat Peta</h4>
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <div style="flex:1;">
-          <select id="heatTimeFilter" style="display:none;">
-            <option value="all">Semua Waktu</option>
-            <option value="24h">24 Jam Terakhir</option>
-            <option value="7d">7 Hari Terakhir</option>
-            <option value="30d">1 Bulan Terakhir</option>
-          </select>
-          <div class="custom-select-trigger" onclick="openCustomSelect('heatTimeFilter', 'Pilih Waktu')" id="heatTimeFilter_display">Semua Waktu</div>
-        </div>
-        <button id="btnHeatmap" onclick="toggleHeatmap()" style="flex:1; background:#f97316; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="flame" class="lucide-sm"></i> Peta Panas</button>
-      </div>
-      <button id="btnChoropleth" onclick="toggleChoropleth()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="map" class="lucide-sm"></i> Batas Wilayah</button>
-    </div>
-
     <div class="filter-group" style="border:none;">
       <h4>Menu Admin</h4>
-      <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#64748b; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px; display:none; justify-content:center; align-items:center; gap:4px;"><i data-lucide="users" class="lucide-sm"></i> Kelola Penduduk</button>
       <button onclick="bukaQR()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:white; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:4px;"><i data-lucide="qr-code" class="lucide-sm"></i> QR Code Aplikasi</button>
     </div>
     
@@ -539,91 +515,78 @@
   </div>
 </div>
 
-<!-- MODAL LAPORAN -->
+<!-- MODAL LAPORAN (SMART & RINGKAS) -->
 <div id="modalLapor" class="modal-overlay">
   <div class="modal-content" style="text-align: left;">
-    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;" id="judulForm"><i data-lucide="file-text"></i> Form Laporan</h2>
+    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;" id="judulForm"><i data-lucide="camera"></i> Lapor Cepat</h2>
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
-      <div class="form-group">
-        <label>Kategori Data</label>
+      
+      <!-- Hanya Admin yang melihat ini -->
+      <div class="form-group" id="divKategoriAdmin" style="display:none;">
+        <label>Kategori Data (Admin)</label>
         <select id="inKategori" style="display:none;">
           <option value="krisis">Krisis Sampah</option>
           <option value="fasilitas">Tambah Tempat Sampah</option>
-          <option value="bank_sampah" id="optBankSampah" style="display:none;">Bank Sampah (Admin)</option>
+          <option value="bank_sampah" id="optBankSampah">Bank Sampah (Admin)</option>
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
+      
+      <!-- Wajib: Foto -->
       <div class="form-group">
-        <label id="labelNama">Nama Lokasi / TPS</label>
-        <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
+        <label>Foto Bukti <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
+        <input type="file" id="inFoto" accept="image/*" style="padding: 10px; background: #f8fafc; border: 1px dashed #cbd5e1;">
+        <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
       </div>
+
+      <!-- Wajib: Lokasi (Tombol Besar) -->
       <div class="form-group">
-        <label>Lokasi (Koordinat)</label>
-        <div style="display:flex; gap:8px;">
-          <input type="number" step="any" id="inLat" required placeholder="Latitude" style="flex:1;">
-          <input type="number" step="any" id="inLng" required placeholder="Longitude" style="flex:1;">
-        </div>
-        <button type="button" id="locBtn" onclick="ambilLokasiGPS()"><i data-lucide="map-pin" class="lucide-sm"></i> Ambil GPS</button>
-        <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()"><i data-lucide="map" class="lucide-sm"></i> Pilih di Peta</button>
+        <label>Lokasi</label>
+        <button type="button" id="locBtn" onclick="ambilLokasiGPS()" style="padding:12px; font-size:14px;"><i data-lucide="map-pin"></i> Ambil Lokasi GPS Saya</button>
+        <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()" style="padding:12px; font-size:14px; margin-top:6px;"><i data-lucide="map"></i> Pilih Manual di Peta</button>
       </div>
+
+      <!-- Auto-filled: Nama Lokasi (Readonly) -->
       <div class="form-group">
-        <label>Kabupaten / Kota</label>
-        <select id="inWilayah" style="display:none;">
-          <option value="">-- Pilih --</option>
-          <option value="Kota Gorontalo">Kota Gorontalo</option>
-          <option value="Kab. Gorontalo">Kab. Gorontalo</option>
-          <option value="Bone Bolango">Bone Bolango</option>
-          <option value="Pohuwato">Pohuwato</option>
-          <option value="Boalemo">Boalemo</option>
-          <option value="Gorontalo Utara">Gorontalo Utara</option>
-        </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inWilayah', 'Pilih Wilayah')" id="inWilayah_display">-- Pilih --</div>
+        <label>Nama Jalan / Daerah (Otomatis)</label>
+        <input type="text" id="inNama" required placeholder="Sedang mendeteksi lokasi..." readonly style="background:#e2e8f0; color:#475569; font-weight:bold; border:none;">
       </div>
-      <div class="form-group">
-        <label>Kecamatan</label>
-        <input type="text" id="inKecamatan" list="listKecamatan" required placeholder="Ketik atau pilih kecamatan...">
-        <datalist id="listKecamatan"></datalist>
+
+      <!-- Tersembunyi (Diisi Sistem) -->
+      <div style="display:none;">
+        <input type="number" step="any" id="inLat">
+        <input type="number" step="any" id="inLng">
+        <input type="text" id="inKecamatan">
+        <input type="text" id="inWilayah" value="Kota Gorontalo">
       </div>
+
+      <!-- Opsional: Detail -->
       <div class="form-group" id="divJenisSampah">
-        <label>Jenis Sampah Spesifik</label>
+        <label>Jenis Sampah (Opsional)</label>
         <select id="inJenis" style="display:none;">
-          <option value="">-- Pilih --</option>
+          <option value="Campuran">Pilih jika tahu</option>
           <option value="Plastik">Plastik</option>
           <option value="Kertas & Kardus">Kertas & Kardus</option>
           <option value="Logam & Kaleng">Logam & Kaleng</option>
           <option value="Kaca">Kaca</option>
           <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
           <option value="Karet">Karet</option>
-          <option value="Campuran">Campuran</option>
         </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">-- Pilih --</div>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">Campuran (Default)</div>
       </div>
+      
       <div class="form-group" id="divKritis">
         <label id="labelKritis">Tingkat Kekritisan</label>
         <select id="inKritis" style="display:none;">
           <option value="Tinggi">Tinggi</option>
-          <option value="Sedang">Sedang</option>
+          <option value="Sedang" selected>Sedang (Default)</option>
           <option value="Rendah">Rendah</option>
         </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Tinggi</div>
-      </div>
-      
-      <div id="divBankSampah" style="display:none;">
-        <div class="form-group">
-          <label>Jam Operasional</label>
-          <input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00 WITA">
-        </div>
-        <div class="form-group">
-          <label>Kontak Pengurus</label>
-          <input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890 (Bu Ani)">
-        </div>
-        <div class="form-group">
-          <label>Jenis Sampah Diterima</label>
-          <input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas, Kaleng, Kaca">
-        </div>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Sedang (Default)</div>
       </div>
 
+      <!-- Khusus Admin -->
       <div class="form-group" id="divStatus" style="display:none;">
         <label>Status Penanganan (Admin)</label>
         <select id="inStatus" style="display:none;">
@@ -632,20 +595,29 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inStatus', 'Pilih Status')" id="inStatus_display">Belum Ditangani</div>
       </div>
-      <div class="form-group">
-        <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
-        <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
-        <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ganti foto.</small>
+
+      <!-- Khusus Bank Sampah -->
+      <div id="divBankSampah" style="display:none;">
+        <div class="form-group">
+          <label>Jam Operasional</label>
+          <input type="text" id="inJam" placeholder="Contoh: Senin-Sabtu 08.00-16.00">
+        </div>
+        <div class="form-group">
+          <label>Kontak Pengurus</label>
+          <input type="text" id="inKontak" placeholder="Contoh: 0812-3456-7890">
+        </div>
+        <div class="form-group">
+          <label>Jenis Sampah Diterima</label>
+          <input type="text" id="inJenisDiterima" placeholder="Contoh: Plastik, Kertas">
+        </div>
       </div>
+
       <div class="form-group">
-        <label>Catatan Tambahan</label>
+        <label>Catatan (Opsional)</label>
         <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
       </div>
-      <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;" id="divAntiBot">
-        <label style="color:#b91c1c;">Verifikasi Anti-Bot: 3 + 4 = ?</label>
-        <input type="number" id="inVerifikasi" placeholder="Jawaban">
-      </div>
-      <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Data</button>
+      
+      <button type="submit" class="btn-submit" id="btnKirimLaporan" style="padding:15px; font-size:16px;"><i data-lucide="send"></i> Kirim Laporan Sekarang</button>
       <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
     </form>
   </div>
@@ -690,15 +662,6 @@
   </div>
 </div>
 
-<!-- MODAL KELOLA PENDUDUK -->
-<div id="modalPenduduk" class="modal-overlay">
-  <div class="modal-content" style="text-align: left;">
-    <h2 style="text-align: center; display:flex; justify-content:center; align-items:center; gap:6px;"><i data-lucide="users"></i> Kelola Penduduk</h2>
-    <div id="formPendudukContainer"></div>
-    <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
-  </div>
-</div>
-
 <!-- MODAL QR CODE -->
 <div id="modalQR" class="modal-overlay">
   <div class="modal-content">
@@ -723,15 +686,6 @@
 const SUPABASE_URL = 'https://jhetrpqhcytlyqyvfvla.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_IuPMT8dpVh7NtXkGTwPHLA_cUbkUuB1';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const daftarFileGeoJSON = [
-  'Kabupaten Pohuwato-KECAMATAN.geojson.json',
-  'Kabupaten Bone Bolango-KECAMATAN.geojson.json',
-  'Kabupaten Boalemo-KECAMATAN.geojson.json',
-  'Kabupaten Gorontalo Utara-KECAMATAN.geojson.json',
-  'Kabupaten Gorontalo-KECAMATAN.geojson.json',
-  'Kota Gorontalo-KECAMATAN.geojson.json'
-];
 
 const listKecamatanGorontalo = [
   "Kota Barat", "Kota Selatan", "Kota Timur", "Kota Utara", "Dungingi", "Kota Tengah", "Sipatana", "Dumbo Raya", "Hulonthalangi",
@@ -769,16 +723,11 @@ let currentUserRole = 'warga';
 let confirmCallback = null;
 
 let dataTitik = [];
-let dataPenduduk = {}; 
 let petaMarkers = []; 
 let userMarker = null; 
 let isAdmin = false; 
 let tempMarker = null;
-let heatLayer = null;
-let choroplethLayer = null;
 let routingControl = null; 
-let isHeatmapMode = false;
-let isChoroplethMode = false;
 let myChart = null;
 
 let currentFilter = 'all';
@@ -795,14 +744,37 @@ L.control.locate({
   locateOptions: { enableHighAccuracy: true }
 }).addTo(map);
 
+// PENTING: MaxClusterRadius diatur agar laporan krisis berdekatan bergabung, 
+// namun karena kita pisahkan kategori saat render, ini hanya berlaku untuk krisis.
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
-const datalistKec = document.getElementById('listKecamatan');
-listKecamatanGorontalo.forEach(kec => {
-  let option = document.createElement('option');
-  option.value = kec;
-  datalistKec.appendChild(option);
-});
+// ================= AI LOCATION (REVERSE GEOCODE) =================
+async function reverseGeocode(lat, lng) {
+  const inputNama = document.getElementById('inNama');
+  inputNama.value = "Mendeteksi nama jalan...";
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+      headers: { 'Accept-Language': 'id' } // Minta hasil dalam bahasa Indonesia
+    });
+    const data = await res.json();
+    if(data && data.display_name) {
+      let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Tidak Diketahui";
+      let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
+      
+      inputNama.value = namaLokasi;
+      if (kecamatan) document.getElementById('inKecamatan').value = kecamatan;
+    }
+  } catch(e) {
+    console.log("Geocode gagal:", e);
+    inputNama.value = "Lokasi Dipilih";
+  }
+}
+
+function updateKoordinat(lat, lng) {
+  document.getElementById('inLat').value = lat.toFixed(6);
+  document.getElementById('inLng').value = lng.toFixed(6);
+  reverseGeocode(lat, lng);
+}
 
 // ================= SISTEM CUSTOM SELECT =================
 function openCustomSelect(selectId, title) {
@@ -812,7 +784,7 @@ function openCustomSelect(selectId, title) {
   
   let html = '';
   options.forEach(opt => {
-    if(opt.style.display === 'none') return; // Skip hidden options
+    if(opt.style.display === 'none') return;
     let isSelected = opt.value === currentVal;
     html += `
       <label class="custom-option" onclick="pilihOpsi('${selectId}', '${opt.value}')">
@@ -858,21 +830,21 @@ function showToast(message, type = 'info') {
   if(type === 'success') iconName = 'check-circle';
   if(type === 'error') iconName = 'x-circle';
   if(type === 'warning') iconName = 'alert-triangle';
+  if(type === 'ai') iconName = 'sparkles'; // Ikon khusus AI
   
   toast.innerHTML = `<i data-lucide="${iconName}" class="lucide"></i> <span>${message.replace(/\n/g, '<br>')}</span>`;
   container.appendChild(toast);
   
-  lucide.createIcons(); // Render ikon SVG di dalam toast
+  lucide.createIcons();
   
   setTimeout(() => toast.classList.add('show'), 10);
-  
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 4000); // Sedikit lebih lama untuk AI Tips
 }
 
-function customConfirm(message, callback, title = "Konfirmasi", icon = "alert-triangle") {
+function customConfirm(message, callback, title = "Konfirmasi") {
   document.getElementById('confirmMessage').innerHTML = message;
   document.getElementById('confirmTitle').innerText = title;
   document.getElementById('modalConfirm').style.display = 'flex';
@@ -891,353 +863,6 @@ function eksekusiConfirm() {
     cb();
   }
 }
-
-// ================= FITUR BARU (TAHAP 1, 2, 3) =================
-function shareKeWA(nama, status) {
-  const urlWeb = "https://tuwoto-app.github.io/";
-  let text = `Halo! Saya baru saja melaporkan/melihat data di Tuwoto.\n\nLokasi: *${nama}*\nStatus: ${status}\n\nYuk bantu pantau kebersihan lingkungan kita dengan membuka aplikasi Tuwoto: ${urlWeb}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-}
-
-function bukaHargaSampah() { document.getElementById('modalHarga').style.display = 'flex'; }
-function tutupHarga() { document.getElementById('modalHarga').style.display = 'none'; }
-
-function bukaDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'flex'; }
-function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'none'; }
-
-function ambilLokasiBank() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      document.getElementById('bankLat').value = pos.coords.latitude;
-      document.getElementById('bankLng').value = pos.coords.longitude;
-      showToast("Titik lokasi berhasil diambil!", "success");
-    }, () => showToast("Gagal mengambil GPS.", "error"));
-  }
-}
-
-document.getElementById('formDaftarBank').onsubmit = async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('btnKirimBank');
-  btn.textContent = "Mengirim..."; btn.disabled = true;
-  
-  const dataBank = {
-    nama: document.getElementById('bankNama').value,
-    lat: parseFloat(document.getElementById('bankLat').value),
-    lng: parseFloat(document.getElementById('bankLng').value),
-    wilayah: "Kota Gorontalo",
-    kecamatan: document.getElementById('bankKecamatan').value,
-    kategori: 'bank_sampah',
-    kritis: 'Sedang',
-    jenis: document.getElementById('bankJenis').value,
-    status: 'Belum Ditangani',
-    is_approved: false,
-    catatan: "Didaftarkan mandiri oleh pengurus.",
-    alamat: "-",
-    jam_operasional: document.getElementById('bankJam').value,
-    kontak: document.getElementById('bankKontak').value,
-    jenis_diterima: document.getElementById('bankJenis').value,
-    foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah'
-  };
-
-  const { error } = await supabaseClient.from('titik_sampah').insert([dataBank]);
-  if (error) {
-    showToast("Gagal mendaftar: " + error.message, "error");
-    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
-  } else {
-    showToast("✅ Pendaftaran berhasil! Menunggu verifikasi Admin.", "success");
-    tutupDaftarBank();
-    btn.textContent = "Kirim Pendaftaran"; btn.disabled = false;
-    document.getElementById('formDaftarBank').reset();
-  }
-};
-
-function renderLeaderboard() {
-  const panel = document.getElementById('leaderboard-panel');
-  if (!panel) return;
-
-  const dataSelesai = dataTitik.filter(t => t.status === 'Sudah Ditangani' && t.kategori === 'krisis');
-  let skorWilayah = {};
-  
-  dataSelesai.forEach(t => {
-    if (t.kecamatan) {
-      skorWilayah[t.kecamatan] = (skorWilayah[t.kecamatan] || 0) + 1;
-    }
-  });
-
-  const sorted = Object.entries(skorWilayah).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-  if (sorted.length === 0) {
-    panel.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Belum ada laporan yang selesai.</p>';
-    return;
-  }
-
-  let html = '';
-  sorted.forEach((item, index) => {
-    let rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
-    let medal = index === 0 ? '1' : index === 1 ? '2' : index === 2 ? '3' : `${index + 1}`;
-    html += `
-      <div class="leaderboard-item">
-        <div class="leaderboard-rank ${rankClass}">${medal}</div>
-        <div class="leaderboard-name">Kec. ${item[0]}</div>
-        <div class="leaderboard-score">${item[1]} Selesai</div>
-      </div>
-    `;
-  });
-  panel.innerHTML = html;
-}
-
-function bukaFilter() { document.getElementById('modalFilter').style.display = 'flex'; }
-function tutupFilter() { document.getElementById('modalFilter').style.display = 'none'; renderSemua(currentFilter); }
-function filterDariStat(kategori) {
-  document.getElementById('statBoxTinggi').classList.remove('active-filter');
-  document.getElementById('statBoxSedang').classList.remove('active-filter');
-  document.getElementById('statBoxRendah').classList.remove('active-filter');
-
-  if (currentFilter === kategori) {
-    currentFilter = 'all';
-  } else {
-    currentFilter = kategori;
-    if(kategori === 'Tinggi') document.getElementById('statBoxTinggi').classList.add('active-filter');
-    if(kategori === 'Sedang') document.getElementById('statBoxSedang').classList.add('active-filter');
-    if(kategori === 'Rendah') document.getElementById('statBoxRendah').classList.add('active-filter');
-  }
-  renderSemua(currentFilter);
-}
-
-// ================= SISTEM AUTH WARGA & ADMIN =================
-async function cekSesiUser() {
-  const { data: { session }, error } = await supabaseClient.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await ambilDataUser();
-  } else {
-    currentUser = null;
-    currentUserPoints = 0;
-    currentUserRole = 'warga';
-    isAdmin = false;
-  }
-  updateUIProfil();
-}
-
-async function prosesLoginWarga() {
-  const email = document.getElementById('inEmailUser').value;
-  const pass = document.getElementById('inPassUser').value;
-  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
-  
-  const btn = event.target;
-  btn.innerText = "Memproses...";
-  
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    showToast("❌ Gagal Login: " + error.message, "error");
-    btn.innerText = "Masuk";
-  } else {
-    showToast("✅ Berhasil Login!", "success");
-    document.getElementById('inEmailUser').value = '';
-    document.getElementById('inPassUser').value = '';
-    currentUser = data.user;
-    await ambilDataUser();
-    updateUIProfil();
-  }
-}
-
-async function prosesDaftarWarga() {
-  const email = document.getElementById('inEmailUser').value;
-  const pass = document.getElementById('inPassUser').value;
-  if(!email || !pass) { showToast("Email dan Password wajib diisi!", "warning"); return; }
-  if(pass.length < 6) { showToast("Password minimal 6 karakter!", "warning"); return; }
-  
-  const btn = event.target;
-  btn.innerText = "Memproses...";
-  
-  const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
-  if (error) {
-    showToast("❌ Gagal Daftar: " + error.message, "error");
-    btn.innerText = "Buat Akun Baru";
-  } else {
-    showToast("✅ Pendaftaran Berhasil! Silakan login.", "success");
-    btn.innerText = "Buat Akun Baru";
-  }
-}
-
-async function logoutWarga() {
-  customConfirm("Keluar dari akun Anda saat ini?", async () => {
-    await supabaseClient.auth.signOut();
-    currentUser = null;
-    currentUserPoints = 0;
-    currentUserRole = 'warga';
-    isAdmin = false;
-    updateUIProfil();
-    ambilData(); 
-    showToast("Anda telah keluar.", "info");
-  }, "Logout");
-}
-
-async function ambilDataUser() {
-  if(!currentUser) return;
-  const { data, error } = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
-  if (data) {
-    currentUserPoints = data.total_poin;
-    currentUserRole = data.role || 'warga';
-  } else {
-    currentUserPoints = 0;
-    currentUserRole = 'warga';
-  }
-  
-  if (currentUserRole === 'admin') {
-    isAdmin = true;
-    document.getElementById('optBankSampah').style.display = 'block'; 
-    document.getElementById('adminPendudukBtn').style.display = 'flex'; 
-  } else {
-    isAdmin = false;
-    document.getElementById('optBankSampah').style.display = 'none'; 
-    document.getElementById('adminPendudukBtn').style.display = 'none'; 
-  }
-  
-  ambilData(); 
-}
-
-async function tambahPoinKeDB(jumlah) {
-  if (!currentUser) return;
-  const newPoin = currentUserPoints + jumlah;
-  const { error } = await supabaseClient.from('profiles').update({ total_poin: newPoin }).eq('id', currentUser.id);
-  if (!error) {
-    currentUserPoints = newPoin;
-    updateUIProfil();
-  }
-}
-
-function updateUIProfil() {
-  const divBelum = document.getElementById('profilBelumLogin');
-  const divSudah = document.getElementById('profilSudahLogin');
-  
-  if (currentUser) {
-    divBelum.style.display = 'none';
-    divSudah.style.display = 'block';
-    document.getElementById('profilEmailText').innerText = currentUser.email + (isAdmin ? " (ADMIN)" : "");
-    renderProfilLencana();
-    
-    if (isAdmin) {
-      document.getElementById('divPoinBox').style.display = 'none';
-      document.getElementById('divProgressContainer').style.display = 'none';
-      document.getElementById('divCaraDapatPoin').style.display = 'none';
-    } else {
-      document.getElementById('divPoinBox').style.display = 'inline-block';
-      document.getElementById('divProgressContainer').style.display = 'block';
-      document.getElementById('divCaraDapatPoin').style.display = 'block';
-    }
-  } else {
-    divBelum.style.display = 'block';
-    divSudah.style.display = 'none';
-  }
-}
-
-function renderProfilLencana() {
-  if(isAdmin) return; 
-
-  const imgBadge = document.getElementById('profilBadge');
-  const txtTitle = document.getElementById('profilLevelTitle');
-  const txtDesc = document.getElementById('profilLevelDesc');
-  const txtPoin = document.getElementById('profilTotalPoin');
-  const bar = document.getElementById('profilProgressBar');
-  const txtProgress = document.getElementById('profilProgressText');
-
-  txtPoin.innerText = currentUserPoints;
-
-  let levelData = {};
-
-  if (currentUserPoints <= 50) {
-    levelData = { title: "Tunas", desc: "Warga Baru Peduli Sampah", src: "badge1.png", next: 50 };
-  } else if (currentUserPoints <= 150) {
-    levelData = { title: "Peduli", desc: "Mulai Aktif Melapor", src: "badge2.png", next: 150 };
-  } else if (currentUserPoints <= 300) {
-    levelData = { title: "Pejuang", desc: "Pejuang Kebersihan Lingkungan", src: "badge3.png", next: 300 };
-  } else if (currentUserPoints <= 500) {
-    levelData = { title: "Pahlawan", desc: "Pahlawan Bumi Gorontalo", src: "badge4.png", next: 500 };
-  } else {
-    levelData = { title: "Legenda", desc: "Legenda Tuwoto", src: "badge5.png", next: 1000 };
-  }
-
-  imgBadge.src = levelData.src;
-  txtTitle.innerText = levelData.title;
-  txtDesc.innerText = levelData.desc;
-
-  let prevTarget = 0;
-  if (currentUserPoints > 50 && currentUserPoints <= 150) prevTarget = 50;
-  else if (currentUserPoints > 150 && currentUserPoints <= 300) prevTarget = 150;
-  else if (currentUserPoints > 300 && currentUserPoints <= 500) prevTarget = 300;
-  else if (currentUserPoints > 500) prevTarget = 500;
-
-  let percent = ((currentUserPoints - prevTarget) / (levelData.next - prevTarget)) * 100;
-  if (percent > 100) percent = 100;
-  
-  bar.style.width = percent + '%';
-  
-  if (currentUserPoints >= 1000) {
-     txtProgress.innerText = "Level Maksimal Tercapai!";
-  } else {
-     txtProgress.innerText = `${currentUserPoints}/${levelData.next} Poin menuju level berikutnya`;
-  }
-}
-
-// ================= FUNGSI WEB PUSH NOTIFICATION =================
-async function mintaIzinNotifikasi() {
-  if (!currentUser) { showToast("Silakan login terlebih dahulu.", "warning"); return; }
-  
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    showToast("HP/Browser ini tidak mendukung notifikasi.", "error");
-    return;
-  }
-
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      showToast("Izin notifikasi ditolak. Silakan izinkan lewat pengaturan browser.", "warning");
-      return;
-    }
-
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array('BDFAQP490-cIPINZemy6EqYaQUBuOsF7IVf4hUweGFRdH_7DiWw9c-FIg1OVi7yQesJb7yokG3jc3J6la-H3b_4')
-    });
-
-    const { error } = await supabaseClient.from('push_subscriptions').upsert({
-      user_id: currentUser.id,
-      subscription: subscription
-    }, { onConflict: 'user_id' });
-
-    if (error) throw error;
-    showToast("✅ Notifikasi HP berhasil diaktifkan!", "success");
-  } catch (err) {
-    console.error(err);
-    showToast("Gagal mengaktifkan notifikasi: " + err.message, "error");
-  }
-}
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN') {
-    currentUser = session.user;
-    ambilDataUser().then(() => updateUIProfil());
-  } else if (event === 'SIGNED_OUT') {
-    currentUser = null;
-    currentUserPoints = 0;
-    currentUserRole = 'warga';
-    isAdmin = false;
-    updateUIProfil();
-  }
-});
 
 // ================= FITUR PETA & UI =================
 function toggleSheet() {
@@ -1311,7 +936,6 @@ function generateEduGrid() {
     let card = document.createElement('div');
     card.className = 'edu-card';
     card.onclick = () => bukaEdukasi(key);
-    // Emoji di edukasi dibiarkan karena konten
     card.innerHTML = `<span class="edu-card-icon">${data.icon}</span><div class="edu-card-title">${data.title}</div>`;
     grid.appendChild(card);
   }
@@ -1488,61 +1112,6 @@ async function kompresGambar(file) {
   });
 }
 
-async function toggleChoropleth() {
-  isChoroplethMode = !isChoroplethMode;
-  const btn = document.getElementById('btnChoropleth');
-  if (isChoroplethMode) { 
-    btn.style.background = '#ef4444'; btn.innerHTML = '<i data-lucide="map-pin" class="lucide-sm"></i> Sembunyikan Batas'; await muatChoropleth(); 
-  } else { 
-    btn.style.background = '#8b5cf6'; btn.innerHTML = '<i data-lucide="map" class="lucide-sm"></i> Batas Wilayah'; 
-    if (choroplethLayer) { map.removeLayer(choroplethLayer); choroplethLayer = null; } 
-  }
-  lucide.createIcons();
-  tutupFilter();
-}
-
-async function muatChoropleth() {
-  if (choroplethLayer) map.removeLayer(choroplethLayer);
-  try {
-    const promises = daftarFileGeoJSON.map(file => fetch(file).then(res => res.json()));
-    const hasilFetch = await Promise.all(promises);
-    let semuaFitur = [];
-    hasilFetch.forEach(geojson => { if (geojson.features) semuaFitur.push(...geojson.features); });
-    const dataGabungan = { type: 'FeatureCollection', features: semuaFitur };
-
-    let skorKecamatan = {};
-    const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis');
-    approvedData.forEach(t => {
-      let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
-      if (t.kecamatan) skorKecamatan[t.kecamatan] = (skorKecamatan[t.kecamatan] || 0) + nilai;
-    });
-
-    choroplethLayer = L.geoJSON(dataGabungan, {
-      style: function (feature) {
-        let props = feature.properties;
-        let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || "";
-        let namaKecClean = namaKec.replace(/Kecamatan /gi, '').trim();
-        let namaData = "";
-        for (let key in skorKecamatan) {
-          if (namaKecClean.toLowerCase() === key.toLowerCase() || namaKecClean.toLowerCase().includes(key.toLowerCase())) { namaData = key; break; }
-        }
-        let skor = namaData ? skorKecamatan[namaData] : 0;
-        let fillColor = '#e2e8f0';
-        if (skor >= 6) fillColor = '#ef4444'; else if (skor >= 3) fillColor = '#f59e0b'; else if (skor >= 1) fillColor = '#10b981'; else if (namaKecClean) fillColor = '#cbd5e1'; 
-        return { fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6 };
-      },
-      onEachFeature: function (feature, layer) {
-        let props = feature.properties;
-        let namaKec = props.kecamatan || props.NAME_3 || props.WADMKC || props.name || 'Kecamatan';
-        namaKec = namaKec.replace(/Kecamatan /gi, '').trim();
-        let namaKab = props.kab_kota || props.WADMKK || props.KABUPATEN || '';
-        layer.bindPopup(`<b>Kec. ${namaKec}</b><br><small>${namaKab}</small>`);
-      }
-    }).addTo(map);
-    map.fitBounds(choroplethLayer.getBounds());
-  } catch (error) { console.error("Gagal memuat batas wilayah:", error); }
-}
-
 function ubahFormKategori() {
   const kat = document.getElementById('inKategori').value;
   const selectKritis = document.getElementById('inKritis');
@@ -1558,27 +1127,26 @@ function ubahFormKategori() {
 
   if (kat === 'fasilitas') {
     document.getElementById('inJenis').required = false;
-    labelNama.innerText = "Nama Tempat Sampah / RT"; inNama.placeholder = "Contoh: Bak Sampah RT 05";
+    labelNama.innerText = "Nama Tempat Sampah / RT"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Ukuran Tempat Sampah"; 
-    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang">Sedang</option><option value="Besar">Besar</option>`;
+    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang (Default)</option><option value="Besar">Besar</option>`;
     catatan.placeholder = "Kondisi bak / butuh perbaikan";
   } else if (kat === 'bank_sampah') {
     document.getElementById('inJenis').required = false;
     divBank.style.display = 'block';
-    labelNama.innerText = "Nama Bank Sampah"; inNama.placeholder = "Contoh: Bank Sampah Melati RW 05";
+    labelNama.innerText = "Nama Bank Sampah"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Kapasitas Bank Sampah"; 
-    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang">Sedang</option><option value="Besar">Besar</option>`;
+    selectKritis.innerHTML = `<option value="Kecil">Kecil</option><option value="Sedang" selected>Sedang (Default)</option><option value="Besar">Besar</option>`;
     catatan.placeholder = "Info tambahan (opsional)";
   } else {
     document.getElementById('inJenis').required = true;
     divJenis.style.display = 'block';
-    labelNama.innerText = "Nama Lokasi / TPS"; inNama.placeholder = "Contoh: TPS Pasar Sentral";
+    labelNama.innerText = "Nama Jalan / Daerah (Otomatis)"; inNama.placeholder = "Sedang mendeteksi lokasi...";
     labelKritis.innerText = "Tingkat Kekritisan"; 
-    selectKritis.innerHTML = `<option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option>`;
+    selectKritis.innerHTML = `<option value="Tinggi">Tinggi</option><option value="Sedang" selected>Sedang (Default)</option><option value="Rendah">Rendah</option>`;
     catatan.placeholder = "Sudah 3 hari belum diangkut";
   }
   
-  // Update display text custom select setelah opsi diubah
   updateSelectDisplay('inJenis');
   updateSelectDisplay('inKritis');
 }
@@ -1673,7 +1241,6 @@ function renderSemua(filter = 'all') {
   if (!showFasilitas) dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
   if (!showBankSampah) dataFilter = dataFilter.filter(t => t.kategori !== 'bank_sampah');
 
-  let dataForHeatmap = [...dataFilter];
   let dataForMap = [...dataFilter];
   if (!showSelesai) {
     dataForMap = dataForMap.filter(t => t.status !== 'Sudah Ditangani');
@@ -1687,39 +1254,17 @@ function renderSemua(filter = 'all') {
 
   if (dataForMap.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
 
-  if (isHeatmapMode) {
-    map.removeLayer(cluster);
-    if (heatLayer) map.removeLayer(heatLayer);
-    
-    const timeFilter = document.getElementById('heatTimeFilter').value;
-    const now = new Date();
-    let krisisData = dataForHeatmap.filter(t => t.kategori === 'krisis');
-
-    if (timeFilter !== 'all') {
-      krisisData = krisisData.filter(t => {
-        if (!t.created_at) return true;
-        const createdDate = new Date(t.created_at);
-        const diffHours = (now - createdDate) / (1000 * 60 * 60);
-        if (timeFilter === '24h') return diffHours <= 24;
-        if (timeFilter === '7d') return diffHours <= 24 * 7;
-        if (timeFilter === '30d') return diffHours <= 24 * 30;
-        return true;
-      });
-    }
-
-    if (krisisData.length > 0) {
-      const heatData = krisisData.map(t => [parseFloat(t.lat), parseFloat(t.lng), t.kritis === 'Tinggi' ? 1 : t.kritis === 'Sedang' ? 0.6 : 0.3]);
-      heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
-    }
-  } else {
-    if (heatLayer) map.removeLayer(heatLayer);
-    dataForMap.forEach((titik) => { 
-      const marker = buatMarker(titik); 
+  // PETA: Cluster hanya untuk Krisis. Fasilitas & Bank Sampah direct.
+  dataForMap.forEach((titik) => { 
+    const marker = buatMarker(titik); 
+    if (titik.kategori === 'krisis') {
       cluster.addLayer(marker); 
-      petaMarkers.push(marker); 
-    });
-    map.addLayer(cluster);
-  }
+    } else {
+      map.addLayer(marker); // Tidak masuk cluster
+    }
+    petaMarkers.push(marker); 
+  });
+  map.addLayer(cluster);
 
   dataForMap.forEach((titik, index) => {
     const div = document.createElement('div');
@@ -1763,8 +1308,7 @@ function renderSemua(filter = 'all') {
   });
 
   updateStats();
-  if (isChoroplethMode) muatChoropleth(); 
-  lucide.createIcons(); // Render semua ikon SVG yang baru dimuat di list & admin
+  lucide.createIcons(); 
 }
 
 function updateStats() {
@@ -1774,77 +1318,8 @@ function updateStats() {
   document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
 }
 
-function renderAnalisis() {
-  const panel = document.getElementById('analysis-panel');
-  panel.innerHTML = '';
-  let skorSampah = {};
-  let totalPenduduk = 0;
-  let totalSkor = 0;
-  
-  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori === 'krisis');
-  approvedData.forEach(t => { 
-    let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1); 
-    skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai; 
-    totalSkor += nilai;
-  });
-  for (let key in dataPenduduk) { totalPenduduk += parseInt(dataPenduduk[key]); }
-
-  let rasioProvinsi = totalPenduduk > 0 ? (totalSkor / (totalPenduduk / 100000)).toFixed(2) : "0.00";
-  let warnaProv = rasioProvinsi > 1.5 ? '#ef4444' : (rasioProvinsi > 0.5 ? '#f59e0b' : '#10b981');
-  let statusProv = rasioProvinsi > 1.5 ? 'Waspada' : (rasioProvinsi > 0.5 ? 'Pantau' : 'Aman');
-  
-  let htmlProv = `
-    <div style="margin-bottom: 15px; padding: 10px; background: #e0f2fe; border-radius: 8px; border: 1px solid #bae6fd;">
-      <div style="font-weight: bold; font-size: 14px; color: #0369a1; margin-bottom: 4px;">PROVINSI GORONTALO</div>
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #0c4a6e;"><span>Total Penduduk:</span> <b>${totalPenduduk.toLocaleString('id-ID')} jiwa</b></div>
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #0c4a6e;"><span>Total Skor Sampah:</span> <b>${totalSkor} poin</b></div>
-      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-top: 4px; color: ${warnaProv};">
-        <span>Rasio:</span> <span>${rasioProvinsi} (${statusProv})</span>
-      </div>
-    </div>
-    <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 8px;">RINCIAN PER KABUPATEN/KOTA:</div>
-  `;
-  panel.innerHTML = htmlProv;
-
-  for (let wilayah in dataPenduduk) {
-    let penduduk = dataPenduduk[wilayah] || 0;
-    let skor = skorSampah[wilayah] || 0;
-    let rasio = penduduk > 0 ? (skor / (penduduk / 100000)).toFixed(2) : "0.00";
-    let warna = rasio > 1.5 ? '#ef4444' : (rasio > 0.5 ? '#f59e0b' : '#10b981');
-    let status = rasio > 1.5 ? 'Waspada' : (rasio > 0.5 ? 'Pantau' : 'Aman');
-    
-    panel.innerHTML += `
-      <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1;">
-        <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">${wilayah}</div>
-        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 2px;"><span>Penduduk:</span> <b>${penduduk.toLocaleString('id-ID')} jiwa</b></div>
-        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 4px;"><span>Skor Sampah:</span> <b>${skor} poin</b></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 8px; border-radius: 6px;">
-          <span>Rasio:</span> <span style="color: ${warna}; font-weight: bold;">${rasio} (${status})</span>
-        </div>
-      </div>`;
-  }
-}
-
 document.getElementById('searchInput').addEventListener('input', (e) => { currentSearch = e.target.value.toLowerCase(); renderSemua(currentFilter); });
 document.getElementById('sortSelect').addEventListener('change', (e) => { currentSort = e.target.value; renderSemua(currentFilter); });
-
-function bukaKelolaPenduduk() {
-  const container = document.getElementById('formPendudukContainer');
-  container.innerHTML = '';
-  for (let wilayah in dataPenduduk) {
-    let row = document.createElement('div'); row.className = 'penduduk-row'; let safeId = wilayah.replace(/[^a-zA-Z0-9]/g, '_');
-    row.innerHTML = `<label>${wilayah}</label><input type="number" id="input_${safeId}" value="${dataPenduduk[wilayah]}" onchange="simpanPenduduk('${wilayah}', this.value)">`;
-    container.appendChild(row);
-  }
-  document.getElementById('modalPenduduk').style.display = 'flex';
-  tutupFilter();
-}
-function tutupKelolaPenduduk() { document.getElementById('modalPenduduk').style.display = 'none'; }
-async function simpanPenduduk(wilayah, nilaiBaru) {
-  const jumlah = parseInt(nilaiBaru);
-  if (isNaN(jumlah) || jumlah < 0) { showToast("Angka valid!", "warning"); return; }
-  try { const { error } = await supabaseClient.from('data_penduduk').update({ jumlah_penduduk: jumlah }).eq('nama_wilayah', wilayah); if (error) throw error; dataPenduduk[wilayah] = jumlah; renderAnalisis(); if (isChoroplethMode) muatChoropleth(); } catch (err) { showToast("Gagal: " + err.message, "error"); }
-}
 
 async function setujuiData(id) { 
   customConfirm("Setujui data laporan ini?", async () => {
@@ -1878,10 +1353,9 @@ function bukaEdit(id) {
     document.getElementById('inJenisDiterima').value = data.jenis_diterima || '';
   }
   document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
-  document.getElementById('divAntiBot').style.display = 'none'; document.getElementById('inVerifikasi').required = false;
+  document.getElementById('divAntiBot').style.display = 'none';
   document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
   
-  // Update display texts for custom selects
   updateSelectDisplay('inKategori');
   updateSelectDisplay('inJenis');
   updateSelectDisplay('inKritis');
@@ -1902,16 +1376,15 @@ async function hapusData(id) {
 
 document.getElementById('laporBtn').onclick = () => {
   document.getElementById('formLaporan').reset(); 
-  document.getElementById('judulForm').innerHTML = '<i data-lucide="file-text"></i> Form Laporan'; 
+  document.getElementById('judulForm').innerHTML = '<i data-lucide="camera"></i> Lapor Cepat'; 
   document.getElementById('editId').value = "";
   document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
-  document.getElementById('divAntiBot').style.display = 'block'; document.getElementById('inVerifikasi').required = true;
   document.getElementById('inFoto').required = true; document.getElementById('labelFotoWajib').style.display = 'inline'; document.getElementById('infoFotoLama').style.display = 'none';
   document.getElementById('divStatus').style.display = 'none'; 
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+  document.getElementById('inNama').value = ""; // Reset nama lokasi
   
-  // Reset display texts for custom selects
   updateSelectDisplay('inKategori');
   updateSelectDisplay('inJenis');
   updateSelectDisplay('inKritis');
@@ -1924,29 +1397,55 @@ document.getElementById('laporBtn').onclick = () => {
 
 function tutupModal() { document.getElementById('modalLapor').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } }
 
-function ambilLokasiGPS() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((position) => { document.getElementById('inLat').value = position.coords.latitude; document.getElementById('inLng').value = position.coords.longitude; showToast("GPS berhasil diambil!", "success"); }, (error) => { showToast("Gagal mengambil GPS.", "error"); }); } else showToast("Perangkat tidak mendukung GPS.", "error"); }
+function ambilLokasiGPS() { 
+  if (navigator.geolocation) { 
+    navigator.geolocation.getCurrentPosition((position) => { 
+      const lat = position.coords.latitude; 
+      const lng = position.coords.longitude;
+      updateKoordinat(lat, lng);
+      showToast("GPS berhasil diambil! Mendeteksi nama jalan...", "success"); 
+    }, (error) => { showToast("Gagal mengambil GPS.", "error"); }); 
+  } else showToast("Perangkat tidak mendukung GPS.", "error"); 
+}
 
 function mulaiPilihPeta() {
-  document.getElementById('modalLapor').style.display = 'none'; showToast("Silakan ketuk peta untuk memilih koordinat.", "info"); document.getElementById('map').style.cursor = 'crosshair';
-  map.once('click', function(e) {
-    const lat = e.latlng.lat, lng = e.latlng.lng; document.getElementById('inLat').value = lat.toFixed(6); document.getElementById('inLng').value = lng.toFixed(6);
-    if (tempMarker) map.removeLayer(tempMarker); tempMarker = L.marker([lat, lng]).addTo(map).bindPopup("<b>Lokasi Dipilih</b>").openPopup();
-    document.getElementById('map').style.cursor = ''; document.getElementById('modalLapor').style.display = 'flex';
+  document.getElementById('modalLapor').style.display = 'none'; 
+  showToast("Geser pin di peta untuk memilih lokasi.", "info"); 
+  document.getElementById('map').style.cursor = 'crosshair';
+  
+  // Set default map view to current lat/lng or center
+  const lat = parseFloat(document.getElementById('inLat').value) || map.getCenter().lat;
+  const lng = parseFloat(document.getElementById('inLng').value) || map.getCenter().lng;
+  
+  if (tempMarker) map.removeLayer(tempMarker); 
+  tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin Ini</b>").openPopup();
+  
+  tempMarker.on('dragend', function(e) {
+    const newLatLng = e.target.getLatLng();
+    updateKoordinat(newLatLng.lat, newLatLng.lng);
   });
+
+  map.setView([lat, lng], 17);
+  
+  // Tombol konfirmasi peta
+  const btnKonfirmPeta = document.createElement('button');
+  btnKonfirmPeta.innerText = "Konfirmasi Lokasi Ini";
+  btnKonfirmPeta.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:var(--primary); color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
+  btnKonfirmPeta.onclick = () => {
+    document.getElementById('map').style.cursor = '';
+    map.removeLayer(tempMarker);
+    tempMarker = null;
+    btnKonfirmPeta.remove();
+    document.getElementById('modalLapor').style.display = 'flex';
+  };
+  document.getElementById('app').appendChild(btnKonfirmPeta);
 }
 
 document.getElementById('formLaporan').onsubmit = async (e) => {
   e.preventDefault();
-  // Manual validation for custom selects
-  if (!document.getElementById('inKategori').value) { showToast("Pilih Kategori", "warning"); return; }
-  if (!document.getElementById('inNama').value) { showToast("Isi Nama Lokasi", "warning"); return; }
-  if (!document.getElementById('inLat').value || !document.getElementById('inLng').value) { showToast("Ambil Lokasi", "warning"); return; }
-  if (!document.getElementById('inWilayah').value) { showToast("Pilih Wilayah", "warning"); return; }
-  if (document.getElementById('divJenisSampah').style.display !== 'none' && !document.getElementById('inJenis').value) { showToast("Pilih Jenis Sampah", "warning"); return; }
-  if (!document.getElementById('inKritis').value) { showToast("Pilih Kekritisan", "warning"); return; }
+  if (!document.getElementById('inNama').value) { showToast("Ambil Lokasi Terlebih Dahulu", "warning"); return; }
 
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
-  if (!isEditMode) { const verifikasi = parseInt(document.getElementById('inVerifikasi').value); if (verifikasi !== 7) { showToast("❌ Anti-bot salah!", "error"); return; } }
   const btnSubmit = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); const kategori = document.getElementById('inKategori').value;
   btnSubmit.textContent = 'Memproses...'; btnSubmit.disabled = true;
   let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false; 
@@ -2000,7 +1499,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
 
     showToast(isEditMode ? "✅ Diperbarui!" : (isAdmin ? "✅ Ditambahkan!" : (currentUser ? "✅ Dikirim! Menunggu ACC. (+10 Poin)" : "✅ Dikirim! Menunggu ACC. (Login untuk dapat poin)")), "success");
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } tutupModal(); ambilData(); 
-  } catch (error) { showToast("❌ Gagal: " + error.message, "error"); } finally { btnKirimLaporan.textContent = 'Kirim Data'; btnSubmit.disabled = false; }
+  } catch (error) { showToast("❌ Gagal: " + error.message, "error"); } finally { btnKirimLaporan.textContent = 'Kirim Laporan Sekarang'; btnSubmit.disabled = false; }
 };
 
 let qrGenerated = false;
@@ -2014,23 +1513,17 @@ async function ambilData() {
     const { data: dataSampah, error: errSampah } = await query; 
     if (!errSampah) dataTitik = dataSampah || [];
     
-    const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*'); 
-    if (!errPend && dataPend) { 
-      dataPenduduk = {}; 
-      dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; }); 
-    }
-    renderSemua(currentFilter); renderAnalisis(); renderLeaderboard();
+    renderSemua(currentFilter);
     if(document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
-    lucide.createIcons(); // Render ikon SVG setelah semua data dimuat
+    lucide.createIcons(); 
   } catch (err) { console.log("Error koneksi:", err); }
 }
 
 // INISIALISASI AWAL
-lucide.createIcons(); // Render ikon pertama kali saat halaman dibuka
-renderSemua(currentFilter); renderAnalisis(); ambilData(); cekSesiUser();
+lucide.createIcons(); 
+renderSemua(currentFilter); ambilData(); cekSesiUser();
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => { ambilData(); }).subscribe();
-supabaseClient.channel('schema-db-changes-penduduk').on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); }).subscribe();
 </script>
 
 <!-- MENGAKTIFKAN SERVICE WORKER PWA -->
