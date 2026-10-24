@@ -185,6 +185,7 @@
     #customSelectBody .custom-option input[type="radio"] { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; outline: none; }
     #customSelectBody .custom-option input[type="radio"]:checked { border-color: var(--primary); border-width: 6px; }
 
+    /* CSS EDUKASI DARI SCRIPT KEDUA */
     .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
     .edu-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
     .edu-card:active { transform: scale(0.95); background: #f8fafc; }
@@ -317,6 +318,7 @@
         </div>
       </div>
 
+      <!-- TAB EDUKASI (DARI SCRIPT KEDUA) -->
       <div id="tab-edukasi" class="tab-content">
         <div class="list-title" style="background:none; border:none; padding-bottom:0;">Pilih topik untuk dipelajari:</div>
         <div class="edu-grid" id="eduGrid"></div>
@@ -350,16 +352,31 @@
         </div>
       </div>
 
+      <!-- TAB TENTANG (DARI SCRIPT KEDUA) -->
       <div id="tab-tentang" class="tab-content">
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
           <div class="about-version">Versi 3.1.3 (Fix Tombol Lapor)</div>
+          
           <div class="about-card">
-            <h4>Filosofi Nama</h4>
-            <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>.</p>
+            <h4><i data-lucide="book"></i> Filosofi Nama</h4>
+            <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
           </div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">&copy; 2024 Tuwoto</div>
+          
+          <div class="about-card">
+            <h4><i data-lucide="target"></i> Visi & Misi</h4>
+            <p>Menciptakan lingkungan Gorontalo yang bersih dan berkelanjutan melalui kolaborasi digital (Smart Waste Management) antara warga, petugas kebersihan, dan pemangku kebijakan.</p>
+          </div>
+          
+          <div class="about-card">
+            <h4><i data-lucide="cpu"></i> Teknologi</h4>
+            <p>Aplikasi ini dibangun menggunakan teknologi web modern tanpa memerlukan unduhan aplikasi besar (PWA).</p>
+            <div class="tech-tags">
+              <span class="tech-tag">PWA</span><span class="tech-tag">Leaflet.js</span><span class="tech-tag">Supabase</span><span class="tech-tag">Web Push</span>
+            </div>
+          </div>
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">&copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.</div>
         </div>
       </div>
 
@@ -543,6 +560,7 @@
   </div>
 </div>
 
+<!-- MODAL EDUKASI (DARI SCRIPT KEDUA) -->
 <div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
   <div class="modal-content">
     <div class="edu-header" id="eduHeader">
@@ -593,13 +611,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const listKecamatanGorontalo = ["Kota Barat", "Kota Selatan", "Kota Timur", "Kota Utara", "Dungingi", "Kota Tengah", "Sipatana", "Dumbo Raya", "Hulonthalangi", "Limboto", "Limboto Barat", "Telaga", "Telaga Biru", "Tilango", "Batudaa", "Batudaa Pantai", "Bongomeme", "Tabongo", "Dungaliyo", "Pulubala", "Tibawa", "Boliyohuto", "Mootilango", "Tolangohula", "Asparaga", "Bilato", "Biluhu", "Talaga Jaya"];
 
+// DATA EDUKASI DARI SCRIPT KEDUA
 const edukasiSampah = {
-  "Plastik": { icon: "🥤", title: "Plastik", color: "#2563eb", fakta: "Butuh 400-1000 tahun untuk terurai.", dampak: "Mencemari laut dan menjadi mikroplastik.", solusi: "Pilah botol untuk Bank Sampah." },
-  "Kertas & Kardus": { icon: "📦", title: "Kertas", color: "#d97706", fakta: "Butuh 2-6 bulan untuk terurai.", dampak: "Menghasilkan gas metana jika tertimbun.", solusi: "Jaga tetap kering untuk didaur ulang." },
-  "Logam & Kaleng": { icon: "🥫", title: "Logam", color: "#475569", fakta: "100% bisa didaur ulang.", dampak: "Tajam dan berkarat, melukai satwa.", solusi: "Kumpulkan dan jual ke pengepul." },
-  "Kaca": { icon: "🍾", title: "Kaca", color: "#0ea5e9", fakta: "Tidak terurai secara alami.", dampak: "Pecahan berbahaya memicu kebakaran.", solusi: "Bungkus dengan koran, serahkan ke Bank Sampah." },
-  "Elektronik (E-Waste)": { icon: "🔋", title: "E-Waste", color: "#ef4444", fakta: "Mengandung logam berat berbahaya.", dampak: "Meracuni tanah dan air tanah.", solusi: "Serahkan ke fasilitas E-Waste." },
-  "Karet": { icon: "🛞", title: "Karet", color: "#334155", fakta: "Butuh 50-80 tahun untuk terurai.", dampak: "Sarang nyamuk, asap beracun jika dibakar.", solusi: "Serahkan ke pengrajin." },
+  "Plastik": { icon: "🥤", title: "Plastik", color: "#2563eb", fakta: "Butuh <b>400-1000 tahun</b> untuk terurai.", dampak: "Mencemari laut, mematikan biota laut, dan menjadi mikroplastik.", solusi: "Gunakan tas kain, kurangi sedotan, pilah botol untuk Bank Sampah." },
+  "Kertas & Kardus": { icon: "📦", title: "Kertas", color: "#d97706", fakta: "Butuh <b>2-6 bulan</b> untuk terurai.", dampak: "Menghasilkan gas metana jika tertimbun dan membusuk.", solusi: "Jaga kardus tetap kering, ikat rapi untuk didaur ulang." },
+  "Logam & Kaleng": { icon: "🥫", title: "Logam", color: "#475569", fakta: "Butuh <b>80-200 tahun</b>, tapi 100% bisa didaur ulang.", dampak: "Tajam dan berkarat, melukai satwa liar.", solusi: "Sangat berharga! Kumpulkan dan jual ke pengepul." },
+  "Kaca": { icon: "🍾", title: "Kaca", color: "#0ea5e9", fakta: "Secara alami <b>TIDAK TERURAI</b>, tapi bisa didaur ulang terus.", dampak: "Pecahan berbahaya, memantulkan cahaya memicu kebakaran.", solusi: "Bungkus pecahan dengan koran. Serahkan botol utuh ke Bank Sampah." },
+  "Elektronik (E-Waste)": { icon: "🔋", title: "E-Waste", color: "#ef4444", fakta: "Mengandung logam berat berbahaya (Merkuri, Timbal).", dampak: "Meracuni tanah dan air tanah.", solusi: "JANGAN buang ke tong biasa! Serahkan ke fasilitas E-Waste." },
+  "Karet": { icon: "🛞", title: "Karet", color: "#334155", fakta: "Butuh <b>50-80 tahun</b> untuk terurai.", dampak: "Sarang nyamuk, asap beracun jika dibakar.", solusi: "Serahkan ke pengrajin untuk jadi pot atau kursi." },
   "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
 };
 
@@ -643,7 +662,7 @@ if (datalistKec) {
   });
 }
 
-// ============ FUNGSI PENTING: TOGGLE SHEET (FIX TOMBOL LAPOR) ============
+// ============ FUNGSI PENTING: TOGGLE SHEET ============
 function toggleSheet() {
   const sheet = document.getElementById('bottomSheet');
   const laporBtn = document.getElementById('laporBtn');
@@ -652,7 +671,6 @@ function toggleSheet() {
   const isExpanded = sheet.classList.contains('expanded');
   document.querySelector('.drag-text i').innerText = isExpanded ? '▼' : '▲';
   
-  // KUNCI FIX: Tombol Lapor HANYA muncul saat sheet tertutup
   if (isExpanded) {
     laporBtn.classList.add('hidden');
   } else {
@@ -660,7 +678,7 @@ function toggleSheet() {
   }
 }
 
-// ============ SWITCH TAB (Disederhanakan - TIDAK sentuh tombol Lapor) ============
+// ============ SWITCH TAB ============
 function switchTab(tabName, btnElement) {
   currentTab = tabName;
   document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
@@ -670,8 +688,38 @@ function switchTab(tabName, btnElement) {
   
   if (tabName === 'analisis') { renderGrafik(); renderLeaderboard(); }
   if (tabName === 'profil') updateUIProfil();
+  if (tabName === 'edukasi') { generateEduGrid(); } // Tambahan dari script kedua
 }
 
+// ============ FUNGSI EDUKASI (DARI SCRIPT KEDUA) ============
+function generateEduGrid() {
+  const grid = document.getElementById('eduGrid');
+  grid.innerHTML = '';
+  for (let key in edukasiSampah) {
+    let data = edukasiSampah[key];
+    let card = document.createElement('div');
+    card.className = 'edu-card';
+    card.onclick = function() { bukaEdukasi(key); };
+    card.innerHTML = '<span class="edu-card-icon">' + data.icon + '</span><div class="edu-card-title">' + data.title + '</div>';
+    grid.appendChild(card);
+  }
+}
+
+function bukaEdukasi(jenisSampah) {
+  const data = edukasiSampah[jenisSampah];
+  if (!data) return;
+  document.getElementById('eduHeader').style.background = data.color;
+  document.getElementById('eduIcon').innerText = data.icon;
+  document.getElementById('eduTitle').innerText = data.title;
+  document.getElementById('eduFakta').innerHTML = data.fakta;
+  document.getElementById('eduDampak').innerHTML = data.dampak;
+  document.getElementById('eduSolusi').innerHTML = data.solusi;
+  document.getElementById('modalEdukasi').style.display = 'flex';
+}
+
+function tutupEdukasi() { document.getElementById('modalEdukasi').style.display = 'none'; }
+
+// ============ FUNGSI LAINNYA ============
 function reverseGeocode(lat, lng) {
   const inputNama = document.getElementById('inNama');
   inputNama.value = "Mendeteksi...";
@@ -1282,6 +1330,7 @@ async function ambilData() {
 }
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
+generateEduGrid(); // PANGGIL FUNGSI EDUKASI SAAT PERTAMA KALI LOAD
 renderSemua(currentFilter);
 ambilData();
 cekSesiUser();
