@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=56">
+  <link rel="manifest" href="manifest.json?v=57">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -336,7 +336,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 3.2.2 (Map Pin Update)</div>
+          <div class="about-version">Versi 3.2.3 (Fix Map Pin)</div>
           
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
@@ -988,7 +988,7 @@ function cariTerdekat() {
     if (fasilitas.length === 0) { showToast("Belum ada TPS", "warning"); return; }
     let terdekat = null, jarakMin = Infinity;
     fasilitas.forEach(function(f) { const j = hitungJarak(pos.coords.latitude, pos.coords.longitude, parseFloat(f.lat), parseFloat(f.lng)); if (j < jarakMin) { jarakMin = j; terdekat = f; } });
-    if (terdekat) { document.getElementById('bottomSheet').classList.remove('expanded'); document.getElementById('laporBtn').classList.remove('hidden'); map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 }); setTimeout(function() { const m = markerMap.get(terdekat.id); if (m) m.openPopup(); showToast('TPS terdekat: ' + terdekat.nama + ' (' + jarakMin.toFixed(2) + ' km)', "success"); }, 2100); }
+    if (terdekat) { document.getElementById('bottomSheet').classList.remove('expanded'); document.getElementById('laporBtn').classList.remove('hidden'); map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 }); setTimeout(function() { const m = markerMap.get(String(terdekat.id)); if (m) m.openPopup(); showToast('TPS terdekat: ' + terdekat.nama + ' (' + jarakMin.toFixed(2) + ' km)', "success"); }, 2100); }
   });
 }
 
@@ -1001,7 +1001,7 @@ function cariBankTerdekat() {
     if (banks.length === 0) { showToast("Belum ada Bank Sampah", "warning"); return; }
     let terdekat = null, jarakMin = Infinity;
     banks.forEach(function(f) { const j = hitungJarak(pos.coords.latitude, pos.coords.longitude, parseFloat(f.lat), parseFloat(f.lng)); if (j < jarakMin) { jarakMin = j; terdekat = f; } });
-    if (terdekat) { document.getElementById('bottomSheet').classList.remove('expanded'); document.getElementById('laporBtn').classList.remove('hidden'); map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 }); setTimeout(function() { const m = markerMap.get(terdekat.id); if (m) m.openPopup(); showToast('Bank terdekat: ' + terdekat.nama + ' (' + jarakMin.toFixed(2) + ' km)', "info"); }, 2100); }
+    if (terdekat) { document.getElementById('bottomSheet').classList.remove('expanded'); document.getElementById('laporBtn').classList.remove('hidden'); map.flyTo([parseFloat(terdekat.lat), parseFloat(terdekat.lng)], 17, { duration: 2 }); setTimeout(function() { const m = markerMap.get(String(terdekat.id)); if (m) m.openPopup(); showToast('Bank terdekat: ' + terdekat.nama + ' (' + jarakMin.toFixed(2) + ' km)', "info"); }, 2100); }
   });
 }
 
@@ -1100,13 +1100,38 @@ function shareKeWA(nama, status) {
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
+// FUNGSI YANG DIPERBAIKI (Fix Map tidak pindah)
 function keLokasiMenu(id) {
-  document.getElementById('bottomSheet').classList.remove('expanded');
+  const sheet = document.getElementById('bottomSheet');
+  sheet.classList.remove('expanded');
   document.getElementById('laporBtn').classList.remove('hidden');
-  const marker = markerMap.get(id);
-  if (!marker) return;
+  document.querySelector('.drag-text i').innerText = '▲'; // Reset panah
+
+  // Paksa ID jadi string agar cocok dengan key di markerMap
+  const marker = markerMap.get(String(id)); 
+  
+  if (!marker) {
+    console.log("Marker tidak ditemukan untuk ID:", id);
+    return;
+  }
+
   const ll = marker.getLatLng();
-  setTimeout(function() { map.invalidateSize(); map.flyTo([ll.lat, ll.lng], 16, { duration: 1.5 }); setTimeout(function() { marker.openPopup(); }, 1600); }, 350);
+
+  setTimeout(function() {
+    map.invalidateSize(); 
+
+    // Cek apakah marker ini bagian dari cluster (Krisis) atau marker tunggal (Bank/Fasilitas)
+    if (cluster.hasLayer(marker)) {
+      // Jika di dalam cluster, gunakan fitur zoomToShowLayer
+      cluster.zoomToShowLayer(marker, function() {
+        marker.openPopup();
+      });
+    } else {
+      // Jika marker tunggal (Bank/Fasilitas)
+      map.flyTo([ll.lat, ll.lng], 17, { duration: 1.5 });
+      setTimeout(function() { marker.openPopup(); }, 1600);
+    }
+  }, 400); // Tunggu animasi bottom sheet menutup
 }
 
 function renderSemua(filter) {
@@ -1142,7 +1167,8 @@ function renderSemua(filter) {
     if (marker) {
       if (titik.kategori === 'krisis') cluster.addLayer(marker);
       else { map.addLayer(marker); nonClusterMarkers.push(marker); }
-      markerMap.set(titik.id, marker);
+      // FIX: Gunakan String(titik.id) agar tipe data konsisten
+      markerMap.set(String(titik.id), marker);
     }
   });
   map.addLayer(cluster);
@@ -1167,7 +1193,6 @@ function renderSemua(filter) {
     const dukunganCount = titik.jumlah_dukungan || 0;
     let btnDukungList = (!isBank && !isFas) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
 
-    // PERBAIKAN: Ikon map-pin menggantikan svgTrash
     div.innerHTML = '<div class="item-info"><div class="item-title">' + titik.nama + '</div><div class="item-meta">' + pendingHTML + badgeHTML + statusBadge + '</div>' + btnDukungList + adminHTML + '</div>' +
       '<div class="item-actions"><button class="btn-icon map" onclick="keLokasiMenu(\'' + titik.id + '\')"><i data-lucide="map-pin" style="width: 20px; height: 20px; stroke-width: 2.5px;"></i></button>' +
       '<button class="btn-icon share" onclick="shareKeWA(\'' + (titik.nama||'').replace(/'/g, "\\'") + '\', \'' + (titik.status||'Aktif') + '\')">' + waIcon + '</button></div>';
@@ -1356,7 +1381,7 @@ async function ambilData() {
 }
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
-generateEduGrid(); // Panggil fungsi render kartu edukasi
+generateEduGrid(); 
 renderSemua(currentFilter);
 ambilData();
 cekSesiUser();
