@@ -6,7 +6,7 @@
   <title>Tuwoto - Smart Waste Management</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
-  <link rel="manifest" href="manifest.json?v=54">
+  <link rel="manifest" href="manifest.json?v=56">
   <meta name="theme-color" content="#ffffff"> 
   <link rel="apple-touch-icon" href="icon.png">
 
@@ -164,21 +164,22 @@
     #customSelectBody .custom-option input[type="radio"] { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; outline: none; }
     #customSelectBody .custom-option input[type="radio"]:checked { border-color: var(--primary); border-width: 6px; }
 
-    /* CSS MINI GAME EDUKASI */
-    .game-container { padding: 16px; display: flex; flex-direction: column; align-items: center; }
-    .game-score { font-size: 18px; font-weight: bold; color: var(--kuning); margin-bottom: 10px; }
-    .game-item-box { background: white; border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; border: 2px dashed #cbd5e1; }
-    .game-icon { font-size: 80px; display: block; margin-bottom: 15px; animation: bounceIn 0.5s; }
-    .game-text { font-size: 20px; font-weight: 800; color: var(--teks); }
-    .game-bins { display: flex; gap: 10px; width: 100%; justify-content: center; }
-    .bin-btn { flex: 1; padding: 15px 5px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: white; }
-    .bin-btn:active { transform: scale(0.95); }
-    .bin-btn.organik { background: #10b981; }
-    .bin-btn.anorganik { background: #3b82f6; }
-    .bin-btn.b3 { background: #ef4444; }
-    .bin-icon { font-size: 24px; }
-    .bin-text { font-size: 11px; }
-    @keyframes bounceIn { 0% { transform: scale(0.3); opacity:0; } 50% { transform: scale(1.1); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity:1; } }
+    /* CSS EDUKASI (KARTU GRID) */
+    .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+    .edu-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .edu-card:active { transform: scale(0.95); background: #f8fafc; }
+    .edu-card-icon { font-size: 30px; margin-bottom: 5px; display: block; }
+    .edu-card-title { font-size: 12px; font-weight: bold; color: var(--teks); }
+    
+    #modalEdukasi .modal-content { padding: 0; overflow: hidden; background: #f8fafc; text-align: left; max-width: 450px; border-radius: 20px; }
+    .edu-header { padding: 30px 20px 20px 20px; text-align: center; color: white; position: relative; }
+    .edu-header-icon { font-size: 60px; display: block; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .edu-header-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+    .edu-close-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.3); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .edu-body { padding: 20px; }
+    .edu-section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .edu-section-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .edu-section-text { font-size: 13px; line-height: 1.5; color: #475569; }
 
     #chart-container { width: 100%; max-width: 320px; height: 320px; margin: 0 auto 20px auto; position: relative; }
 
@@ -296,27 +297,10 @@
         </div>
       </div>
 
-      <!-- TAB EDUKASI (DIUBAH JADI MINI GAME) -->
+      <!-- TAB EDUKASI (KARTU GRID) -->
       <div id="tab-edukasi" class="tab-content">
-        <div class="game-container">
-          <div class="game-score">Skor Kamu: <span id="gameScore">0</span></div>
-          <div class="game-item-box">
-            <span class="game-icon" id="gameIcon">🍌</span>
-            <div class="game-text" id="gameText">Kulit Pisang</div>
-          </div>
-          <p style="font-size: 12px; color: #64748b; margin-bottom: 10px; text-align:center;">Sampah ini masuk ke tong mana?</p>
-          <div class="game-bins">
-            <button class="bin-btn organik" onclick="checkAnswer('organik')">
-              <span class="bin-icon">🍂</span><span class="bin-text">Organik</span>
-            </button>
-            <button class="bin-btn anorganik" onclick="checkAnswer('anorganik')">
-              <span class="bin-icon">♻️</span><span class="bin-text">Anorganik</span>
-            </button>
-            <button class="bin-btn b3" onclick="checkAnswer('b3')">
-              <span class="bin-icon">☣️</span><span class="bin-text">B3 / Berbahaya</span>
-            </button>
-          </div>
-        </div>
+        <div class="list-title" style="background:none; border:none; padding-bottom:0;">Pilih topik untuk dipelajari:</div>
+        <div class="edu-grid" id="eduGrid"></div>
       </div>
 
       <div id="tab-profil" class="tab-content">
@@ -347,15 +331,29 @@
         </div>
       </div>
 
+      <!-- TAB TENTANG (LENGKAP) -->
       <div id="tab-tentang" class="tab-content">
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 3.2.0 (Me Too & Game)</div>
+          <div class="about-version">Versi 3.2.2 (Map Pin Update)</div>
           
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
             <p>Nama <b>Tuwoto</b> berasal dari Bahasa Gorontalo yang berarti <b>"Menunjuk"</b> atau <b>"Memberi Arah"</b>. Aplikasi ini hadir sebagai penunjuk arah bagi masyarakat untuk menemukan tempat pembuangan sampah terdekat, sekaligus menunjuk titik-titik krisis sampah bagi pemerintah daerah (DLH).</p>
+          </div>
+          
+          <div class="about-card">
+            <h4><i data-lucide="target"></i> Visi & Misi</h4>
+            <p>Menciptakan lingkungan Gorontalo yang bersih dan berkelanjutan melalui kolaborasi digital (Smart Waste Management) antara warga, petugas kebersihan, dan pemangku kebijakan.</p>
+          </div>
+          
+          <div class="about-card">
+            <h4><i data-lucide="cpu"></i> Teknologi</h4>
+            <p>Aplikasi ini dibangun menggunakan teknologi web modern tanpa memerlukan unduhan aplikasi besar (PWA).</p>
+            <div class="tech-tags">
+              <span class="tech-tag">PWA</span><span class="tech-tag">Leaflet.js</span><span class="tech-tag">Supabase</span><span class="tech-tag">Web Push</span>
+            </div>
           </div>
           <div style="font-size: 10px; color: #94a3b8; margin-top: 20px;">&copy; 2024 Tuwoto. Hak Cipta Dilindungi Undang-Undang.</div>
         </div>
@@ -541,6 +539,31 @@
   </div>
 </div>
 
+<!-- MODAL EDUKASI (KARTU GRID DETAIL) -->
+<div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
+  <div class="modal-content">
+    <div class="edu-header" id="eduHeader">
+      <button class="edu-close-btn" onclick="tutupEdukasi()">X</button>
+      <span id="eduIcon" class="edu-header-icon">💡</span>
+      <div id="eduTitle" class="edu-header-title">Memuat...</div>
+    </div>
+    <div class="edu-body">
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #f59e0b;">Fakta Terurai</div>
+        <div id="eduFakta" class="edu-section-text">...</div>
+      </div>
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #ef4444;">Dampak Buruk</div>
+        <div id="eduDampak" class="edu-section-text">...</div>
+      </div>
+      <div class="edu-section">
+        <div class="edu-section-title" style="color: #10b981;">Solusi</div>
+        <div id="eduSolusi" class="edu-section-text">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="modalQR" class="modal-overlay">
   <div class="modal-content">
     <h2>Scan Aplikasi Tuwoto</h2>
@@ -567,22 +590,17 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const listKecamatanGorontalo = ["Kota Barat", "Kota Selatan", "Kota Timur", "Kota Utara", "Dungingi", "Kota Tengah", "Sipatana", "Dumbo Raya", "Hulonthalangi", "Limboto", "Limboto Barat", "Telaga", "Telaga Biru", "Tilango", "Batudaa", "Batudaa Pantai", "Bongomeme", "Tabongo", "Dungaliyo", "Pulubala", "Tibawa", "Boliyohuto", "Mootilango", "Tolangohula", "Asparaga", "Bilato", "Biluhu", "Talaga Jaya"];
 
-// DATA UNTUK MINI GAME EDUKASI
-const gameData = [
-  { nama: "Kulit Pisang", icon: "🍌", jawaban: "organik" },
-  { nama: "Botol Plastik", icon: "🥤", jawaban: "anorganik" },
-  { nama: "Baterai Bekas", icon: "🔋", jawaban: "b3" },
-  { nama: "Sisa Nasi", icon: "🍚", jawaban: "organik" },
-  { nama: "Kaleng Bekas", icon: "🥫", jawaban: "anorganik" },
-  { nama: "Lampu Neon", icon: "💡", jawaban: "b3" },
-  { nama: "Daun Kering", icon: "🍂", jawaban: "organik" },
-  { nama: "Kardus", icon: "📦", jawaban: "anorganik" },
-  { nama: "Obat Kadaluarsa", icon: "💊", jawaban: "b3" },
-  { nama: "Kaca Pecah", icon: "🍾", jawaban: "anorganik" }
-];
+// DATA EDUKASI
+const edukasiSampah = {
+  "Plastik": { icon: "🥤", title: "Plastik", color: "#2563eb", fakta: "Butuh <b>400-1000 tahun</b> untuk terurai.", dampak: "Mencemari laut, mematikan biota laut, dan menjadi mikroplastik.", solusi: "Gunakan tas kain, kurangi sedotan, pilah botol untuk Bank Sampah." },
+  "Kertas & Kardus": { icon: "📦", title: "Kertas", color: "#d97706", fakta: "Butuh <b>2-6 bulan</b> untuk terurai.", dampak: "Menghasilkan gas metana jika tertimbun dan membusuk.", solusi: "Jaga kardus tetap kering, ikat rapi untuk didaur ulang." },
+  "Logam & Kaleng": { icon: "🥫", title: "Logam", color: "#475569", fakta: "Butuh <b>80-200 tahun</b>, tapi 100% bisa didaur ulang.", dampak: "Tajam dan berkarat, melukai satwa liar.", solusi: "Sangat berharga! Kumpulkan dan jual ke pengepul." },
+  "Kaca": { icon: "🍾", title: "Kaca", color: "#0ea5e9", fakta: "Secara alami <b>TIDAK TERURAI</b>, tapi bisa didaur ulang terus.", dampak: "Pecahan berbahaya, memantulkan cahaya memicu kebakaran.", solusi: "Bungkus pecahan dengan koran. Serahkan botol utuh ke Bank Sampah." },
+  "Elektronik (E-Waste)": { icon: "🔋", title: "E-Waste", color: "#ef4444", fakta: "Mengandung logam berat berbahaya (Merkuri, Timbal).", dampak: "Meracuni tanah dan air tanah.", solusi: "JANGAN buang ke tong biasa! Serahkan ke fasilitas E-Waste." },
+  "Karet": { icon: "🛞", title: "Karet", color: "#334155", fakta: "Butuh <b>50-80 tahun</b> untuk terurai.", dampak: "Sarang nyamuk, asap beracun jika dibakar.", solusi: "Serahkan ke pengrajin untuk jadi pot atau kursi." },
+  "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
+};
 
-let currentGameIndex = 0;
-let gameScore = 0;
 let votedIds = new Set(); // Mencegah user vote 2x di sesi yang sama
 
 const svgTrash = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
@@ -625,47 +643,42 @@ if (datalistKec) {
   });
 }
 
-// ============ FUNGSI EDUKASI (MINI GAME) ============
-function loadGameQuestion() {
-  const item = gameData[currentGameIndex];
-  document.getElementById('gameIcon').innerText = item.icon;
-  document.getElementById('gameText').innerText = item.nama;
-  document.getElementById('gameScore').innerText = gameScore;
-}
-
-function checkAnswer(pilihan) {
-  const item = gameData[currentGameIndex];
-  if (pilihan === item.jawaban) {
-    // BENAR
-    gameScore += 10;
-    document.getElementById('gameScore').innerText = gameScore;
-    confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 }, colors: ['#10b981', '#3b82f6'] });
-    showToast("Benar! Hebat! +10 Skor", "success");
-    
-    // Acak soal berikutnya
-    currentGameIndex = Math.floor(Math.random() * gameData.length);
-    setTimeout(loadGameQuestion, 500);
-  } else {
-    // SALAH
-    showToast("Salah! Ini masuk ke " + item.jawaban.toUpperCase(), "error");
-    // Efek getar di kotak
-    const box = document.querySelector('.game-item-box');
-    box.style.transform = 'translateX(-10px)';
-    setTimeout(() => box.style.transform = 'translateX(10px)', 100);
-    setTimeout(() => box.style.transform = 'translateX(0)', 200);
+// ============ FUNGSI EDUKASI (KARTU GRID) ============
+function generateEduGrid() {
+  const grid = document.getElementById('eduGrid');
+  grid.innerHTML = '';
+  for (let key in edukasiSampah) {
+    let data = edukasiSampah[key];
+    let card = document.createElement('div');
+    card.className = 'edu-card';
+    card.onclick = function() { bukaEdukasi(key); };
+    card.innerHTML = '<span class="edu-card-icon">' + data.icon + '</span><div class="edu-card-title">' + data.title + '</div>';
+    grid.appendChild(card);
   }
 }
+
+function bukaEdukasi(jenisSampah) {
+  const data = edukasiSampah[jenisSampah];
+  if (!data) return;
+  document.getElementById('eduHeader').style.background = data.color;
+  document.getElementById('eduIcon').innerText = data.icon;
+  document.getElementById('eduTitle').innerText = data.title;
+  document.getElementById('eduFakta').innerHTML = data.fakta;
+  document.getElementById('eduDampak').innerHTML = data.dampak;
+  document.getElementById('eduSolusi').innerHTML = data.solusi;
+  document.getElementById('modalEdukasi').style.display = 'flex';
+}
+
+function tutupEdukasi() { document.getElementById('modalEdukasi').style.display = 'none'; }
 
 // ============ FITUR "SAYA JUGA MELIHAT INI" ============
 async function dukungLaporan(id, btnElement) {
   if (votedIds.has(id)) { showToast("Kamu sudah mendukung laporan ini!", "warning"); return; }
   
-  // Ubah tampilan tombol jadi loading sementara
   const originalText = btnElement.innerHTML;
   btnElement.innerHTML = "Memproses...";
   btnElement.disabled = true;
 
-  // Ambil data terbaru dari Supabase
   const { data, error } = await supabaseClient.from('titik_sampah').select('jumlah_dukungan').eq('id', id).single();
   
   if (error) {
@@ -675,11 +688,9 @@ async function dukungLaporan(id, btnElement) {
     return;
   }
 
-  // Hitung dukungan baru
   const currentDukungan = data.jumlah_dukungan || 0;
   const newDukungan = currentDukungan + 1;
 
-  // Simpan ke database
   const { error: updateError } = await supabaseClient.from('titik_sampah').update({ jumlah_dukungan: newDukungan }).eq('id', id);
 
   if (updateError) {
@@ -690,10 +701,8 @@ async function dukungLaporan(id, btnElement) {
     votedIds.add(id);
     btnElement.innerHTML = `👋 Didukung (${newDukungan})`;
     btnElement.classList.add('voted');
-    confetti({ particleCount: 30, spread: 40, origin: { y: 0.8 } }); // Confetti kecil
+    confetti({ particleCount: 30, spread: 40, origin: { y: 0.8 } });
     showToast("Terima kasih! Laporan ini makin kritis.", "success");
-    
-    // Refresh data di background agar list & marker terupdate
     ambilData(); 
   }
 }
@@ -717,7 +726,7 @@ function switchTab(tabName, btnElement) {
   
   if (tabName === 'analisis') { renderGrafik(); renderLeaderboard(); }
   if (tabName === 'profil') updateUIProfil();
-  if (tabName === 'edukasi') { loadGameQuestion(); } // Reset game saat buka tab
+  if (tabName === 'edukasi') { generateEduGrid(); }
 }
 
 function reverseGeocode(lat, lng) {
@@ -823,7 +832,7 @@ document.getElementById('formDaftarBank').onsubmit = async function(e) {
     kontak: document.getElementById('bankKontak').value,
     jenis_diterima: document.getElementById('bankJenis').value,
     foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah',
-    jumlah_dukungan: 0 // Inisialisasi awal
+    jumlah_dukungan: 0 
   };
   const res = await supabaseClient.from('titik_sampah').insert([dataBank]);
   if (res.error) { showToast("Gagal: " + res.error.message, "error"); btn.textContent = "Kirim"; btn.disabled = false; }
@@ -1079,7 +1088,6 @@ function buatMarker(titik) {
   const btnRute = '<button onclick="buatRute(' + lat + ', ' + lng + ')" style="width:100%; margin-top:8px; padding:8px; background:#3b82f6; color:white; border:none; border-radius:6px; font-weight:bold;">Rute</button>';
   const btnShare = '<button onclick="shareKeWA(\'' + (titik.nama||'').replace(/'/g, "\\'") + '\', \'' + (titik.status||'Aktif') + '\')" style="width:100%; margin-top:6px; padding:8px; background:#25D366; color:white; border:none; border-radius:6px; font-weight:bold;">Share WA</button>';
   
-  // TOMBOL DUKUNG (HANYA UNTUK KRISIS)
   const dukunganCount = titik.jumlah_dukungan || 0;
   let btnDukung = (!isFas && !isBank) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
 
@@ -1156,12 +1164,12 @@ function renderSemua(filter) {
       adminHTML = '<div class="admin-actions-compact">' + tombolAcc + '<button class="btn-admin-edit" onclick="bukaEdit(\'' + titik.id + '\')">Edit</button><button class="btn-admin-hapus" onclick="hapusData(\'' + titik.id + '\')">Hapus</button></div>';
     }
     
-    // TAMBAHKAN TOMBOL DUKUNG DI LIST (HANYA UNTUK KRISIS)
     const dukunganCount = titik.jumlah_dukungan || 0;
     let btnDukungList = (!isBank && !isFas) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
 
+    // PERBAIKAN: Ikon map-pin menggantikan svgTrash
     div.innerHTML = '<div class="item-info"><div class="item-title">' + titik.nama + '</div><div class="item-meta">' + pendingHTML + badgeHTML + statusBadge + '</div>' + btnDukungList + adminHTML + '</div>' +
-      '<div class="item-actions"><button class="btn-icon map" onclick="keLokasiMenu(\'' + titik.id + '\')">' + svgTrash + '</button>' +
+      '<div class="item-actions"><button class="btn-icon map" onclick="keLokasiMenu(\'' + titik.id + '\')"><i data-lucide="map-pin" style="width: 20px; height: 20px; stroke-width: 2.5px;"></i></button>' +
       '<button class="btn-icon share" onclick="shareKeWA(\'' + (titik.nama||'').replace(/'/g, "\\'") + '\', \'' + (titik.status||'Aktif') + '\')">' + waIcon + '</button></div>';
     list.appendChild(div);
   });
@@ -1309,7 +1317,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
       kategori: kategori, status: statusValue, is_approved: isApprovedValue,
       catatan: document.getElementById('inCatatan').value, alamat: "-", foto: fotoUrl,
       user_id: currentUser ? currentUser.id : null,
-      jumlah_dukungan: dukunganValue // Simpan nilai dukungan (jika edit)
+      jumlah_dukungan: dukunganValue 
     };
     if (kategori === 'bank_sampah') {
       dataBaru.jam_operasional = document.getElementById('inJam').value || null;
@@ -1348,7 +1356,7 @@ async function ambilData() {
 }
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
-loadGameQuestion(); // Load soal game pertama kali
+generateEduGrid(); // Panggil fungsi render kartu edukasi
 renderSemua(currentFilter);
 ambilData();
 cekSesiUser();
