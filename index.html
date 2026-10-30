@@ -38,6 +38,30 @@
     .floating-header img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
     .floating-header h1 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px; }
     .floating-header .subtitle { font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600; }
+
+    /* Tombol Refresh — port dari Hygenix */
+    .btn-refresh-tuwoto {
+      margin-left: auto;
+      background: #ecfdf5;
+      color: var(--primary);
+      border: 1px solid #a7f3d0;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .btn-refresh-tuwoto:hover { background: #d1fae5; }
+    .btn-refresh-tuwoto:active { transform: rotate(180deg); background: #a7f3d0; }
+    .btn-refresh-tuwoto.spinning svg { animation: spin-tuwoto 1s linear infinite; }
+    @keyframes spin-tuwoto {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
     
     #bottomSheet { position: absolute; bottom: 0; left: 0; width: 100%; height: 85vh; background: var(--card); z-index: 2000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(calc(100% - 140px)); display: flex; flex-direction: column; }
     #bottomSheet.expanded { transform: translateY(0); }
@@ -106,7 +130,6 @@
     .btn-icon.map { background: #e0f2fe; color: #0369a1; }
     .btn-icon.share { background: var(--wa); color: white; }
 
-    /* TOMBOL DUKUNG (SAYA JUGA MELIHAT INI) */
     .btn-dukung { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: bold; color: #475569; cursor: pointer; margin-top: 8px; transition: 0.2s; }
     .btn-dukung:active { background: #e2e8f0; transform: scale(0.95); }
     .btn-dukung.voted { background: #ecfdf5; border-color: #a7f3d0; color: #047857; pointer-events: none; }
@@ -164,7 +187,6 @@
     #customSelectBody .custom-option input[type="radio"] { appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 50%; outline: none; }
     #customSelectBody .custom-option input[type="radio"]:checked { border-color: var(--primary); border-width: 6px; }
 
-    /* CSS EDUKASI (KARTU GRID) */
     .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
     .edu-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     .edu-card:active { transform: scale(0.95); background: #f8fafc; }
@@ -245,6 +267,9 @@
       <h1>Tuwoto</h1>
       <div class="subtitle">Smart Waste Management</div>
     </div>
+    <button class="btn-refresh-tuwoto" onclick="forceRefreshApp()" title="Muat Ulang Aplikasi">
+      <i data-lucide="refresh-cw" class="lucide"></i>
+    </button>
   </div>
 
   <button id="laporBtn"><i data-lucide="plus-circle"></i> Lapor</button>
@@ -297,7 +322,6 @@
         </div>
       </div>
 
-      <!-- TAB EDUKASI (KARTU GRID) -->
       <div id="tab-edukasi" class="tab-content">
         <div class="list-title" style="background:none; border:none; padding-bottom:0;">Pilih topik untuk dipelajari:</div>
         <div class="edu-grid" id="eduGrid"></div>
@@ -331,7 +355,6 @@
         </div>
       </div>
 
-      <!-- TAB TENTANG (LENGKAP) -->
       <div id="tab-tentang" class="tab-content">
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
@@ -539,7 +562,6 @@
   </div>
 </div>
 
-<!-- MODAL EDUKASI (KARTU GRID DETAIL) -->
 <div id="modalEdukasi" class="modal-overlay" onclick="if(event.target===this) tutupEdukasi()">
   <div class="modal-content">
     <div class="edu-header" id="eduHeader">
@@ -601,7 +623,7 @@ const edukasiSampah = {
   "Campuran": { icon: "🗑️", title: "Campuran", color: "#8b5cf6", fakta: "Sulit didaur ulang, berakhir di TPA.", dampak: "Bau busuk, air lindi merusak tanah.", solusi: "Mulai pilah sampah dari rumah." }
 };
 
-let votedIds = new Set(); // Mencegah user vote 2x di sesi yang sama
+let votedIds = new Set();
 
 const svgTrash = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
 const svgBank = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 20 7 4 7"/><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/></svg>`;
@@ -643,7 +665,42 @@ if (datalistKec) {
   });
 }
 
-// ============ FUNGSI EDUKASI (KARTU GRID) ============
+// ============ FORCE REFRESH (Port dari Hygenix) ============
+async function forceRefreshApp() {
+  const btn = document.querySelector('.btn-refresh-tuwoto');
+  if (btn) btn.classList.add('spinning');
+  
+  showToast("Memuat ulang aplikasi...", "info");
+  
+  // Hapus semua cache Service Worker & Cache Storage
+  if ('caches' in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      console.log('[Force Refresh] Cache dibersihkan:', cacheNames.length, 'cache');
+    } catch (e) {
+      console.warn('[Force Refresh] Gagal hapus cache:', e);
+    }
+  }
+  
+  // Unregister semua Service Worker agar benar-benar fresh
+  if ('serviceWorker' in navigator) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg => reg.unregister()));
+      console.log('[Force Refresh] Service Worker di-unregister:', registrations.length);
+    } catch (e) {
+      console.warn('[Force Refresh] Gagal unregister SW:', e);
+    }
+  }
+  
+  // Reload dengan cache-busting timestamp
+  setTimeout(function() {
+    window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+  }, 1000);
+}
+
+// ============ FUNGSI EDUKASI ============
 function generateEduGrid() {
   const grid = document.getElementById('eduGrid');
   grid.innerHTML = '';
@@ -658,10 +715,8 @@ function generateEduGrid() {
 }
 
 function bukaEdukasi(jenisSampah) {
-  // Konversi jika jenis sampah mengandung teks yang berbeda dari key
   let key = jenisSampah;
   if (!edukasiSampah[key]) {
-      // Fallback jika tidak persis sama
       if (jenisSampah.includes("Plastik")) key = "Plastik";
       else if (jenisSampah.includes("Kertas") || jenisSampah.includes("Kardus")) key = "Kertas & Kardus";
       else if (jenisSampah.includes("Logam") || jenisSampah.includes("Kaleng")) key = "Logam & Kaleng";
@@ -915,7 +970,6 @@ async function tambahPoinKeDB(jumlah) {
   if (!res.error) { 
     currentUserPoints = newPoin; 
     updateUIProfil(); 
-    // CONFETTI BESAR SAAT DAPAT POIN DARI LAPORAN
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'] });
   }
 }
@@ -1099,7 +1153,6 @@ function buatMarker(titik) {
                              (titik.kontak ? '<div class="popup-row"><span>Kontak</span><b>' + titik.kontak + '</b></div>' : '') : '';
   if (!isFas && !isBank) popupContent = '<div class="popup-row"><span>Jenis</span><b>' + (titik.jenis||'-') + '</b></div><div class="popup-row"><span>Kekritisan</span><span class="badge ' + warnaClass + '">' + titik.kritis + '</span></div>';
   
-  // Minimalis: Tombol disejajarkan dalam 1 baris
   let btnRute = `<button onclick="buatRute(${lat}, ${lng})" style="flex:1; padding:6px 0; background:#3b82f6; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">Rute</button>`;
   let btnShare = `<button onclick="shareKeWA('${(titik.nama||'').replace(/'/g, "\\'")}', '${titik.status||'Aktif'}')" style="flex:1; padding:6px 0; background:#25D366; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">WA</button>`;
   let btnEdukasi = (!isFas && !isBank && titik.jenis) ? `<button onclick="bukaEdukasi('${titik.jenis}')" style="flex:1; padding:6px 0; background:#8b5cf6; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">Info</button>` : '';
@@ -1107,7 +1160,6 @@ function buatMarker(titik) {
   const dukunganCount = titik.jumlah_dukungan || 0;
   let btnDukung = (!isFas && !isBank) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
 
-  // Layout Popup yang lebih rapi dan minimalis
   const popupHTML = `
     <img class="popup-img" src="${fotoUrl}">
     <div class="popup-body">
@@ -1132,14 +1184,12 @@ function shareKeWA(nama, status) {
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
-// FUNGSI YANG DIPERBAIKI (Fix Map tidak pindah)
 function keLokasiMenu(id) {
   const sheet = document.getElementById('bottomSheet');
   sheet.classList.remove('expanded');
   document.getElementById('laporBtn').classList.remove('hidden');
-  document.querySelector('.drag-text i').innerText = '▲'; // Reset panah
+  document.querySelector('.drag-text i').innerText = '▲';
 
-  // Paksa ID jadi string agar cocok dengan key di markerMap
   const marker = markerMap.get(String(id)); 
   
   if (!marker) {
@@ -1152,18 +1202,15 @@ function keLokasiMenu(id) {
   setTimeout(function() {
     map.invalidateSize(); 
 
-    // Cek apakah marker ini bagian dari cluster (Krisis) atau marker tunggal (Bank/Fasilitas)
     if (cluster.hasLayer(marker)) {
-      // Jika di dalam cluster, gunakan fitur zoomToShowLayer
       cluster.zoomToShowLayer(marker, function() {
         marker.openPopup();
       });
     } else {
-      // Jika marker tunggal (Bank/Fasilitas)
       map.flyTo([ll.lat, ll.lng], 17, { duration: 1.5 });
       setTimeout(function() { marker.openPopup(); }, 1600);
     }
-  }, 400); // Tunggu animasi bottom sheet menutup
+  }, 400);
 }
 
 function renderSemua(filter) {
@@ -1199,7 +1246,6 @@ function renderSemua(filter) {
     if (marker) {
       if (titik.kategori === 'krisis') cluster.addLayer(marker);
       else { map.addLayer(marker); nonClusterMarkers.push(marker); }
-      // FIX: Gunakan String(titik.id) agar tipe data konsisten
       markerMap.set(String(titik.id), marker);
     }
   });
