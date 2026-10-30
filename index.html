@@ -34,12 +34,13 @@
     #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     .leaflet-top.leaflet-right { top: 75px; }
 
+    /* CSS FLOATING HEADER & TOMBOL REFRESH */
     .floating-header { position: absolute; top: 15px; left: 15px; right: 15px; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; }
     .floating-header img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
     .floating-header h1 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px; }
     .floating-header .subtitle { font-size: 10px; color: var(--teks-muted); margin-top: -2px; font-weight: 600; }
 
-    /* Tombol Refresh — port dari Hygenix */
+    /* Tombol Refresh */
     .btn-refresh-tuwoto {
       margin-left: auto;
       background: #ecfdf5;
@@ -58,11 +59,30 @@
     .btn-refresh-tuwoto:hover { background: #d1fae5; }
     .btn-refresh-tuwoto:active { transform: rotate(180deg); background: #a7f3d0; }
     .btn-refresh-tuwoto.spinning svg { animation: spin-tuwoto 1s linear infinite; }
-    @keyframes spin-tuwoto {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
+    @keyframes spin-tuwoto { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Tombol QR sejajar dengan tombol lokasi Leaflet */
+    .leaflet-control.qr-control-btn {
+      width: 34px; height: 34px;
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      background-clip: padding-box;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; margin-top: 8px;
     }
-    
+    .leaflet-control.qr-control-btn:hover { background: #f4f4f4; }
+    .leaflet-control.qr-control-btn svg { width: 18px; height: 18px; stroke: #333; stroke-width: 2.2; }
+
+    /* Menggeser panel rute agar tidak menutupi tombol QR & Lokasi */
+    .leaflet-routing-container {
+      top: auto !important; bottom: 80px !important; right: auto !important; left: 10px !important;
+      max-height: 45vh !important; overflow-y: auto; max-width: 280px;
+      border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    }
+
     #bottomSheet { position: absolute; bottom: 0; left: 0; width: 100%; height: 85vh; background: var(--card); z-index: 2000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(calc(100% - 140px)); display: flex; flex-direction: column; }
     #bottomSheet.expanded { transform: translateY(0); }
 
@@ -650,9 +670,30 @@ const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 14);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
+// Inisialisasi Tombol Lokasi
 if (typeof L.control.locate === 'function') {
   L.control.locate({ position: 'topright', strings: { title: "Lokasi Saya" }, locateOptions: { enableHighAccuracy: true } }).addTo(map);
 }
+
+// ✅ Tombol QR sejajar vertikal di bawah tombol lokasi
+L.Control.QRButton = L.Control.extend({
+  options: { position: 'topright' },
+  onAdd: function(map) {
+    const btn = L.DomUtil.create('button', 'leaflet-control qr-control-btn');
+    btn.type = 'button';
+    btn.title = 'Scan QR Aplikasi';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>';
+    
+    L.DomEvent.disableClickPropagation(btn);
+    L.DomEvent.on(btn, 'click', function(e) {
+      L.DomEvent.stopPropagation(e);
+      bukaQR();
+    });
+    
+    return btn;
+  }
+});
+new L.Control.QRButton().addTo(map);
 
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
