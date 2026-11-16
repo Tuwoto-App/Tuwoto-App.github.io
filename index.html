@@ -384,7 +384,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.0.0</div>
+          <div class="about-version">Versi 1.0.1</div>
           
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
@@ -621,8 +621,6 @@
 
 <div id="toastContainer" class="toast-container"></div>
 <datalist id="listKecamatan"></datalist>
-
-<!-- BAGIAN 1 SELESAI. SILAKAN BALAS "LANJUT" UNTUK BAGIAN 2 -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -936,12 +934,33 @@ function renderLeaderboard() {
   if (sorted.length === 0) { panel.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Belum ada data.</p>'; return; }
   panel.innerHTML = sorted.map(function(item, i) { return '<div class="leaderboard-item"><div class="leaderboard-rank ' + (i===0?'gold':i===1?'silver':i===2?'bronze':'') + '">' + (i+1) + '</div><div class="leaderboard-name">Kec. ' + item[0] + '</div><div class="leaderboard-score">' + item[1] + ' Selesai</div></div>'; }).join('');
 }
+
+// ⚡ FUNGSI KOMPRES GAMBAR YANG SUDAH DIPERBAIKI (ANTI-STUCK)
 function kompresGambar(file) {
-  return new Promise(function(resolve) {
-    const reader = new FileReader(); reader.readAsDataURL(file);
+  return new Promise(function(resolve, reject) {
+    if (!file.type.startsWith('image/')) { reject(new Error("File bukan gambar valid.")); return; }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onerror = function() { reject(new Error("Gagal membaca file.")); };
     reader.onload = function(event) {
-      const img = new Image(); img.src = event.target.result;
-      img.onload = function() { const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = img.height * (800 / img.width); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); canvas.toBlob(function(blob) { resolve(new File([blob], file.name, { type: 'image/jpeg' })); }, 'image/jpeg', 0.7); };
+      const img = new Image();
+      img.src = event.target.result;
+      img.onerror = function() { reject(new Error("Format tidak didukung/rusak.")); };
+      img.onload = function() {
+        try {
+          if (img.width < 800 && file.size < 1000000) { resolve(file); return; }
+          const canvas = document.createElement('canvas');
+          let width = img.width; let height = img.height;
+          if (width > 800) { height = Math.round((height * 800) / width); width = 800; }
+          if (width === 0 || height === 0 || isNaN(width) || isNaN(height)) { reject(new Error("Dimensi gambar tidak valid.")); return; }
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          canvas.toBlob(function(blob) {
+            if (blob) { resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg' })); }
+            else { reject(new Error("Gagal kompres ke Blob.")); }
+          }, 'image/jpeg', 0.7);
+        } catch (err) { reject(err); }
+      };
     };
   });
 }
@@ -1096,6 +1115,7 @@ function mulaiPilihPeta() {
   document.getElementById('app').appendChild(btnKonfirm);
 }
 
+// ⚡ FORM SUBMIT YANG SUDAH DIPERBAIKI (ERROR HANDLING)
 document.getElementById('formLaporan').onsubmit = async function(e) {
   e.preventDefault();
   if (!document.getElementById('inNama').value) { showToast("Ambil lokasi dulu", "warning"); return; }
@@ -1110,8 +1130,12 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
   } else { if (isAdmin) isApprovedValue = true; }
   try {
     if (fileInput.files.length > 0) {
-      btn.textContent = 'Kompres...'; const compFile = await kompresGambar(fileInput.files[0]);
-      btn.textContent = 'Upload...'; const fileName = Date.now() + '_' + compFile.name.replace(/\s/g, '_');
+      if (fileInput.files[0].size > 15 * 1024 * 1024) { throw new Error("Ukuran gambar terlalu besar (Maks 15MB)."); }
+      btn.textContent = 'Kompres...'; 
+      const compFile = await kompresGambar(fileInput.files[0]);
+      
+      btn.textContent = 'Upload...'; 
+      const fileName = Date.now() + '_' + compFile.name.replace(/\s/g, '_');
       const upload = await supabaseClient.storage.from('foto_sampah').upload(fileName, compFile);
       if (upload.error) throw upload.error;
       const urlData = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); fotoUrl = urlData.data.publicUrl;
@@ -1126,7 +1150,12 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
     showToast(isEditMode ? "Diperbarui" : "Dikirim! Menunggu ACC", "success");
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
     tutupModal(); ambilData();
-  } catch (err) { showToast("Gagal: " + err.message, "error"); } finally { btn.textContent = 'Kirim Laporan Sekarang'; btn.disabled = false; }
+  } catch (err) { 
+    showToast("Gagal: " + err.message, "error"); 
+  } finally { 
+    btn.textContent = 'Kirim Laporan Sekarang'; 
+    btn.disabled = false; 
+  }
 };
 
 let qrGenerated = false;
