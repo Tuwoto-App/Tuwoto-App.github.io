@@ -74,11 +74,18 @@
     }
     .leaflet-control.qr-control-btn:hover { background-color: #f4f4f4; }
 
-    /* Menggeser panel rute agar tidak menutupi tombol QR & Lokasi */
+    /* Panel Rute dipindah ke bawah tombol QR */
     .leaflet-routing-container {
-      top: auto !important; bottom: 80px !important; right: auto !important; left: 10px !important;
-      max-height: 45vh !important; overflow-y: auto; max-width: 280px;
-      border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+      top: 150px !important; 
+      right: 15px !important; 
+      left: auto !important; 
+      bottom: auto !important;
+      max-height: 40vh !important; 
+      overflow-y: auto;
+      width: 260px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+      z-index: 1000;
     }
 
     #bottomSheet { position: absolute; bottom: 0; left: 0; width: 100%; height: 85vh; background: var(--card); z-index: 2000; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(calc(100% - 140px)); display: flex; flex-direction: column; }
@@ -615,7 +622,7 @@
 <div id="toastContainer" class="toast-container"></div>
 <datalist id="listKecamatan"></datalist>
 
-<!-- BAGIAN 1 SELESAI. (Di bagian bawah ini, Anda akan menempelkan Bagian 2) -->
+<!-- BAGIAN 1 SELESAI. SILAKAN BALAS "LANJUT" UNTUK BAGIAN 2 -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -656,7 +663,7 @@ if (typeof L.control.locate === 'function') {
   L.control.locate({ position: 'topright', strings: { title: "Lokasi Saya" }, locateOptions: { enableHighAccuracy: true } }).addTo(map);
 }
 
-// ✅ PERBAIKAN: Menyuntikkan Tombol QR langsung ke elemen peta
+// ✅ TRIK ANTI-GAGAL: Suntikkan Tombol QR Langsung ke Elemen Kontainer Leaflet
 setTimeout(function() {
   const leafletTopRight = document.querySelector('.leaflet-top.leaflet-right');
   if (leafletTopRight && !document.querySelector('.qr-control-btn')) {
