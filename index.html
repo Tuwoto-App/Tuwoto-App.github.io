@@ -854,7 +854,7 @@ function updateUIProfil() {
 }
 function renderProfilLencana() {
   if (isAdmin) return;
-  let levelData = currentUserPoints <= 50 ? { title: "Tunas", src: "badge1.png", next: 50 } : currentUserPoints <= 150 ? { title: "Peduli", src: "badge2.png", next: 150 } : currentUserPoints <= 300 ? { title: "Pejuang", src: "badge3.png", next: 300 } : currentUserPoints <= 500 ? { title: "Pahlawan", src: "badge4.png", next: 500 } : { title: "Legenda", src: "badge5.png", next: 1000 };
+  let levelData = currentUserPoints <= 50 ? { title: "Tunas", src: "badge1.png", next: 50 } : currentUserPoints <= 150 ? { title: "Pemilah", src: "badge2.png", next: 150 } : currentUserPoints <= 300 ? { title: "Penggerak", src: "badge3.png", next: 300 } : currentUserPoints <= 500 ? { title: "Penjaga", src: "badge4.png", next: 500 } : { title: "Pelestari", src: "badge5.png", next: 1000 };
   document.getElementById('profilBadge').src = levelData.src; document.getElementById('profilLevelTitle').innerText = levelData.title; document.getElementById('profilTotalPoin').innerText = currentUserPoints;
   let prevTarget = currentUserPoints <= 50 ? 0 : currentUserPoints <= 150 ? 50 : currentUserPoints <= 300 ? 150 : currentUserPoints <= 500 ? 300 : 500;
   let percent = ((currentUserPoints - prevTarget) / (levelData.next - prevTarget)) * 100;
