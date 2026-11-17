@@ -524,6 +524,8 @@
     <h2 style="text-align: center;" id="judulForm">Lapor Cepat</h2>
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
+      
+      <!-- KATEGORI ADMIN (MUNCUL DI SINI) -->
       <div class="form-group" id="divKategoriAdmin" style="display:none;">
         <label>Kategori Data (Admin)</label>
         <select id="inKategori" style="display:none;">
@@ -533,6 +535,7 @@
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
+      
       <div class="form-group">
         <label>Foto Bukti <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
         <input type="file" id="inFoto" accept="image/*" style="padding: 10px; border: 1px dashed #cbd5e1;">
@@ -853,7 +856,16 @@ async function logoutWarga() {
 async function ambilDataUser() {
   if (!currentUser) return;
   const res = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
-  if (res.data) { currentUserPoints = res.data.total_poin; currentUserRole = res.data.role || 'warga'; } else { currentUserPoints = 0; currentUserRole = 'warga'; }
+  
+  if (res.data) { 
+    currentUserPoints = res.data.total_poin; 
+    // ⚡ PERBAIKAN: Ubah ke huruf kecil semua agar tidak error jika di DB tertulis "Admin"
+    currentUserRole = res.data.role ? String(res.data.role).toLowerCase() : 'warga'; 
+  } else { 
+    currentUserPoints = 0; 
+    currentUserRole = 'warga'; 
+  }
+  
   if (currentUserRole === 'admin') { 
     isAdmin = true; 
     document.getElementById('optBankSampah').style.display = 'block'; 
@@ -1121,6 +1133,7 @@ function bukaEdit(id) {
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
+// ⚡ FUNGSI TOMBOL LAPOR (MUNCULKAN KATEGORI KHUSUS ADMIN)
 document.getElementById('laporBtn').onclick = function() {
   document.getElementById('formLaporan').reset(); document.getElementById('judulForm').innerText = "Lapor Cepat"; document.getElementById('editId').value = "";
   document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
@@ -1128,8 +1141,11 @@ document.getElementById('laporBtn').onclick = function() {
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } document.getElementById('inNama').value = "";
   
+  // Tampilkan/Sembunyikan dropdown kategori admin
   if (isAdmin) {
     document.getElementById('divKategoriAdmin').style.display = 'block'; 
+  } else {
+    document.getElementById('divKategoriAdmin').style.display = 'none'; 
   }
   
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
