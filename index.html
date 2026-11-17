@@ -327,11 +327,22 @@
           <button class="btn-action purple" onclick="bukaLacak()">Lacak</button>
           <button class="btn-action yellow" onclick="bukaHargaSampah()">Harga Sampah</button>
           <button class="btn-action" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarBank()">Daftar Bank</button>
+          
+          <!-- TOMBOL KHUSUS ADMIN UNTUK TAMBAH TPS -->
+          <button class="btn-action" id="adminTpsBtn" style="display:none; background:#fef08a; color:#854d0e; border-color:#fde047;" onclick="bukaFormTambahTPS()">+ Tambah TPS (Admin)</button>
         </div>
 
         <div class="search-filter-bar">
           <input type="text" id="searchInput" placeholder="Cari nama lokasi...">
           <button class="btn-filter-open" onclick="bukaFilter()">Filter</button>
+        </div>
+
+        <!-- LEGENDA WARNA MARKER -->
+        <div style="padding: 0 16px 8px 16px; display: flex; gap: 12px; font-size: 10px; color: #64748b; font-weight: bold; flex-wrap: wrap;">
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#3b82f6; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> TPS</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#10b981; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Bank Sampah</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#ef4444; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Krisis</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#94a3b8; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Pending</div>
         </div>
 
         <div class="list-title">Data Laporan</div>
@@ -833,8 +844,22 @@ async function ambilDataUser() {
   if (!currentUser) return;
   const res = await supabaseClient.from('profiles').select('total_poin, role').eq('id', currentUser.id).single();
   if (res.data) { currentUserPoints = res.data.total_poin; currentUserRole = res.data.role || 'warga'; } else { currentUserPoints = 0; currentUserRole = 'warga'; }
-  if (currentUserRole === 'admin') { isAdmin = true; document.getElementById('optBankSampah').style.display = 'block'; document.getElementById('divKategoriAdmin').style.display = 'block'; document.getElementById('divStatus').style.display = 'block'; }
-  else { isAdmin = false; document.getElementById('optBankSampah').style.display = 'none'; document.getElementById('divKategoriAdmin').style.display = 'none'; document.getElementById('divStatus').style.display = 'none'; document.getElementById('inKategori').value = 'krisis'; ubahFormKategori(); }
+  if (currentUserRole === 'admin') { 
+    isAdmin = true; 
+    document.getElementById('optBankSampah').style.display = 'block'; 
+    document.getElementById('divKategoriAdmin').style.display = 'block'; 
+    document.getElementById('divStatus').style.display = 'block'; 
+    document.getElementById('adminTpsBtn').style.display = 'flex'; // Tampilkan Tombol Admin
+  }
+  else { 
+    isAdmin = false; 
+    document.getElementById('optBankSampah').style.display = 'none'; 
+    document.getElementById('divKategoriAdmin').style.display = 'none'; 
+    document.getElementById('divStatus').style.display = 'none'; 
+    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan Tombol Admin
+    document.getElementById('inKategori').value = 'krisis'; 
+    ubahFormKategori(); 
+  }
   ambilData();
 }
 async function tambahPoinKeDB(jumlah) {
@@ -848,7 +873,10 @@ function updateUIProfil() {
   if (currentUser) {
     divBelum.style.display = 'none'; divSudah.style.display = 'block'; document.getElementById('profilEmailText').innerText = currentUser.email + (isAdmin ? " (ADMIN)" : ""); renderProfilLencana();
     if (isAdmin) { document.getElementById('divPoinBox').style.display = 'none'; document.getElementById('divProgressContainer').style.display = 'none'; } else { document.getElementById('divPoinBox').style.display = 'inline-block'; document.getElementById('divProgressContainer').style.display = 'block'; }
-  } else { divBelum.style.display = 'block'; divSudah.style.display = 'none'; }
+  } else { 
+    divBelum.style.display = 'block'; divSudah.style.display = 'none'; 
+    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan Tombol Admin saat logout
+  }
 }
 function renderProfilLencana() {
   if (isAdmin) return;
@@ -1086,12 +1114,37 @@ function bukaEdit(id) {
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
+function bukaFormTambahTPS() {
+  if (!isAdmin) return;
+  document.getElementById('formLaporan').reset(); 
+  document.getElementById('judulForm').innerText = "Tambah Tempat Sampah (TPS)"; 
+  document.getElementById('editId').value = "";
+  document.getElementById('inKategori').value = 'fasilitas'; 
+  ubahFormKategori();
+  document.getElementById('inFoto').required = false; 
+  document.getElementById('labelFotoWajib').style.display = 'none'; 
+  document.getElementById('infoFotoLama').style.display = 'none'; 
+  document.getElementById('divStatus').style.display = 'none';
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
+  document.getElementById('inNama').value = "";
+  
+  document.getElementById('divKategoriAdmin').style.display = 'none'; 
+  
+  updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); 
+  document.getElementById('modalLapor').style.display = 'flex';
+}
+
 document.getElementById('laporBtn').onclick = function() {
   document.getElementById('formLaporan').reset(); document.getElementById('judulForm').innerText = "Lapor Cepat"; document.getElementById('editId').value = "";
   document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
   document.getElementById('inFoto').required = true; document.getElementById('labelFotoWajib').style.display = 'inline'; document.getElementById('infoFotoLama').style.display = 'none'; document.getElementById('divStatus').style.display = 'none';
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } document.getElementById('inNama').value = "";
+  
+  if (isAdmin) {
+    document.getElementById('divKategoriAdmin').style.display = 'block'; 
+  }
+  
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 };
 
@@ -1115,9 +1168,17 @@ function mulaiPilihPeta() {
   document.getElementById('app').appendChild(btnKonfirm);
 }
 
-// ⚡ FORM SUBMIT YANG SUDAH DIPERBAIKI (ERROR HANDLING)
+// ⚡ FORM SUBMIT YANG SUDAH DIPERBAIKI (ERROR HANDLING + ANTI-CHEAT WARGA)
 document.getElementById('formLaporan').onsubmit = async function(e) {
   e.preventDefault();
+  
+  // PENGAMAN: Cegah warga menambahkan TPS lewat cara curang (inspect element)
+  const cekKategori = document.getElementById('inKategori').value;
+  if (cekKategori === 'fasilitas' && !isAdmin) {
+    showToast("Akses ditolak! Hanya Admin yang bisa menambah TPS.", "error");
+    return; 
+  }
+
   if (!document.getElementById('inNama').value) { showToast("Ambil lokasi dulu", "warning"); return; }
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
   const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); const kategori = document.getElementById('inKategori').value;
@@ -1162,16 +1223,14 @@ let qrGenerated = false;
 function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { new QRCode(document.getElementById("qrcode"), { text: "https://tuwoto-app.github.io/", width: 200, height: 200 }); qrGenerated = true; } tutupFilter(); }
 function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
 
-// ⚡ FUNGSI AMBIL DATA YANG SUDAH DIPERBAIKI (WARGA BISA LIHAT PENDING SENDIRI)
+// ⚡ FUNGSI AMBIL DATA (WARGA LIHAT PENDING SENDIRI, TAPI BUKAN PENDING ORANG LAIN)
 async function ambilData() {
   try {
     let query = supabaseClient.from('titik_sampah').select('*');
     if (!isAdmin) {
       if (currentUser) {
-        // Warga: Ambil data yang sudah di-ACC publik + data miliknya sendiri yang pending
         query = query.or(`is_approved.eq.true,user_id.eq.${currentUser.id}`);
       } else {
-        // Belum login: Hanya lihat yang sudah ACC publik
         query = query.eq('is_approved', true);
       }
     }
@@ -1184,7 +1243,7 @@ async function ambilData() {
 }
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
-generateEduGrid(); renderSemua(currentFilter); cekSesiUser(); // cekSesiUser akan memicu ambilData
+generateEduGrid(); renderSemua(currentFilter); cekSesiUser();
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, function(payload) { ambilData(); }).subscribe();
 </script>
