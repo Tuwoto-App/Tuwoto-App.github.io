@@ -384,7 +384,7 @@
         <div class="about-container">
           <img src="icon.png" alt="Tuwoto Logo" class="about-logo" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
           <div class="about-title">Tuwoto</div>
-          <div class="about-version">Versi 1.0.1</div>
+          <div class="about-version">Versi 1.0.0</div>
           
           <div class="about-card">
             <h4><i data-lucide="book"></i> Filosofi Nama</h4>
@@ -1162,10 +1162,21 @@ let qrGenerated = false;
 function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { new QRCode(document.getElementById("qrcode"), { text: "https://tuwoto-app.github.io/", width: 200, height: 200 }); qrGenerated = true; } tutupFilter(); }
 function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
 
+// ⚡ FUNGSI AMBIL DATA YANG SUDAH DIPERBAIKI (WARGA BISA LIHAT PENDING SENDIRI)
 async function ambilData() {
   try {
-    let query = supabaseClient.from('titik_sampah').select('*'); if (!isAdmin) query = query.eq('is_approved', true);
-    const res = await query; if (res.error) { showToast("Gagal load: " + res.error.message, "error"); return; }
+    let query = supabaseClient.from('titik_sampah').select('*');
+    if (!isAdmin) {
+      if (currentUser) {
+        // Warga: Ambil data yang sudah di-ACC publik + data miliknya sendiri yang pending
+        query = query.or(`is_approved.eq.true,user_id.eq.${currentUser.id}`);
+      } else {
+        // Belum login: Hanya lihat yang sudah ACC publik
+        query = query.eq('is_approved', true);
+      }
+    }
+    const res = await query; 
+    if (res.error) { showToast("Gagal load: " + res.error.message, "error"); return; }
     dataTitik = res.data || []; renderSemua(currentFilter); renderLeaderboard();
     if (document.getElementById('tab-analisis').classList.contains('active')) renderGrafik();
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1173,7 +1184,7 @@ async function ambilData() {
 }
 
 if (typeof lucide !== 'undefined') lucide.createIcons();
-generateEduGrid(); renderSemua(currentFilter); ambilData(); cekSesiUser();
+generateEduGrid(); renderSemua(currentFilter); cekSesiUser(); // cekSesiUser akan memicu ambilData
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, function(payload) { ambilData(); }).subscribe();
 </script>
