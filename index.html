@@ -74,7 +74,7 @@
     }
     .leaflet-control.qr-control-btn:hover { background-color: #f4f4f4; }
 
-    /* Panel Rute dipindah ke bawah tombol QR */
+    /* Panel Rute */
     .leaflet-routing-container {
       top: 150px !important; 
       right: 15px !important; 
@@ -249,7 +249,21 @@
     .tech-tag { background: #f1f5f9; color: #334155; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
 
     .profile-card { margin: 16px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 25px 20px; text-align: center; }
-    .profile-badge-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+    
+    /* ⚡ ANIMASI BADGE MENGAMBANG */
+    .profile-badge-img { 
+      width: 100px; 
+      height: 100px; 
+      object-fit: contain; 
+      margin-bottom: 10px; 
+      animation: floatBadge 3s ease-in-out infinite; 
+    }
+    @keyframes floatBadge {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
     .profile-level-title { font-size: 22px; font-weight: 800; color: var(--teks); margin-bottom: 2px; }
     .profile-level-desc { font-size: 12px; color: var(--teks-muted); margin-bottom: 15px; }
     .profile-points-box { display: inline-block; background: #f0fdf4; color: #166534; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 16px; border: 1px solid #bbf7d0; margin-bottom: 20px; }
@@ -327,9 +341,6 @@
           <button class="btn-action purple" onclick="bukaLacak()">Lacak</button>
           <button class="btn-action yellow" onclick="bukaHargaSampah()">Harga Sampah</button>
           <button class="btn-action" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarBank()">Daftar Bank</button>
-          
-          <!-- TOMBOL KHUSUS ADMIN UNTUK TAMBAH TPS -->
-          <button class="btn-action" id="adminTpsBtn" style="display:none; background:#fef08a; color:#854d0e; border-color:#fde047;" onclick="bukaFormTambahTPS()">+ Tambah TPS (Admin)</button>
         </div>
 
         <div class="search-filter-bar">
@@ -337,7 +348,6 @@
           <button class="btn-filter-open" onclick="bukaFilter()">Filter</button>
         </div>
 
-        <!-- LEGENDA WARNA MARKER -->
         <div style="padding: 0 16px 8px 16px; display: flex; gap: 12px; font-size: 10px; color: #64748b; font-weight: bold; flex-wrap: wrap;">
             <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#3b82f6; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> TPS</div>
             <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#10b981; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Bank Sampah</div>
@@ -849,14 +859,12 @@ async function ambilDataUser() {
     document.getElementById('optBankSampah').style.display = 'block'; 
     document.getElementById('divKategoriAdmin').style.display = 'block'; 
     document.getElementById('divStatus').style.display = 'block'; 
-    document.getElementById('adminTpsBtn').style.display = 'flex'; // Tampilkan Tombol Admin
   }
   else { 
     isAdmin = false; 
     document.getElementById('optBankSampah').style.display = 'none'; 
     document.getElementById('divKategoriAdmin').style.display = 'none'; 
     document.getElementById('divStatus').style.display = 'none'; 
-    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan Tombol Admin
     document.getElementById('inKategori').value = 'krisis'; 
     ubahFormKategori(); 
   }
@@ -875,7 +883,6 @@ function updateUIProfil() {
     if (isAdmin) { document.getElementById('divPoinBox').style.display = 'none'; document.getElementById('divProgressContainer').style.display = 'none'; } else { document.getElementById('divPoinBox').style.display = 'inline-block'; document.getElementById('divProgressContainer').style.display = 'block'; }
   } else { 
     divBelum.style.display = 'block'; divSudah.style.display = 'none'; 
-    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan Tombol Admin saat logout
   }
 }
 function renderProfilLencana() {
@@ -1112,26 +1119,6 @@ function bukaEdit(id) {
   document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
   document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
-}
-
-function bukaFormTambahTPS() {
-  if (!isAdmin) return;
-  document.getElementById('formLaporan').reset(); 
-  document.getElementById('judulForm').innerText = "Tambah Tempat Sampah (TPS)"; 
-  document.getElementById('editId').value = "";
-  document.getElementById('inKategori').value = 'fasilitas'; 
-  ubahFormKategori();
-  document.getElementById('inFoto').required = false; 
-  document.getElementById('labelFotoWajib').style.display = 'none'; 
-  document.getElementById('infoFotoLama').style.display = 'none'; 
-  document.getElementById('divStatus').style.display = 'none';
-  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
-  document.getElementById('inNama').value = "";
-  
-  document.getElementById('divKategoriAdmin').style.display = 'none'; 
-  
-  updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); 
-  document.getElementById('modalLapor').style.display = 'flex';
 }
 
 document.getElementById('laporBtn').onclick = function() {
