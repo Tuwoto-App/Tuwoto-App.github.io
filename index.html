@@ -341,6 +341,9 @@
           <button class="btn-action purple" onclick="bukaLacak()">Lacak</button>
           <button class="btn-action yellow" onclick="bukaHargaSampah()">Harga Sampah</button>
           <button class="btn-action" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarBank()">Daftar Bank</button>
+          
+          <!-- TOMBOL KHUSUS ADMIN UNTUK TAMBAH TPS -->
+          <button class="btn-action" id="adminTpsBtn" style="display:none; background:#fef08a; color:#854d0e; border-color:#fde047;" onclick="bukaDaftarTPS()">Daftar TPS</button>
         </div>
 
         <div class="search-filter-bar">
@@ -508,6 +511,36 @@
   </div>
 </div>
 
+<!-- MODAL DAFTAR TPS (KHUSUS ADMIN) -->
+<div id="modalDaftarTPS" class="modal-overlay" onclick="if(event.target===this) tutupDaftarTPS()">
+  <div class="modal-content" style="text-align: left;">
+    <h2 style="text-align: center;">Tambah Tempat Sampah (TPS)</h2>
+    <form id="formDaftarTPS">
+      <div class="form-group"><label>Nama Lokasi TPS</label><input type="text" id="tpsNama" required placeholder="Contoh: TPS Pasar Sentral"></div>
+      <div class="form-group"><label>Kecamatan</label><input type="text" id="tpsKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan"></div>
+      <div class="form-group">
+        <label>Ukuran TPS</label>
+        <select id="tpsUkuran" required>
+          <option value="Kecil">Kecil</option>
+          <option value="Sedang" selected>Sedang</option>
+          <option value="Besar">Besar</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lokasi Koordinat</label>
+        <button type="button" onclick="ambilLokasiTPS()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; font-weight:bold;">Ambil Titik Lokasi</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="number" step="any" id="tpsLat" required placeholder="Lat" style="flex:1;">
+          <input type="number" step="any" id="tpsLng" required placeholder="Lng" style="flex:1;">
+        </div>
+      </div>
+      <div class="form-group"><label>Catatan Tambahan (Opsional)</label><input type="text" id="tpsCatatan" placeholder="Contoh: Buka 24 Jam"></div>
+      <button type="submit" class="btn-submit" id="btnKirimTPS">Simpan Data TPS</button>
+      <button type="button" class="btn-cancel" onclick="tutupDaftarTPS()">Batal</button>
+    </form>
+  </div>
+</div>
+
 <div id="modalConfirm" class="modal-overlay">
   <div class="modal-content" style="max-width: 320px; padding: 25px 20px;">
     <h2 id="confirmTitle">Konfirmasi</h2>
@@ -524,18 +557,10 @@
     <h2 style="text-align: center;" id="judulForm">Lapor Cepat</h2>
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
-      
-      <!-- KATEGORI ADMIN (MUNCUL DI SINI) -->
-      <div class="form-group" id="divKategoriAdmin" style="display:none;">
-        <label>Kategori Data (Admin)</label>
-        <select id="inKategori" style="display:none;">
-          <option value="krisis">Krisis Sampah</option>
-          <option value="fasilitas">Tambah Tempat Sampah</option>
-          <option value="bank_sampah" id="optBankSampah">Bank Sampah</option>
-        </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
-      </div>
-      
+      <!-- Hidden Inputs for Logic Compatibility -->
+      <input type="hidden" id="inKategori" value="krisis">
+      <input type="hidden" id="inStatus" value="Belum Ditangani">
+
       <div class="form-group">
         <label>Foto Bukti <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
         <input type="file" id="inFoto" accept="image/*" style="padding: 10px; border: 1px dashed #cbd5e1;">
@@ -556,41 +581,40 @@
         <input type="text" id="inKecamatan">
         <input type="text" id="inWilayah" value="Kota Gorontalo">
       </div>
-      <div class="form-group" id="divJenisSampah">
-        <label>Jenis Sampah (Opsional)</label>
-        <select id="inJenis" style="display:none;">
-          <option value="Campuran">Pilih jika tahu</option>
-          <option value="Plastik">Plastik</option>
-          <option value="Kertas & Kardus">Kertas & Kardus</option>
-          <option value="Logam & Kaleng">Logam & Kaleng</option>
-          <option value="Kaca">Kaca</option>
-          <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
-          <option value="Karet">Karet</option>
-        </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">Campuran (Default)</div>
+      
+      <!-- Tampilan Form Krisis -->
+      <div id="divKrisisFields">
+        <div class="form-group" id="divJenisSampah">
+          <label>Jenis Sampah (Opsional)</label>
+          <select id="inJenis" style="display:none;">
+            <option value="Campuran">Pilih jika tahu</option>
+            <option value="Plastik">Plastik</option>
+            <option value="Kertas & Kardus">Kertas & Kardus</option>
+            <option value="Logam & Kaleng">Logam & Kaleng</option>
+            <option value="Kaca">Kaca</option>
+            <option value="Elektronik (E-Waste)">Elektronik (E-Waste)</option>
+            <option value="Karet">Karet</option>
+          </select>
+          <div class="custom-select-trigger" onclick="openCustomSelect('inJenis', 'Pilih Jenis Sampah')" id="inJenis_display">Campuran (Default)</div>
+        </div>
+        <div class="form-group" id="divKritis">
+          <label id="labelKritis">Tingkat Kekritisan</label>
+          <select id="inKritis" style="display:none;">
+            <option value="Tinggi">Tinggi</option>
+            <option value="Sedang" selected>Sedang (Default)</option>
+            <option value="Rendah">Rendah</option>
+          </select>
+          <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Sedang (Default)</div>
+        </div>
       </div>
-      <div class="form-group" id="divKritis">
-        <label id="labelKritis">Tingkat Kekritisan</label>
-        <select id="inKritis" style="display:none;">
-          <option value="Tinggi">Tinggi</option>
-          <option value="Sedang" selected>Sedang (Default)</option>
-          <option value="Rendah">Rendah</option>
-        </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Sedang (Default)</div>
-      </div>
-      <div class="form-group" id="divStatus" style="display:none;">
-        <label>Status Penanganan (Admin)</label>
-        <select id="inStatus" style="display:none;">
-          <option value="Belum Ditangani">Belum Ditangani</option>
-          <option value="Sudah Ditangani">Sudah Ditangani</option>
-        </select>
-        <div class="custom-select-trigger" onclick="openCustomSelect('inStatus', 'Pilih Status')" id="inStatus_display">Belum Ditangani</div>
-      </div>
+
+      <!-- Tampilan Form Bank Sampah (Untuk Edit) -->
       <div id="divBankSampah" style="display:none;">
         <div class="form-group"><label>Jam Operasional</label><input type="text" id="inJam" placeholder="Senin-Sabtu 08-16"></div>
         <div class="form-group"><label>Kontak</label><input type="text" id="inKontak" placeholder="0812-xxxx"></div>
         <div class="form-group"><label>Jenis Diterima</label><input type="text" id="inJenisDiterima" placeholder="Plastik, Kertas"></div>
       </div>
+
       <div class="form-group">
         <label>Catatan</label>
         <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari"></textarea>
@@ -806,6 +830,36 @@ function tutupHarga() { document.getElementById('modalHarga').style.display = 'n
 function bukaDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'flex'; }
 function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'none'; }
 
+// ============ FUNGSI DAFTAR TPS KHUSUS ADMIN ============
+function bukaDaftarTPS() { document.getElementById('modalDaftarTPS').style.display = 'flex'; }
+function tutupDaftarTPS() { document.getElementById('modalDaftarTPS').style.display = 'none'; }
+function ambilLokasiTPS() {
+  if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos) { document.getElementById('tpsLat').value = pos.coords.latitude; document.getElementById('tpsLng').value = pos.coords.longitude; showToast("Lokasi diambil!", "success"); }); }
+}
+
+document.getElementById('formDaftarTPS').onsubmit = async function(e) {
+  e.preventDefault(); const btn = document.getElementById('btnKirimTPS'); btn.textContent = "Menyimpan..."; btn.disabled = true;
+  const dataTPS = {
+    nama: document.getElementById('tpsNama').value,
+    lat: parseFloat(document.getElementById('tpsLat').value),
+    lng: parseFloat(document.getElementById('tpsLng').value),
+    wilayah: "Kota Gorontalo",
+    kecamatan: document.getElementById('tpsKecamatan').value,
+    kategori: 'fasilitas',
+    kritis: document.getElementById('tpsUkuran').value, // Ukuran
+    jenis: '-',
+    status: 'Sudah Ditangani',
+    is_approved: true,
+    catatan: document.getElementById('tpsCatatan').value,
+    alamat: "-",
+    foto: 'https://via.placeholder.com/400x200?text=TPS',
+    jumlah_dukungan: 0
+  };
+  const res = await supabaseClient.from('titik_sampah').insert([dataTPS]);
+  if (res.error) { showToast("Gagal: " + res.error.message, "error"); btn.textContent = "Simpan Data TPS"; btn.disabled = false; }
+  else { showToast("TPS berhasil ditambahkan!", "success"); tutupDaftarTPS(); btn.textContent = "Simpan Data TPS"; btn.disabled = false; document.getElementById('formDaftarTPS').reset(); ambilData(); }
+};
+
 function ambilLokasiBank() {
   if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos) { document.getElementById('bankLat').value = pos.coords.latitude; document.getElementById('bankLng').value = pos.coords.longitude; showToast("Lokasi diambil!", "success"); }); }
 }
@@ -859,7 +913,6 @@ async function ambilDataUser() {
   
   if (res.data) { 
     currentUserPoints = res.data.total_poin; 
-    // ⚡ PERBAIKAN: Ubah ke huruf kecil semua agar tidak error jika di DB tertulis "Admin"
     currentUserRole = res.data.role ? String(res.data.role).toLowerCase() : 'warga'; 
   } else { 
     currentUserPoints = 0; 
@@ -868,17 +921,11 @@ async function ambilDataUser() {
   
   if (currentUserRole === 'admin') { 
     isAdmin = true; 
-    document.getElementById('optBankSampah').style.display = 'block'; 
-    document.getElementById('divKategoriAdmin').style.display = 'block'; 
-    document.getElementById('divStatus').style.display = 'block'; 
+    document.getElementById('adminTpsBtn').style.display = 'flex'; // Tampilkan Tombol Admin TPS
   }
   else { 
     isAdmin = false; 
-    document.getElementById('optBankSampah').style.display = 'none'; 
-    document.getElementById('divKategoriAdmin').style.display = 'none'; 
-    document.getElementById('divStatus').style.display = 'none'; 
-    document.getElementById('inKategori').value = 'krisis'; 
-    ubahFormKategori(); 
+    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan Tombol Admin TPS
   }
   ambilData();
 }
@@ -895,6 +942,7 @@ function updateUIProfil() {
     if (isAdmin) { document.getElementById('divPoinBox').style.display = 'none'; document.getElementById('divProgressContainer').style.display = 'none'; } else { document.getElementById('divPoinBox').style.display = 'inline-block'; document.getElementById('divProgressContainer').style.display = 'block'; }
   } else { 
     divBelum.style.display = 'block'; divSudah.style.display = 'none'; 
+    document.getElementById('adminTpsBtn').style.display = 'none'; // Sembunyikan saat logout
   }
 }
 function renderProfilLencana() {
@@ -982,7 +1030,7 @@ function renderLeaderboard() {
   panel.innerHTML = sorted.map(function(item, i) { return '<div class="leaderboard-item"><div class="leaderboard-rank ' + (i===0?'gold':i===1?'silver':i===2?'bronze':'') + '">' + (i+1) + '</div><div class="leaderboard-name">Kec. ' + item[0] + '</div><div class="leaderboard-score">' + item[1] + ' Selesai</div></div>'; }).join('');
 }
 
-// ⚡ FUNGSI KOMPRES GAMBAR YANG SUDAH DIPERBAIKI (ANTI-STUCK)
+// ⚡ FUNGSI KOMPRES GAMBAR
 function kompresGambar(file) {
   return new Promise(function(resolve, reject) {
     if (!file.type.startsWith('image/')) { reject(new Error("File bukan gambar valid.")); return; }
@@ -1013,24 +1061,12 @@ function kompresGambar(file) {
 }
 
 function ubahFormKategori() {
-  const kat = document.getElementById('inKategori').value; const selectKritis = document.getElementById('inKritis'); const divJenis = document.getElementById('divJenisSampah'); const divBank = document.getElementById('divBankSampah');
-  divJenis.style.display = 'none'; divBank.style.display = 'none';
-  if (kat === 'fasilitas') { 
-    document.getElementById('inJenis').required = false; 
-    document.getElementById('labelKritis').innerText = "Ukuran"; 
-    selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
-  }
-  else if (kat === 'bank_sampah') { 
-    document.getElementById('inJenis').required = false; 
+  const kat = document.getElementById('inKategori').value; const selectKritis = document.getElementById('inKritis'); const divKrisis = document.getElementById('divKrisisFields'); const divBank = document.getElementById('divBankSampah');
+  divKrisis.style.display = 'block'; divBank.style.display = 'none';
+  
+  if (kat === 'bank_sampah') { 
+    divKrisis.style.display = 'none'; 
     divBank.style.display = 'block'; 
-    document.getElementById('labelKritis').innerText = "Kapasitas"; 
-    selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
-  }
-  else { 
-    document.getElementById('inJenis').required = true; 
-    divJenis.style.display = 'block'; 
-    document.getElementById('labelKritis').innerText = "Kekritisan"; 
-    selectKritis.innerHTML = '<option>Tinggi</option><option selected>Sedang</option><option>Rendah</option>'; 
   }
   updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis');
 }
@@ -1133,22 +1169,23 @@ function bukaEdit(id) {
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
-// ⚡ FUNGSI TOMBOL LAPOR (MUNCULKAN KATEGORI KHUSUS ADMIN)
+// ⚡ FUNGSI TOMBOL LAPOR (HANYA UNTUK KRISIS SAMPAH)
 document.getElementById('laporBtn').onclick = function() {
-  document.getElementById('formLaporan').reset(); document.getElementById('judulForm').innerText = "Lapor Cepat"; document.getElementById('editId').value = "";
-  document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
-  document.getElementById('inFoto').required = true; document.getElementById('labelFotoWajib').style.display = 'inline'; document.getElementById('infoFotoLama').style.display = 'none'; document.getElementById('divStatus').style.display = 'none';
+  document.getElementById('formLaporan').reset(); 
+  document.getElementById('judulForm').innerText = "Lapor Cepat (Krisis Sampah)"; 
+  document.getElementById('editId').value = "";
+  document.getElementById('inKategori').value = 'krisis'; // Paksa jadi krisis
+  ubahFormKategori();
+  document.getElementById('inFoto').required = true; 
+  document.getElementById('labelFotoWajib').style.display = 'inline'; 
+  document.getElementById('infoFotoLama').style.display = 'none'; 
+  document.getElementById('divStatus').style.display = 'none';
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
-  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } document.getElementById('inNama').value = "";
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
+  document.getElementById('inNama').value = "";
   
-  // Tampilkan/Sembunyikan dropdown kategori admin
-  if (isAdmin) {
-    document.getElementById('divKategoriAdmin').style.display = 'block'; 
-  } else {
-    document.getElementById('divKategoriAdmin').style.display = 'none'; 
-  }
-  
-  updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
+  updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); 
+  document.getElementById('modalLapor').style.display = 'flex';
 };
 
 function tutupModal() { document.getElementById('modalLapor').style.display = 'none'; if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } }
@@ -1171,27 +1208,26 @@ function mulaiPilihPeta() {
   document.getElementById('app').appendChild(btnKonfirm);
 }
 
-// ⚡ FORM SUBMIT YANG SUDAH DIPERBAIKI (ERROR HANDLING + ANTI-CHEAT WARGA)
+// ⚡ FORM SUBMIT LAPOR (DI-SIMPLIFIKASI KARENA HANYA UNTUK KRISIS/BANK)
 document.getElementById('formLaporan').onsubmit = async function(e) {
   e.preventDefault();
   
-  // PENGAMAN: Cegah warga menambahkan TPS lewat cara curang (inspect element)
-  const cekKategori = document.getElementById('inKategori').value;
-  if (cekKategori === 'fasilitas' && !isAdmin) {
-    showToast("Akses ditolak! Hanya Admin yang bisa menambah TPS.", "error");
-    return; 
-  }
-
   if (!document.getElementById('inNama').value) { showToast("Ambil lokasi dulu", "warning"); return; }
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
-  const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); const kategori = document.getElementById('inKategori').value;
+  const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); 
+  const kategori = document.getElementById('inKategori').value; // Ini akan bernilai 'krisis' atau 'bank_sampah' (saat edit)
+  
   btn.textContent = 'Memproses...'; btn.disabled = true;
   let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false, dukunganValue = 0;
+  
   if (isEditMode) {
     const lama = dataTitik.find(function(t) { return t.id == editId; });
     if (lama) { fotoUrl = lama.foto; isApprovedValue = lama.is_approved; dukunganValue = lama.jumlah_dukungan || 0; }
     statusValue = document.getElementById('inStatus').value;
-  } else { if (isAdmin) isApprovedValue = true; }
+  } else { 
+    if (isAdmin) isApprovedValue = true; 
+  }
+  
   try {
     if (fileInput.files.length > 0) {
       if (fileInput.files[0].size > 15 * 1024 * 1024) { throw new Error("Ukuran gambar terlalu besar (Maks 15MB)."); }
@@ -1204,14 +1240,37 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
       if (upload.error) throw upload.error;
       const urlData = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName); fotoUrl = urlData.data.publicUrl;
     }
+    
     const dataBaru = {
-      nama: document.getElementById('inNama').value, lat: parseFloat(document.getElementById('inLat').value), lng: parseFloat(document.getElementById('inLng').value), wilayah: document.getElementById('inWilayah').value, kecamatan: document.getElementById('inKecamatan').value, jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), kritis: document.getElementById('inKritis').value, kategori: kategori, status: statusValue, is_approved: isApprovedValue, catatan: document.getElementById('inCatatan').value, alamat: "-", foto: fotoUrl, user_id: currentUser ? currentUser.id : null, jumlah_dukungan: dukunganValue 
+      nama: document.getElementById('inNama').value, 
+      lat: parseFloat(document.getElementById('inLat').value), 
+      lng: parseFloat(document.getElementById('inLng').value), 
+      wilayah: document.getElementById('inWilayah').value, 
+      kecamatan: document.getElementById('inKecamatan').value, 
+      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : document.getElementById('inJenis').value, 
+      kritis: document.getElementById('inKritis').value, 
+      kategori: kategori, 
+      status: statusValue, 
+      is_approved: isApprovedValue, 
+      catatan: document.getElementById('inCatatan').value, 
+      alamat: "-", 
+      foto: fotoUrl, 
+      user_id: currentUser ? currentUser.id : null, 
+      jumlah_dukungan: dukunganValue 
     };
-    if (kategori === 'bank_sampah') { dataBaru.jam_operasional = document.getElementById('inJam').value || null; dataBaru.kontak = document.getElementById('inKontak').value || null; dataBaru.jenis_diterima = document.getElementById('inJenisDiterima').value || null; }
+    
+    if (kategori === 'bank_sampah') { 
+      dataBaru.jam_operasional = document.getElementById('inJam').value || null; 
+      dataBaru.kontak = document.getElementById('inKontak').value || null; 
+      dataBaru.jenis_diterima = document.getElementById('inJenisDiterima').value || null; 
+    }
+    
     const result = isEditMode ? await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId) : await supabaseClient.from('titik_sampah').insert([dataBaru]);
     if (result.error) throw result.error;
+    
     if (!isEditMode && currentUser && !isAdmin) await tambahPoinKeDB(10);
     showToast(isEditMode ? "Diperbarui" : "Dikirim! Menunggu ACC", "success");
+    
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
     tutupModal(); ambilData();
   } catch (err) { 
@@ -1226,7 +1285,7 @@ let qrGenerated = false;
 function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { new QRCode(document.getElementById("qrcode"), { text: "https://tuwoto-app.github.io/", width: 200, height: 200 }); qrGenerated = true; } tutupFilter(); }
 function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
 
-// ⚡ FUNGSI AMBIL DATA (WARGA LIHAT PENDING SENDIRI, TAPI BUKAN PENDING ORANG LAIN)
+// ⚡ FUNGSI AMBIL DATA
 async function ambilData() {
   try {
     let query = supabaseClient.from('titik_sampah').select('*');
