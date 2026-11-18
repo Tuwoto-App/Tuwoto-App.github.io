@@ -342,8 +342,8 @@
           <button class="btn-action yellow" onclick="bukaHargaSampah()">Harga Sampah</button>
           <button class="btn-action" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarBank()">Daftar Bank</button>
           
-          <!-- TOMBOL KHUSUS ADMIN UNTUK TAMBAH TPS -->
-          <button class="btn-action" id="adminTpsBtn" style="display:none; background:#fef08a; color:#854d0e; border-color:#fde047;" onclick="bukaDaftarTPS()">Daftar TPS</button>
+          <!-- TOMBOL KHUSUS ADMIN UNTUK TAMBAH TPS (WARNA DISAMAKAN) -->
+          <button class="btn-action" id="adminTpsBtn" style="display:none; background:#e0f2fe; color:#0369a1; border-color:#bae6fd;" onclick="bukaDaftarTPS()">Daftar TPS</button>
         </div>
 
         <div class="search-filter-bar">
@@ -1164,7 +1164,7 @@ function bukaEdit(id) {
   if (data.kategori === 'krisis') document.getElementById('inJenis').value = data.jenis;
   document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
   if (data.kategori === 'bank_sampah') { document.getElementById('inJam').value = data.jam_operasional || ''; document.getElementById('inKontak').value = data.kontak || ''; document.getElementById('inJenisDiterima').value = data.jenis_diterima || ''; }
-  document.getElementById('divStatus').style.display = 'block'; document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
+  document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
   document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
@@ -1179,7 +1179,6 @@ document.getElementById('laporBtn').onclick = function() {
   document.getElementById('inFoto').required = true; 
   document.getElementById('labelFotoWajib').style.display = 'inline'; 
   document.getElementById('infoFotoLama').style.display = 'none'; 
-  document.getElementById('divStatus').style.display = 'none';
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
   document.getElementById('inNama').value = "";
