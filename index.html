@@ -200,6 +200,8 @@
     .btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
     #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
     #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+    #tpsLocBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+    #tpsPickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
     #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
 
     .custom-select-trigger { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; background: white; color: var(--teks); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
@@ -516,7 +518,7 @@
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center;">Tambah Tempat Sampah (TPS)</h2>
     <form id="formDaftarTPS">
-      <div class="form-group"><label>Nama Lokasi TPS</label><input type="text" id="tpsNama" required placeholder="Contoh: TPS Pasar Sentral"></div>
+      <div class="form-group"><label>Nama Lokasi TPS</label><input type="text" id="tpsNamaAsli" required placeholder="Contoh: TPS Pasar Sentral"></div>
       <div class="form-group"><label>Kecamatan</label><input type="text" id="tpsKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan"></div>
       <div class="form-group">
         <label>Ukuran TPS</label>
@@ -526,14 +528,21 @@
           <option value="Besar">Besar</option>
         </select>
       </div>
+      
       <div class="form-group">
-        <label>Lokasi Koordinat</label>
-        <button type="button" onclick="ambilLokasiTPS()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; font-weight:bold;">Ambil Titik Lokasi</button>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="number" step="any" id="tpsLat" required placeholder="Lat" style="flex:1;">
-          <input type="number" step="any" id="tpsLng" required placeholder="Lng" style="flex:1;">
-        </div>
+        <label>Lokasi</label>
+        <button type="button" id="tpsLocBtn" onclick="ambilLokasiGPS_TPS()" style="padding:12px; font-size:14px;">Ambil Lokasi GPS</button>
+        <button type="button" id="tpsPickMapBtn" onclick="mulaiPilihPeta_TPS()" style="padding:12px; font-size:14px; margin-top:6px;">Pilih Manual di Peta</button>
       </div>
+      <div class="form-group">
+        <label>Nama Jalan (Otomatis)</label>
+        <input type="text" id="tpsNamaJalan" required placeholder="Mendeteksi lokasi..." readonly style="background:#e2e8f0; font-weight:bold; border:none;">
+      </div>
+      <div style="display:none;">
+        <input type="number" step="any" id="tpsLat">
+        <input type="number" step="any" id="tpsLng">
+      </div>
+
       <div class="form-group"><label>Catatan Tambahan (Opsional)</label><input type="text" id="tpsCatatan" placeholder="Contoh: Buka 24 Jam"></div>
       <button type="submit" class="btn-submit" id="btnKirimTPS">Simpan Data TPS</button>
       <button type="button" class="btn-cancel" onclick="tutupDaftarTPS()">Batal</button>
@@ -557,9 +566,17 @@
     <h2 style="text-align: center;" id="judulForm">Lapor Cepat</h2>
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
-      <!-- Hidden Inputs for Logic Compatibility -->
-      <input type="hidden" id="inKategori" value="krisis">
-      <input type="hidden" id="inStatus" value="Belum Ditangani">
+      
+      <!-- KATEGORI DROPDOWN (HANYA MUNCUL UNTUK ADMIN) -->
+      <div class="form-group" id="divKategoriAdmin" style="display:none;">
+        <label>Kategori Data (Admin)</label>
+        <select id="inKategori" style="display:none;">
+          <option value="krisis">Krisis Sampah</option>
+          <option value="fasilitas">Tambah Tempat Sampah</option>
+          <option value="bank_sampah" id="optBankSampah">Bank Sampah</option>
+        </select>
+        <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
+      </div>
 
       <div class="form-group">
         <label>Foto Bukti <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
@@ -580,6 +597,7 @@
         <input type="number" step="any" id="inLng">
         <input type="text" id="inKecamatan">
         <input type="text" id="inWilayah" value="Kota Gorontalo">
+        <input type="text" id="inStatus" value="Belum Ditangani">
       </div>
       
       <!-- Tampilan Form Krisis -->
@@ -805,6 +823,26 @@ function reverseGeocode(lat, lng) {
   }).catch(function() { inputNama.value = "Lokasi Dipilih"; });
 }
 function updateKoordinat(lat, lng) { document.getElementById('inLat').value = lat.toFixed(6); document.getElementById('inLng').value = lng.toFixed(6); reverseGeocode(lat, lng); }
+
+// REVERSE GEOCODE UNTUK TPS
+function reverseGeocode_TPS(lat, lng) {
+  const inputNama = document.getElementById('tpsNamaJalan'); inputNama.value = "Mendeteksi...";
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', { headers: { 'Accept-Language': 'id' } })
+  .then(function(res) { return res.json(); }).then(function(data) {
+    if (data && data.address) {
+      let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Dipilih";
+      let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
+      inputNama.value = namaLokasi; 
+      if (kecamatan && !document.getElementById('tpsKecamatan').value) document.getElementById('tpsKecamatan').value = kecamatan;
+    }
+  }).catch(function() { inputNama.value = "Lokasi Dipilih"; });
+}
+function updateKoordinat_TPS(lat, lng) { 
+  document.getElementById('tpsLat').value = lat.toFixed(6); 
+  document.getElementById('tpsLng').value = lng.toFixed(6); 
+  reverseGeocode_TPS(lat, lng); 
+}
+
 function openCustomSelect(selectId, title) {
   const selectEl = document.getElementById(selectId); const currentVal = selectEl.value; let html = '';
   Array.from(selectEl.options).forEach(function(opt) {
@@ -831,34 +869,81 @@ function bukaDaftarBank() { document.getElementById('modalDaftarBank').style.dis
 function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'none'; }
 
 // ============ FUNGSI DAFTAR TPS KHUSUS ADMIN ============
-function bukaDaftarTPS() { document.getElementById('modalDaftarTPS').style.display = 'flex'; }
-function tutupDaftarTPS() { document.getElementById('modalDaftarTPS').style.display = 'none'; }
-function ambilLokasiTPS() {
-  if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos) { document.getElementById('tpsLat').value = pos.coords.latitude; document.getElementById('tpsLng').value = pos.coords.longitude; showToast("Lokasi diambil!", "success"); }); }
+function bukaDaftarTPS() { 
+  document.getElementById('formDaftarTPS').reset();
+  document.getElementById('modalDaftarTPS').style.display = 'flex'; 
+}
+function tutupDaftarTPS() { 
+  document.getElementById('modalDaftarTPS').style.display = 'none'; 
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+}
+
+function ambilLokasiGPS_TPS() {
+  if (navigator.geolocation) { 
+    navigator.geolocation.getCurrentPosition(function(pos) { 
+      updateKoordinat_TPS(pos.coords.latitude, pos.coords.longitude); 
+      showToast("Lokasi diambil!", "success"); 
+    }); 
+  }
+}
+
+function mulaiPilihPeta_TPS() {
+  document.getElementById('modalDaftarTPS').style.display = 'none'; 
+  showToast("Geser pin di peta", "info");
+  const lat = parseFloat(document.getElementById('tpsLat').value) || map.getCenter().lat; 
+  const lng = parseFloat(document.getElementById('tpsLng').value) || map.getCenter().lng;
+  
+  if (tempMarker) map.removeLayer(tempMarker);
+  tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin</b>").openPopup();
+  tempMarker.on('dragend', function(e) { const ll = e.target.getLatLng(); updateKoordinat_TPS(ll.lat, ll.lng); });
+  map.setView([lat, lng], 17);
+  
+  const btnKonfirm = document.createElement('button');
+  btnKonfirm.innerText = "Konfirmasi Lokasi";
+  btnKonfirm.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:#059669; color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
+  btnKonfirm.onclick = function() { 
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
+    btnKonfirm.remove(); 
+    document.getElementById('modalDaftarTPS').style.display = 'flex'; 
+  };
+  document.getElementById('app').appendChild(btnKonfirm);
 }
 
 document.getElementById('formDaftarTPS').onsubmit = async function(e) {
-  e.preventDefault(); const btn = document.getElementById('btnKirimTPS'); btn.textContent = "Menyimpan..."; btn.disabled = true;
+  e.preventDefault(); 
+  const btn = document.getElementById('btnKirimTPS'); 
+  btn.textContent = "Menyimpan..."; btn.disabled = true;
+  
   const dataTPS = {
-    nama: document.getElementById('tpsNama').value,
+    nama: document.getElementById('tpsNamaAsli').value + " (" + document.getElementById('tpsNamaJalan').value + ")",
     lat: parseFloat(document.getElementById('tpsLat').value),
     lng: parseFloat(document.getElementById('tpsLng').value),
     wilayah: "Kota Gorontalo",
     kecamatan: document.getElementById('tpsKecamatan').value,
     kategori: 'fasilitas',
-    kritis: document.getElementById('tpsUkuran').value, // Ukuran
+    kritis: document.getElementById('tpsUkuran').value, 
     jenis: '-',
     status: 'Sudah Ditangani',
     is_approved: true,
     catatan: document.getElementById('tpsCatatan').value,
-    alamat: "-",
+    alamat: document.getElementById('tpsNamaJalan').value,
     foto: 'https://via.placeholder.com/400x200?text=TPS',
     jumlah_dukungan: 0
   };
+  
   const res = await supabaseClient.from('titik_sampah').insert([dataTPS]);
-  if (res.error) { showToast("Gagal: " + res.error.message, "error"); btn.textContent = "Simpan Data TPS"; btn.disabled = false; }
-  else { showToast("TPS berhasil ditambahkan!", "success"); tutupDaftarTPS(); btn.textContent = "Simpan Data TPS"; btn.disabled = false; document.getElementById('formDaftarTPS').reset(); ambilData(); }
+  if (res.error) { 
+    showToast("Gagal: " + res.error.message, "error"); 
+    btn.textContent = "Simpan Data TPS"; btn.disabled = false; 
+  } else { 
+    showToast("TPS berhasil ditambahkan!", "success"); 
+    tutupDaftarTPS(); 
+    btn.textContent = "Simpan Data TPS"; btn.disabled = false; 
+    document.getElementById('formDaftarTPS').reset(); 
+    ambilData(); 
+  }
 };
+
 
 function ambilLokasiBank() {
   if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos) { document.getElementById('bankLat').value = pos.coords.latitude; document.getElementById('bankLng').value = pos.coords.longitude; showToast("Lokasi diambil!", "success"); }); }
@@ -1061,12 +1146,30 @@ function kompresGambar(file) {
 }
 
 function ubahFormKategori() {
-  const kat = document.getElementById('inKategori').value; const selectKritis = document.getElementById('inKritis'); const divKrisis = document.getElementById('divKrisisFields'); const divBank = document.getElementById('divBankSampah');
-  divKrisis.style.display = 'block'; divBank.style.display = 'none';
+  const kat = document.getElementById('inKategori').value; 
+  const selectKritis = document.getElementById('inKritis'); 
+  const divJenis = document.getElementById('divJenisSampah'); 
+  const divBank = document.getElementById('divBankSampah');
   
-  if (kat === 'bank_sampah') { 
-    divKrisis.style.display = 'none'; 
+  divJenis.style.display = 'block';
+  divBank.style.display = 'none';
+  
+  if (kat === 'fasilitas') { 
+    document.getElementById('inJenis').required = false; 
+    document.getElementById('labelKritis').innerText = "Ukuran"; 
+    selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
+    divJenis.style.display = 'none'; 
+  }
+  else if (kat === 'bank_sampah') { 
+    document.getElementById('inJenis').required = false; 
     divBank.style.display = 'block'; 
+    document.getElementById('labelKritis').innerText = "Kapasitas"; 
+    selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
+  }
+  else { 
+    document.getElementById('inJenis').required = true; 
+    document.getElementById('labelKritis').innerText = "Kekritisan"; 
+    selectKritis.innerHTML = '<option>Tinggi</option><option selected>Sedang</option><option>Rendah</option>'; 
   }
   updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis');
 }
@@ -1169,19 +1272,26 @@ function bukaEdit(id) {
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
-// ⚡ FUNGSI TOMBOL LAPOR (HANYA UNTUK KRISIS SAMPAH)
+// ⚡ FUNGSI TOMBOL LAPOR (KATEGORI KEMBALI)
 document.getElementById('laporBtn').onclick = function() {
   document.getElementById('formLaporan').reset(); 
-  document.getElementById('judulForm').innerText = "Lapor Cepat (Krisis Sampah)"; 
+  document.getElementById('judulForm').innerText = "Lapor Cepat"; 
   document.getElementById('editId').value = "";
-  document.getElementById('inKategori').value = 'krisis'; // Paksa jadi krisis
-  ubahFormKategori();
+  document.getElementById('inKategori').value = 'krisis'; ubahFormKategori();
   document.getElementById('inFoto').required = true; 
   document.getElementById('labelFotoWajib').style.display = 'inline'; 
   document.getElementById('infoFotoLama').style.display = 'none'; 
   document.getElementById('inJam').value = ''; document.getElementById('inKontak').value = ''; document.getElementById('inJenisDiterima').value = '';
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
   document.getElementById('inNama').value = "";
+  
+  // MUNCULKAN DROPDOWN JIKA ADMIN
+  if (isAdmin) {
+    document.getElementById('divKategoriAdmin').style.display = 'block';
+    document.getElementById('optBankSampah').style.display = 'block';
+  } else {
+    document.getElementById('divKategoriAdmin').style.display = 'none';
+  }
   
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); 
   document.getElementById('modalLapor').style.display = 'flex';
@@ -1207,14 +1317,20 @@ function mulaiPilihPeta() {
   document.getElementById('app').appendChild(btnKonfirm);
 }
 
-// ⚡ FORM SUBMIT LAPOR (DI-SIMPLIFIKASI KARENA HANYA UNTUK KRISIS/BANK)
+// ⚡ FORM SUBMIT LAPOR (ERROR HANDLING)
 document.getElementById('formLaporan').onsubmit = async function(e) {
   e.preventDefault();
   
+  const cekKategori = document.getElementById('inKategori').value;
+  if (cekKategori === 'fasilitas' && !isAdmin) {
+    showToast("Akses ditolak! Hanya Admin yang bisa menambah TPS.", "error");
+    return; 
+  }
+
   if (!document.getElementById('inNama').value) { showToast("Ambil lokasi dulu", "warning"); return; }
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
   const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); 
-  const kategori = document.getElementById('inKategori').value; // Ini akan bernilai 'krisis' atau 'bank_sampah' (saat edit)
+  const kategori = document.getElementById('inKategori').value;
   
   btn.textContent = 'Memproses...'; btn.disabled = true;
   let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false, dukunganValue = 0;
@@ -1246,7 +1362,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
       lng: parseFloat(document.getElementById('inLng').value), 
       wilayah: document.getElementById('inWilayah').value, 
       kecamatan: document.getElementById('inKecamatan').value, 
-      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : document.getElementById('inJenis').value, 
+      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
       kritis: document.getElementById('inKritis').value, 
       kategori: kategori, 
       status: statusValue, 
