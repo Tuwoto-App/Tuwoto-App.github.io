@@ -1234,7 +1234,7 @@ function renderSemua(filter) {
   if (toggleBank && !toggleBank.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'bank_sampah'; });
   
   let dataForMap = dataFilter.slice();
-  if (!toggleSel || !toggleSel.checked) dataForMap = dataForMap.filter(function(t) { return t.status !== 'Sudah Ditangani'; });
+  if (!toggleSel || !toggleSel.checked) dataForMap = dataForMap.filter(function(t) { return t.kategori !== 'krisis' || t.status !== 'Sudah Ditangani'; });
   
   if (currentSort === 'nama_asc') dataForMap.sort(function(a, b) { return (a.nama||'').localeCompare(b.nama||''); });
   else if (currentSort === 'kritis_tinggi') dataForMap.sort(function(a, b) { const r = function(k){return k==='Tinggi'?3:k==='Sedang'?2:1;}; return r(b.kritis) - r(a.kritis); });
