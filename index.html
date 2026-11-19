@@ -571,13 +571,13 @@
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
       
-      <!-- KATEGORI DROPDOWN (HANYA MUNCUL UNTUK ADMIN, TANPA BANK SAMPAH) -->
+      <!-- KATEGORI DROPDOWN (HANYA MUNCUL UNTUK ADMIN) -->
       <div class="form-group" id="divKategoriAdmin" style="display:none;">
         <label>Kategori Data (Admin)</label>
         <select id="inKategori" style="display:none;">
           <option value="krisis">Krisis Sampah</option>
-          <option value="tps">Tambah Tempat Pembuangan Akhir (TPA)</option>
-          <option value="fasilitas">Tambah Tempat Sampah (Biasa)</option>
+          <option value="fasilitas">Tambah Tempat Sampah</option>
+          <option value="tps" style="display:none;">TPA</option>
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
@@ -816,7 +816,7 @@ function reverseGeocode(lat, lng) {
       let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Dipilih";
       let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
       inputNama.value = namaLokasi; if (kecamatan) document.getElementById('inKecamatan').value = kecamatan;
-    }
+    } else { inputNama.value = "Lokasi Dipilih"; }
   }).catch(function() { inputNama.value = "Lokasi Dipilih"; });
 }
 function updateKoordinat(lat, lng) { document.getElementById('inLat').value = lat.toFixed(6); document.getElementById('inLng').value = lng.toFixed(6); reverseGeocode(lat, lng); }
@@ -831,7 +831,7 @@ function reverseGeocode_TPS(lat, lng) {
       let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
       inputNama.value = namaLokasi; 
       if (kecamatan && !document.getElementById('tpsKecamatan').value) document.getElementById('tpsKecamatan').value = kecamatan;
-    }
+    } else { inputNama.value = "Lokasi Dipilih"; }
   }).catch(function() { inputNama.value = "Lokasi Dipilih"; });
 }
 function updateKoordinat_TPS(lat, lng) { 
@@ -880,7 +880,7 @@ function ambilLokasiGPS_TPS() {
     navigator.geolocation.getCurrentPosition(function(pos) { 
       updateKoordinat_TPS(pos.coords.latitude, pos.coords.longitude); 
       showToast("Lokasi diambil!", "success"); 
-    }); 
+    }, function() { showToast("Gagal mengambil GPS", "error"); }); 
   }
 }
 
@@ -893,6 +893,7 @@ function mulaiPilihPeta_TPS() {
   if (tempMarker) map.removeLayer(tempMarker);
   tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin</b>").openPopup();
   tempMarker.on('dragend', function(e) { const ll = e.target.getLatLng(); updateKoordinat_TPS(ll.lat, ll.lng); });
+  updateKoordinat_TPS(lat, lng); // koordinat langsung terisi walau pin belum digeser
   map.setView([lat, lng], 17);
   
   const btnKonfirm = document.createElement('button');
@@ -908,6 +909,7 @@ function mulaiPilihPeta_TPS() {
 
 document.getElementById('formDaftarTPS').onsubmit = async function(e) {
   e.preventDefault(); 
+  if (!document.getElementById('tpsLat').value || !document.getElementById('tpsLng').value) { showToast("Lokasi belum diambil. Geser pin atau ambil GPS dulu.", "warning"); return; }
   const btn = document.getElementById('btnKirimTPS'); 
   btn.textContent = "Menyimpan..."; btn.disabled = true;
   
@@ -1234,6 +1236,7 @@ function renderSemua(filter) {
   if (toggleBank && !toggleBank.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'bank_sampah'; });
   
   let dataForMap = dataFilter.slice();
+  // PERBAIKAN: hanya laporan KRISIS yang selesai yang disembunyikan; TPA, tempat sampah, bank sampah selalu tampil
   if (!toggleSel || !toggleSel.checked) dataForMap = dataForMap.filter(function(t) { return t.kategori !== 'krisis' || t.status !== 'Sudah Ditangani'; });
   
   if (currentSort === 'nama_asc') dataForMap.sort(function(a, b) { return (a.nama||'').localeCompare(b.nama||''); });
@@ -1309,7 +1312,7 @@ function bukaEdit(id) {
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
-// TOMBOL LAPOR (BUG DIPERBAIKI: baris inJam / inKontak / inJenisDiterima sudah dihapus)
+// TOMBOL LAPOR
 document.getElementById('laporBtn').onclick = function() {
   document.getElementById('formLaporan').reset();
   document.getElementById('judulForm').innerText = "Lapor Cepat";
@@ -1337,6 +1340,7 @@ function mulaiPilihPeta() {
   if (tempMarker) map.removeLayer(tempMarker);
   tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin</b>").openPopup();
   tempMarker.on('dragend', function(e) { const ll = e.target.getLatLng(); updateKoordinat(ll.lat, ll.lng); });
+  updateKoordinat(lat, lng); // koordinat langsung terisi walau pin belum digeser
   map.setView([lat, lng], 17);
   const btnKonfirm = document.createElement('button');
   btnKonfirm.innerText = "Konfirmasi Lokasi";
@@ -1355,7 +1359,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
     return; 
   }
 
-  if (!document.getElementById('inNama').value) { showToast("Ambil lokasi dulu", "warning"); return; }
+  if (!document.getElementById('inNama').value || !document.getElementById('inLat').value || !document.getElementById('inLng').value) { showToast("Ambil lokasi dulu", "warning"); return; }
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
   const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); 
   const kategori = document.getElementById('inKategori').value;
@@ -1446,19 +1450,8 @@ if (typeof lucide !== 'undefined') lucide.createIcons();
 generateEduGrid(); renderSemua(currentFilter); cekSesiUser();
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, function(payload) { ambilData(); }).subscribe();
-
-// Rapikan pilihan kategori Lapor Cepat
-(function() {
-  const sel = document.getElementById('inKategori');
-  if (!sel) return;
-  Array.from(sel.options).forEach(function(o) {
-    if (o.value === 'tps') { o.style.display = 'none'; }
-    if (o.value === 'fasilitas') { o.text = 'Tambah Tempat Sampah'; }
-  });
-  updateSelectDisplay('inKategori');
-})(); 
 </script>
-    
+
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
