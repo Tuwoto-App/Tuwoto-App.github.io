@@ -143,7 +143,8 @@
     .badge.tinggi { background: var(--merah); }
     .badge.sedang { background: var(--kuning); }
     .badge.rendah { background: var(--hijau); }
-    .badge.fasilitas { background: var(--biru); }
+    .badge.fasilitas { background: #64748b; } /* Warna Abu-abu untuk Tempat Sampah RT */
+    .badge.tps { background: #3b82f6; } /* Warna Biru untuk TPS */
     .badge.bank-sampah { background: #10b981; }
     .badge-status { padding: 2px 6px; border-radius: 8px; font-size: 9px; font-weight: 700; }
     .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
@@ -176,7 +177,9 @@
     @keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     @keyframes pulse-bank { 0% { box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 0 0 0 rgba(16, 185, 129, 0.6); } 70% { box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 0 0 14px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 0 0 0 rgba(16, 185, 129, 0); } }
     
-    .marker-fasilitas { background: var(--biru); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    /* MARKER ICONS */
+    .marker-fasilitas { background: #64748b; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    .marker-tps { background: var(--biru); color: white; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 18px; }
     .marker-bank-sampah { background: #10b981; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); animation: pulse-bank 2s infinite; }
     
     .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
@@ -353,11 +356,12 @@
           <button class="btn-filter-open" onclick="bukaFilter()">Filter</button>
         </div>
 
+        <!-- LEGENDA WARNA MARKER (DIPERBARUI) -->
         <div style="padding: 0 16px 8px 16px; display: flex; gap: 12px; font-size: 10px; color: #64748b; font-weight: bold; flex-wrap: wrap;">
-            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#3b82f6; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> TPS</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:4px; background:#3b82f6; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> TPS</div>
+            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#64748b; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Tempat Sampah</div>
             <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#10b981; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Bank Sampah</div>
             <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#ef4444; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Krisis</div>
-            <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:50%; background:#94a3b8; border:1px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span> Pending</div>
         </div>
 
         <div class="list-title">Data Laporan</div>
@@ -456,6 +460,7 @@
     </div>
     <div style="text-align:left; margin-bottom:15px;">
       <h4 style="font-size:12px; margin-bottom:10px;">Tampilkan Data</h4>
+      <label style="display:flex; justify-content:space-between; margin-bottom:8px; cursor:pointer;"><span>TPS (Tempat Pembuangan)</span> <input type="checkbox" id="toggleTps" checked onchange="renderSemua(currentFilter)"></label>
       <label style="display:flex; justify-content:space-between; margin-bottom:8px; cursor:pointer;"><span>Tempat Sampah (RT/RW)</span> <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)"></label>
       <label style="display:flex; justify-content:space-between; margin-bottom:8px; cursor:pointer;"><span>Bank Sampah</span> <input type="checkbox" id="toggleBankSampah" checked onchange="renderSemua(currentFilter)"></label>
       <label style="display:flex; justify-content:space-between; margin-bottom:8px; cursor:pointer;"><span>Laporan Selesai</span> <input type="checkbox" id="toggleSelesai" onchange="renderSemua(currentFilter)"></label>
@@ -516,7 +521,7 @@
 <!-- MODAL DAFTAR TPS (KHUSUS ADMIN) -->
 <div id="modalDaftarTPS" class="modal-overlay" onclick="if(event.target===this) tutupDaftarTPS()">
   <div class="modal-content" style="text-align: left;">
-    <h2 style="text-align: center;">Tambah Tempat Sampah (TPS)</h2>
+    <h2 style="text-align: center;">Tambah Tempat Pembuangan Sampah (TPS)</h2>
     <form id="formDaftarTPS">
       <div class="form-group"><label>Nama Lokasi TPS</label><input type="text" id="tpsNamaAsli" required placeholder="Contoh: TPS Pasar Sentral"></div>
       <div class="form-group"><label>Kecamatan</label><input type="text" id="tpsKecamatan" list="listKecamatan" required placeholder="Pilih kecamatan"></div>
@@ -567,13 +572,13 @@
     <form id="formLaporan">
       <input type="hidden" id="editId" value="">
       
-      <!-- KATEGORI DROPDOWN (HANYA MUNCUL UNTUK ADMIN) -->
+      <!-- KATEGORI DROPDOWN (HANYA MUNCUL UNTUK ADMIN, TANPA BANK SAMPAH) -->
       <div class="form-group" id="divKategoriAdmin" style="display:none;">
         <label>Kategori Data (Admin)</label>
         <select id="inKategori" style="display:none;">
           <option value="krisis">Krisis Sampah</option>
-          <option value="fasilitas">Tambah Tempat Sampah</option>
-          <option value="bank_sampah" id="optBankSampah">Bank Sampah</option>
+          <option value="tps">Tambah Tempat Pembuangan (TPS)</option>
+          <option value="fasilitas">Tambah Tempat Sampah (Biasa)</option>
         </select>
         <div class="custom-select-trigger" onclick="openCustomSelect('inKategori', 'Pilih Kategori')" id="inKategori_display">Krisis Sampah</div>
       </div>
@@ -624,13 +629,6 @@
           </select>
           <div class="custom-select-trigger" onclick="openCustomSelect('inKritis', 'Pilih Kekritisan')" id="inKritis_display">Sedang (Default)</div>
         </div>
-      </div>
-
-      <!-- Tampilan Form Bank Sampah (Untuk Edit) -->
-      <div id="divBankSampah" style="display:none;">
-        <div class="form-group"><label>Jam Operasional</label><input type="text" id="inJam" placeholder="Senin-Sabtu 08-16"></div>
-        <div class="form-group"><label>Kontak</label><input type="text" id="inKontak" placeholder="0812-xxxx"></div>
-        <div class="form-group"><label>Jenis Diterima</label><input type="text" id="inJenisDiterima" placeholder="Plastik, Kertas"></div>
       </div>
 
       <div class="form-group">
@@ -920,7 +918,7 @@ document.getElementById('formDaftarTPS').onsubmit = async function(e) {
     lng: parseFloat(document.getElementById('tpsLng').value),
     wilayah: "Kota Gorontalo",
     kecamatan: document.getElementById('tpsKecamatan').value,
-    kategori: 'fasilitas',
+    kategori: 'tps', // ⚡ KATEGORI BARU UNTUK TPS
     kritis: document.getElementById('tpsUkuran').value, 
     jenis: '-',
     status: 'Sudah Ditangani',
@@ -1074,7 +1072,7 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 function cariTerdekat() {
   if (!navigator.geolocation) return; document.querySelector('.btn-action.blue').innerText = "Mencari...";
   navigator.geolocation.getCurrentPosition(function(pos) {
-    const fasilitas = dataTitik.filter(function(t) { return t.kategori === 'fasilitas' && t.is_approved !== false; });
+    const fasilitas = dataTitik.filter(function(t) { return t.kategori === 'tps' && t.is_approved !== false; }); // ⚡ HANYA MENCARI TPS
     document.querySelector('.btn-action.blue').innerText = "Cari TPS"; if (fasilitas.length === 0) { showToast("Belum ada TPS", "warning"); return; }
     let terdekat = null, jarakMin = Infinity;
     fasilitas.forEach(function(f) { const j = hitungJarak(pos.coords.latitude, pos.coords.longitude, parseFloat(f.lat), parseFloat(f.lng)); if (j < jarakMin) { jarakMin = j; terdekat = f; } });
@@ -1099,7 +1097,7 @@ function prosesLacak() {
   const hasil = dataTitik.filter(function(t) { return t.nama && t.nama.toLowerCase().indexOf(keyword) !== -1; });
   if (hasil.length === 0) { hasilContainer.innerHTML = '<p style="color:#ef4444;">Tidak ditemukan.</p>'; return; }
   hasilContainer.innerHTML = '';
-  hasil.forEach(function(t) { let statusText = t.kategori === 'bank_sampah' ? "Bank Sampah Aktif" : (t.is_approved === false ? "Pending" : (t.kategori === 'fasilitas' ? "Tempat Sampah" : (t.status || "Belum Ditangani"))); hasilContainer.innerHTML += '<div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px;"><div style="font-weight:bold;">' + t.nama + '</div><div style="font-size:12px;">Status: ' + statusText + '</div></div>'; });
+  hasil.forEach(function(t) { let statusText = t.kategori === 'bank_sampah' ? "Bank Sampah Aktif" : (t.is_approved === false ? "Pending" : (t.kategori === 'tps' ? "TPS" : (t.kategori === 'fasilitas' ? "Tempat Sampah" : (t.status || "Belum Ditangani")))); hasilContainer.innerHTML += '<div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px;"><div style="font-weight:bold;">' + t.nama + '</div><div style="font-size:12px;">Status: ' + statusText + '</div></div>'; });
 }
 function renderGrafik() {
   const canvas = document.getElementById('myChart'); if (!canvas) return; let hitungJenis = {};
@@ -1149,22 +1147,14 @@ function ubahFormKategori() {
   const kat = document.getElementById('inKategori').value; 
   const selectKritis = document.getElementById('inKritis'); 
   const divJenis = document.getElementById('divJenisSampah'); 
-  const divBank = document.getElementById('divBankSampah');
   
   divJenis.style.display = 'block';
-  divBank.style.display = 'none';
   
-  if (kat === 'fasilitas') { 
+  if (kat === 'fasilitas' || kat === 'tps') { 
     document.getElementById('inJenis').required = false; 
     document.getElementById('labelKritis').innerText = "Ukuran"; 
     selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
     divJenis.style.display = 'none'; 
-  }
-  else if (kat === 'bank_sampah') { 
-    document.getElementById('inJenis').required = false; 
-    divBank.style.display = 'block'; 
-    document.getElementById('labelKritis').innerText = "Kapasitas"; 
-    selectKritis.innerHTML = '<option>Kecil</option><option selected>Sedang</option><option>Besar</option>'; 
   }
   else { 
     document.getElementById('inJenis').required = true; 
@@ -1176,18 +1166,45 @@ function ubahFormKategori() {
 
 function buatMarker(titik) {
   const lat = parseFloat(titik.lat), lng = parseFloat(titik.lng); if (isNaN(lat) || isNaN(lng)) return null;
-  const isFas = titik.kategori === 'fasilitas', isBank = titik.kategori === 'bank_sampah';
+  const isTps = titik.kategori === 'tps', isFas = titik.kategori === 'fasilitas', isBank = titik.kategori === 'bank_sampah';
   const warnaClass = (titik.is_approved === false) ? 'pending' : (titik.kritis || 'rendah').toLowerCase();
-  let icon = isFas ? L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-fasilitas">' + svgTrash + '</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) : isBank ? L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-bank-sampah">' + svgBank + '</div>', iconSize: [32, 32], iconAnchor: [16, 16] }) : L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-pulse ' + warnaClass + '"></div>', iconSize: [20, 20], iconAnchor: [10, 10] });
+  
+  let icon;
+  if (isTps) {
+    // Ikon gedung untuk TPS
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-tps">🏢</div>', iconSize: [34, 34], iconAnchor: [17, 17] });
+  } else if (isFas) {
+    // Ikon tong sampah abu-abu untuk Tempat Sampah biasa
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-fasilitas">' + svgTrash + '</div>', iconSize: [26, 26], iconAnchor: [13, 13] });
+  } else if (isBank) {
+    // Ikon bank hijau
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-bank-sampah">' + svgBank + '</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+  } else {
+    // Ikon pulsa untuk Krisis
+    icon = L.divIcon({ className: 'custom-div-icon', html: '<div class="marker-pulse ' + warnaClass + '"></div>', iconSize: [20, 20], iconAnchor: [10, 10] });
+  }
+
   const fotoUrl = titik.foto || 'https://via.placeholder.com/400x200?text=Foto';
-  let popupContent = isFas ? '<div class="popup-row"><span>Tempat Sampah</span><span class="badge fasilitas">' + (titik.kritis||'') + '</span></div>' : isBank ? '<div class="popup-row"><span>Bank Sampah</span><span class="badge bank-sampah">' + (titik.kritis||'') + '</span></div>' + (titik.jam_operasional ? '<div class="popup-row"><span>Jam</span><b>' + titik.jam_operasional + '</b></div>' : '') + (titik.kontak ? '<div class="popup-row"><span>Kontak</span><b>' + titik.kontak + '</b></div>' : '') : '';
-  if (!isFas && !isBank) popupContent = '<div class="popup-row"><span>Jenis</span><b>' + (titik.jenis||'-') + '</b></div><div class="popup-row"><span>Kekritisan</span><span class="badge ' + warnaClass + '">' + titik.kritis + '</span></div>';
+  let popupContent = '';
+  
+  if (isTps) {
+    popupContent = '<div class="popup-row"><span>TPS (Pembuangan Akhir)</span><span class="badge tps">' + (titik.kritis||'') + '</span></div>';
+  } else if (isFas) {
+    popupContent = '<div class="popup-row"><span>Tempat Sampah</span><span class="badge fasilitas">' + (titik.kritis||'') + '</span></div>';
+  } else if (isBank) {
+    popupContent = '<div class="popup-row"><span>Bank Sampah</span><span class="badge bank-sampah">' + (titik.kritis||'') + '</span></div>' + (titik.jam_operasional ? '<div class="popup-row"><span>Jam</span><b>' + titik.jam_operasional + '</b></div>' : '') + (titik.kontak ? '<div class="popup-row"><span>Kontak</span><b>' + titik.kontak + '</b></div>' : '');
+  } else {
+    popupContent = '<div class="popup-row"><span>Jenis</span><b>' + (titik.jenis||'-') + '</b></div><div class="popup-row"><span>Kekritisan</span><span class="badge ' + warnaClass + '">' + titik.kritis + '</span></div>';
+  }
+
   let btnRute = `<button onclick="buatRute(${lat}, ${lng})" style="flex:1; padding:6px 0; background:#3b82f6; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">Rute</button>`;
   let btnShare = `<button onclick="shareKeWA('${(titik.nama||'').replace(/'/g, "\\'")}', '${titik.status||'Aktif'}')" style="flex:1; padding:6px 0; background:#25D366; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">WA</button>`;
-  let btnEdukasi = (!isFas && !isBank && titik.jenis) ? `<button onclick="bukaEdukasi('${titik.jenis}')" style="flex:1; padding:6px 0; background:#8b5cf6; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">Info</button>` : '';
+  let btnEdukasi = (!isTps && !isFas && !isBank && titik.jenis) ? `<button onclick="bukaEdukasi('${titik.jenis}')" style="flex:1; padding:6px 0; background:#8b5cf6; color:white; border:none; border-radius:6px; font-weight:bold; font-size:11px;">Info</button>` : '';
   const dukunganCount = titik.jumlah_dukungan || 0;
-  let btnDukung = (!isFas && !isBank) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
+  let btnDukung = (!isTps && !isFas && !isBank) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
+  
   const popupHTML = `<img class="popup-img" src="${fotoUrl}"><div class="popup-body"><div class="popup-title">${(titik.nama||'')}</div>${popupContent}<div style="display: flex; gap: 4px; margin-top: 8px;">${btnRute}${btnShare}${btnEdukasi}</div>${btnDukung}</div>`;
+  
   let marker = L.marker([lat, lng], { icon: icon }).bindPopup(popupHTML, { maxWidth: 270 });
   marker.on('popupopen', function() { if (typeof lucide !== 'undefined') lucide.createIcons(); }); return marker;
 }
@@ -1207,38 +1224,65 @@ function renderSemua(filter) {
   if (!filter) filter = 'all'; currentFilter = filter;
   cluster.clearLayers(); nonClusterMarkers.forEach(function(m) { map.removeLayer(m); }); nonClusterMarkers = []; markerMap.clear();
   const list = document.getElementById('list'); list.innerHTML = '';
+  
   let dataFilter = dataTitik.slice();
   if (filter !== 'all') dataFilter = dataFilter.filter(function(t) { return t.kategori === 'krisis' && t.kritis === filter; });
   if (currentSearch) dataFilter = dataFilter.filter(function(t) { return (t.nama && t.nama.toLowerCase().indexOf(currentSearch) !== -1) || (t.wilayah && t.wilayah.toLowerCase().indexOf(currentSearch) !== -1); });
-  const toggleFas = document.getElementById('toggleFasilitas'); const toggleBank = document.getElementById('toggleBankSampah'); const toggleSel = document.getElementById('toggleSelesai');
+  
+  const toggleTps = document.getElementById('toggleTps'); 
+  const toggleFas = document.getElementById('toggleFasilitas'); 
+  const toggleBank = document.getElementById('toggleBankSampah'); 
+  const toggleSel = document.getElementById('toggleSelesai');
+  
+  if (toggleTps && !toggleTps.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'tps'; });
   if (toggleFas && !toggleFas.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'fasilitas'; });
   if (toggleBank && !toggleBank.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'bank_sampah'; });
+  
   let dataForMap = dataFilter.slice();
   if (!toggleSel || !toggleSel.checked) dataForMap = dataForMap.filter(function(t) { return t.status !== 'Sudah Ditangani'; });
+  
   if (currentSort === 'nama_asc') dataForMap.sort(function(a, b) { return (a.nama||'').localeCompare(b.nama||''); });
   else if (currentSort === 'kritis_tinggi') dataForMap.sort(function(a, b) { const r = function(k){return k==='Tinggi'?3:k==='Sedang'?2:1;}; return r(b.kritis) - r(a.kritis); });
+  
   if (dataForMap.length === 0) list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;">Data tidak ditemukan.</p>';
   
   dataForMap.forEach(function(titik) {
     const marker = buatMarker(titik);
-    if (marker) { if (titik.kategori === 'krisis') cluster.addLayer(marker); else { map.addLayer(marker); nonClusterMarkers.push(marker); } markerMap.set(String(titik.id), marker); }
+    if (marker) { 
+      // Masukkan krisis ke cluster, sisanya ke layer biasa
+      if (titik.kategori === 'krisis') { cluster.addLayer(marker); } 
+      else { map.addLayer(marker); nonClusterMarkers.push(marker); } 
+      markerMap.set(String(titik.id), marker); 
+    }
   });
   map.addLayer(cluster);
   
   dataForMap.forEach(function(titik) {
     const div = document.createElement('div'); div.className = 'item';
-    const isBank = titik.kategori === 'bank_sampah'; const isFas = titik.kategori === 'fasilitas';
+    const isBank = titik.kategori === 'bank_sampah'; 
+    const isFas = titik.kategori === 'fasilitas';
+    const isTps = titik.kategori === 'tps';
+    
     const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
     const pendingHTML = (titik.is_approved === false) ? '<span class="badge-status status-pending">Pending</span>' : '';
-    let badgeHTML = isBank ? '<span class="badge bank-sampah">Bank</span>' : (isFas ? '<span class="badge fasilitas">' + (titik.kritis||'') + '</span>' : '<span class="badge ' + (titik.kritis||'rendah').toLowerCase() + '">' + titik.kritis + '</span>');
-    const statusBadge = (!isBank && !isFas) ? '<span class="badge-status ' + statusClass + '">' + (titik.status||'Belum') + '</span>' : '';
+    
+    let badgeHTML = '';
+    if (isTps) badgeHTML = '<span class="badge tps">TPS</span>';
+    else if (isBank) badgeHTML = '<span class="badge bank-sampah">Bank</span>';
+    else if (isFas) badgeHTML = '<span class="badge fasilitas">Tempat Sampah</span>';
+    else badgeHTML = '<span class="badge ' + (titik.kritis||'rendah').toLowerCase() + '">' + titik.kritis + '</span>';
+    
+    const statusBadge = (!isBank && !isFas && !isTps) ? '<span class="badge-status ' + statusClass + '">' + (titik.status||'Belum') + '</span>' : '';
+    
     let adminHTML = '';
     if (isAdmin) {
-      let tombolAcc = titik.is_approved === false ? '<button class="btn-admin-acc" onclick="setujuiData(\'' + titik.id + '\')">ACC</button>' : (titik.status !== 'Sudah Ditangani' && !isBank && !isFas) ? '<button class="btn-admin-selesai" onclick="tandaiSelesai(\'' + titik.id + '\')">Selesai</button>' : '';
+      let tombolAcc = titik.is_approved === false ? '<button class="btn-admin-acc" onclick="setujuiData(\'' + titik.id + '\')">ACC</button>' : (titik.status !== 'Sudah Ditangani' && !isBank && !isFas && !isTps) ? '<button class="btn-admin-selesai" onclick="tandaiSelesai(\'' + titik.id + '\')">Selesai</button>' : '';
       adminHTML = '<div class="admin-actions-compact">' + tombolAcc + '<button class="btn-admin-edit" onclick="bukaEdit(\'' + titik.id + '\')">Edit</button><button class="btn-admin-hapus" onclick="hapusData(\'' + titik.id + '\')">Hapus</button></div>';
     }
+    
     const dukunganCount = titik.jumlah_dukungan || 0;
-    let btnDukungList = (!isBank && !isFas) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
+    let btnDukungList = (!isBank && !isFas && !isTps) ? `<button class="btn-dukung ${votedIds.has(titik.id) ? 'voted' : ''}" onclick="dukungLaporan('${titik.id}', this)" ${votedIds.has(titik.id) ? 'disabled' : ''}>👋 Saya Juga Melihat Ini (${dukunganCount})</button>` : '';
+    
     div.innerHTML = '<div class="item-info"><div class="item-title">' + titik.nama + '</div><div class="item-meta">' + pendingHTML + badgeHTML + statusBadge + '</div>' + btnDukungList + adminHTML + '</div>' + '<div class="item-actions"><button class="btn-icon map" onclick="keLokasiMenu(\'' + titik.id + '\')"><i data-lucide="map-pin" style="width: 20px; height: 20px; stroke-width: 2.5px;"></i></button>' + '<button class="btn-icon share" onclick="shareKeWA(\'' + (titik.nama||'').replace(/'/g, "\\'") + '\', \'' + (titik.status||'Aktif') + '\')">' + waIcon + '</button></div>';
     list.appendChild(div);
   });
@@ -1266,13 +1310,12 @@ function bukaEdit(id) {
   document.getElementById('inNama').value = data.nama; document.getElementById('inLat').value = data.lat; document.getElementById('inLng').value = data.lng; document.getElementById('inWilayah').value = data.wilayah; document.getElementById('inKecamatan').value = data.kecamatan || "";
   if (data.kategori === 'krisis') document.getElementById('inJenis').value = data.jenis;
   document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
-  if (data.kategori === 'bank_sampah') { document.getElementById('inJam').value = data.jam_operasional || ''; document.getElementById('inKontak').value = data.kontak || ''; document.getElementById('inJenisDiterima').value = data.jenis_diterima || ''; }
   document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
   document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
-// ⚡ FUNGSI TOMBOL LAPOR (KATEGORI KEMBALI)
+// ⚡ FUNGSI TOMBOL LAPOR (KATEGORI KEMBALI, TANPA BANK SAMPAH)
 document.getElementById('laporBtn').onclick = function() {
   document.getElementById('formLaporan').reset(); 
   document.getElementById('judulForm').innerText = "Lapor Cepat"; 
@@ -1288,7 +1331,6 @@ document.getElementById('laporBtn').onclick = function() {
   // MUNCULKAN DROPDOWN JIKA ADMIN
   if (isAdmin) {
     document.getElementById('divKategoriAdmin').style.display = 'block';
-    document.getElementById('optBankSampah').style.display = 'block';
   } else {
     document.getElementById('divKategoriAdmin').style.display = 'none';
   }
@@ -1322,8 +1364,8 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
   e.preventDefault();
   
   const cekKategori = document.getElementById('inKategori').value;
-  if (cekKategori === 'fasilitas' && !isAdmin) {
-    showToast("Akses ditolak! Hanya Admin yang bisa menambah TPS.", "error");
+  if ((cekKategori === 'fasilitas' || cekKategori === 'tps') && !isAdmin) {
+    showToast("Akses ditolak! Hanya Admin yang bisa menambah TPS/Tempat Sampah.", "error");
     return; 
   }
 
@@ -1341,6 +1383,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
     statusValue = document.getElementById('inStatus').value;
   } else { 
     if (isAdmin) isApprovedValue = true; 
+    if (kategori === 'fasilitas' || kategori === 'tps') { statusValue = 'Sudah Ditangani'; } // TPS/Bin otomatis selesai
   }
   
   try {
@@ -1362,7 +1405,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
       lng: parseFloat(document.getElementById('inLng').value), 
       wilayah: document.getElementById('inWilayah').value, 
       kecamatan: document.getElementById('inKecamatan').value, 
-      jenis: kategori === 'bank_sampah' ? (document.getElementById('inJenisDiterima').value || 'Campuran') : (kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value), 
+      jenis: (kategori === 'fasilitas' || kategori === 'tps') ? "-" : document.getElementById('inJenis').value, 
       kritis: document.getElementById('inKritis').value, 
       kategori: kategori, 
       status: statusValue, 
@@ -1373,12 +1416,6 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
       user_id: currentUser ? currentUser.id : null, 
       jumlah_dukungan: dukunganValue 
     };
-    
-    if (kategori === 'bank_sampah') { 
-      dataBaru.jam_operasional = document.getElementById('inJam').value || null; 
-      dataBaru.kontak = document.getElementById('inKontak').value || null; 
-      dataBaru.jenis_diterima = document.getElementById('inJenisDiterima').value || null; 
-    }
     
     const result = isEditMode ? await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId) : await supabaseClient.from('titik_sampah').insert([dataBaru]);
     if (result.error) throw result.error;
