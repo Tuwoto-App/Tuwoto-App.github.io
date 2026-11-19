@@ -1446,8 +1446,19 @@ if (typeof lucide !== 'undefined') lucide.createIcons();
 generateEduGrid(); renderSemua(currentFilter); cekSesiUser();
 
 supabaseClient.channel('schema-db-changes-sampah').on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, function(payload) { ambilData(); }).subscribe();
-</script>
 
+// Rapikan pilihan kategori Lapor Cepat
+(function() {
+  const sel = document.getElementById('inKategori');
+  if (!sel) return;
+  Array.from(sel.options).forEach(function(o) {
+    if (o.value === 'tps') { o.style.display = 'none'; }
+    if (o.value === 'fasilitas') { o.text = 'Tambah Tempat Sampah'; }
+  });
+  updateSelectDisplay('inKategori');
+})(); 
+</script>
+    
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
