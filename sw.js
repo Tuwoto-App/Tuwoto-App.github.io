@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuwoto-v80'; 
+const CACHE_NAME = 'tuwoto-v81'; 
 const urlsToCache = [
   './',
   './index.html',
