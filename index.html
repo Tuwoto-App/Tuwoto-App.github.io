@@ -539,7 +539,7 @@
         <button type="button" id="tpsPickMapBtn" onclick="mulaiPilihPeta_TPS()" style="padding:12px; font-size:14px; margin-top:6px;">Pilih Manual di Peta</button>
       </div>
       <div class="form-group">
-        <label>Nama Jalan (Otomatis)</label>
+        <label id="labelTpsNamaJalan">Nama Jalan (Otomatis)</label>
         <input type="text" id="tpsNamaJalan" required placeholder="Mendeteksi lokasi..." readonly style="background:#e2e8f0; font-weight:bold; border:none;">
       </div>
       <div style="display:none;">
@@ -593,7 +593,7 @@
         <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()" style="padding:12px; font-size:14px; margin-top:6px;">Pilih Manual di Peta</button>
       </div>
       <div class="form-group">
-        <label>Nama Jalan (Otomatis)</label>
+        <label id="labelInNama">Nama Jalan (Otomatis)</label>
         <input type="text" id="inNama" required placeholder="Mendeteksi lokasi..." readonly style="background:#e2e8f0; font-weight:bold; border:none;">
       </div>
       <div style="display:none;">
@@ -808,12 +808,44 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'profil') updateUIProfil();
   if (tabName === 'edukasi') { generateEduGrid(); }
 }
+
+// ============ PENAMAAN LOKASI DARI GPS ============
+// Jika jalan terdeteksi lebih jauh dari batas ini dari titik, jalan dianggap tidak akurat dan diganti nama kampung.
+const JARAK_MAKS_JALAN_KM = 0.15;
+
+function buatNamaLokasi(a, lat, lng, hasil) {
+  const jalan = a.road || a.pedestrian || a.path || a.footway || a.track || '';
+  const kampung = a.hamlet || a.neighbourhood || a.village || a.suburb || a.quarter || '';
+  let jalanDekat = !!jalan;
+  if (jalan && hasil && hasil.lat && hasil.lon) {
+    const j = hitungJarak(lat, lng, parseFloat(hasil.lat), parseFloat(hasil.lon));
+    if (!isNaN(j) && j > JARAK_MAKS_JALAN_KM) jalanDekat = false;
+  }
+  if (jalanDekat && kampung) return jalan + ', ' + kampung;
+  if (jalanDekat) return jalan;
+  return kampung || a.city_district || a.town || a.city || a.county || jalan || 'Lokasi Dipilih';
+}
+
+// Kolom nama lokasi hanya bisa diedit oleh admin
+function aturEditNama() {
+  const daftar = [['inNama', 'labelInNama'], ['tpsNamaJalan', 'labelTpsNamaJalan']];
+  daftar.forEach(function(p) {
+    const el = document.getElementById(p[0]); const lb = document.getElementById(p[1]);
+    if (!el) return;
+    el.readOnly = !isAdmin;
+    el.style.background = isAdmin ? '#ffffff' : '#e2e8f0';
+    el.style.border = isAdmin ? '1px solid #cbd5e1' : 'none';
+    el.style.fontWeight = isAdmin ? 'normal' : 'bold';
+    if (lb) lb.innerText = isAdmin ? 'Nama Lokasi / Patokan (bisa diedit)' : 'Nama Jalan (Otomatis)';
+  });
+}
+
 function reverseGeocode(lat, lng) {
   const inputNama = document.getElementById('inNama'); inputNama.value = "Mendeteksi...";
   fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', { headers: { 'Accept-Language': 'id' } })
   .then(function(res) { return res.json(); }).then(function(data) {
     if (data && data.address) {
-      let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Dipilih";
+      let namaLokasi = buatNamaLokasi(data.address, lat, lng, data);
       let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
       inputNama.value = namaLokasi; if (kecamatan) document.getElementById('inKecamatan').value = kecamatan;
     } else { inputNama.value = "Lokasi Dipilih"; }
@@ -827,7 +859,7 @@ function reverseGeocode_TPS(lat, lng) {
   fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', { headers: { 'Accept-Language': 'id' } })
   .then(function(res) { return res.json(); }).then(function(data) {
     if (data && data.address) {
-      let namaLokasi = data.address.road || data.address.village || data.address.suburb || data.address.city || "Lokasi Dipilih";
+      let namaLokasi = buatNamaLokasi(data.address, lat, lng, data);
       let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
       inputNama.value = namaLokasi; 
       if (kecamatan && !document.getElementById('tpsKecamatan').value) document.getElementById('tpsKecamatan').value = kecamatan;
@@ -868,6 +900,7 @@ function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.di
 // ============ FUNGSI DAFTAR TPA KHUSUS ADMIN ============
 function bukaDaftarTPS() { 
   document.getElementById('formDaftarTPS').reset();
+  aturEditNama();
   document.getElementById('modalDaftarTPS').style.display = 'flex'; 
 }
 function tutupDaftarTPS() { 
@@ -910,6 +943,7 @@ function mulaiPilihPeta_TPS() {
 document.getElementById('formDaftarTPS').onsubmit = async function(e) {
   e.preventDefault(); 
   if (!document.getElementById('tpsLat').value || !document.getElementById('tpsLng').value) { showToast("Lokasi belum diambil. Geser pin atau ambil GPS dulu.", "warning"); return; }
+  if (document.getElementById('tpsNamaJalan').value === "Mendeteksi...") { showToast("Nama lokasi masih diproses, tunggu sebentar.", "warning"); return; }
   const btn = document.getElementById('btnKirimTPS'); 
   btn.textContent = "Menyimpan..."; btn.disabled = true;
   
@@ -1236,7 +1270,7 @@ function renderSemua(filter) {
   if (toggleBank && !toggleBank.checked) dataFilter = dataFilter.filter(function(t) { return t.kategori !== 'bank_sampah'; });
   
   let dataForMap = dataFilter.slice();
-  // PERBAIKAN: hanya laporan KRISIS yang selesai yang disembunyikan; TPA, tempat sampah, bank sampah selalu tampil
+  // Hanya laporan KRISIS yang selesai yang disembunyikan; TPA, tempat sampah, bank sampah selalu tampil
   if (!toggleSel || !toggleSel.checked) dataForMap = dataForMap.filter(function(t) { return t.kategori !== 'krisis' || t.status !== 'Sudah Ditangani'; });
   
   if (currentSort === 'nama_asc') dataForMap.sort(function(a, b) { return (a.nama||'').localeCompare(b.nama||''); });
@@ -1309,6 +1343,7 @@ function bukaEdit(id) {
   document.getElementById('inKritis').value = data.kritis; document.getElementById('inCatatan').value = data.catatan;
   document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
   document.getElementById('inFoto').required = false; document.getElementById('labelFotoWajib').style.display = 'none'; document.getElementById('infoFotoLama').style.display = 'block';
+  aturEditNama();
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus'); document.getElementById('modalLapor').style.display = 'flex';
 }
 
@@ -1324,6 +1359,7 @@ document.getElementById('laporBtn').onclick = function() {
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
   document.getElementById('inNama').value = "";
   document.getElementById('divKategoriAdmin').style.display = isAdmin ? 'block' : 'none';
+  aturEditNama();
   updateSelectDisplay('inKategori'); updateSelectDisplay('inJenis'); updateSelectDisplay('inKritis'); updateSelectDisplay('inStatus');
   document.getElementById('modalLapor').style.display = 'flex';
 };
@@ -1360,6 +1396,7 @@ document.getElementById('formLaporan').onsubmit = async function(e) {
   }
 
   if (!document.getElementById('inNama').value || !document.getElementById('inLat').value || !document.getElementById('inLng').value) { showToast("Ambil lokasi dulu", "warning"); return; }
+  if (document.getElementById('inNama').value === "Mendeteksi...") { showToast("Nama lokasi masih diproses, tunggu sebentar.", "warning"); return; }
   const editId = document.getElementById('editId').value; const isEditMode = editId !== "";
   const btn = document.getElementById('btnKirimLaporan'); const fileInput = document.getElementById('inFoto'); 
   const kategori = document.getElementById('inKategori').value;
