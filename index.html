@@ -494,6 +494,7 @@
   </div>
 </div>
 
+<!-- MODAL DAFTAR BANK SAMPAH -->
 <div id="modalDaftarBank" class="modal-overlay" onclick="if(event.target===this) tutupDaftarBank()">
   <div class="modal-content" style="text-align: left;">
     <h2 style="text-align: center;">Daftarkan Bank Sampah</h2>
@@ -503,14 +504,21 @@
       <div class="form-group"><label>Jam Operasional</label><input type="text" id="bankJam" required placeholder="Senin-Sabtu 08-16"></div>
       <div class="form-group"><label>Kontak</label><input type="text" id="bankKontak" required placeholder="0812-xxxx"></div>
       <div class="form-group"><label>Jenis Diterima</label><input type="text" id="bankJenis" required placeholder="Plastik, Kertas"></div>
+
       <div class="form-group">
         <label>Lokasi</label>
-        <button type="button" onclick="ambilLokasiBank()" style="width:100%; padding:10px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:8px; font-weight:bold;">Ambil Titik Lokasi</button>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="number" step="any" id="bankLat" required placeholder="Lat" style="flex:1;">
-          <input type="number" step="any" id="bankLng" required placeholder="Lng" style="flex:1;">
-        </div>
+        <button type="button" id="bankLocBtn" onclick="ambilLokasiGPS_Bank()" style="width:100%; padding:12px; font-size:14px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:8px; cursor:pointer; margin-top:4px; font-weight:bold;">Ambil Lokasi GPS</button>
+        <button type="button" id="bankPickMapBtn" onclick="mulaiPilihPeta_Bank()" style="width:100%; padding:12px; font-size:14px; background:#fdf4ff; color:#a21caf; border:1px solid #f5d0fe; border-radius:8px; cursor:pointer; margin-top:6px; font-weight:bold;">Pilih Manual di Peta</button>
       </div>
+      <div class="form-group">
+        <label id="labelBankNamaJalan">Nama Jalan (Otomatis)</label>
+        <input type="text" id="bankNamaJalan" required placeholder="Mendeteksi lokasi..." readonly style="background:#e2e8f0; font-weight:bold; border:none;">
+      </div>
+      <div style="display:none;">
+        <input type="number" step="any" id="bankLat">
+        <input type="number" step="any" id="bankLng">
+      </div>
+
       <button type="submit" class="btn-submit" id="btnKirimBank">Kirim</button>
       <button type="button" class="btn-cancel" onclick="tutupDaftarBank()">Batal</button>
     </form>
@@ -826,9 +834,9 @@ function buatNamaLokasi(a, lat, lng, hasil) {
   return kampung || a.city_district || a.town || a.city || a.county || jalan || 'Lokasi Dipilih';
 }
 
-// Kolom nama lokasi hanya bisa diedit oleh admin
+// Kolom nama lokasi hanya bisa diedit oleh admin (form Lapor, Daftar TPA, Daftar Bank)
 function aturEditNama() {
-  const daftar = [['inNama', 'labelInNama'], ['tpsNamaJalan', 'labelTpsNamaJalan']];
+  const daftar = [['inNama', 'labelInNama'], ['tpsNamaJalan', 'labelTpsNamaJalan'], ['bankNamaJalan', 'labelBankNamaJalan']];
   daftar.forEach(function(p) {
     const el = document.getElementById(p[0]); const lb = document.getElementById(p[1]);
     if (!el) return;
@@ -872,6 +880,25 @@ function updateKoordinat_TPS(lat, lng) {
   reverseGeocode_TPS(lat, lng); 
 }
 
+// REVERSE GEOCODE UNTUK BANK SAMPAH
+function reverseGeocode_Bank(lat, lng) {
+  const inputNama = document.getElementById('bankNamaJalan'); inputNama.value = "Mendeteksi...";
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1', { headers: { 'Accept-Language': 'id' } })
+  .then(function(res) { return res.json(); }).then(function(data) {
+    if (data && data.address) {
+      let namaLokasi = buatNamaLokasi(data.address, lat, lng, data);
+      let kecamatan = data.address.city_district || data.address.town || data.address.county || "";
+      inputNama.value = namaLokasi; 
+      if (kecamatan && !document.getElementById('bankKecamatan').value) document.getElementById('bankKecamatan').value = kecamatan;
+    } else { inputNama.value = "Lokasi Dipilih"; }
+  }).catch(function() { inputNama.value = "Lokasi Dipilih"; });
+}
+function updateKoordinat_Bank(lat, lng) { 
+  document.getElementById('bankLat').value = lat.toFixed(6); 
+  document.getElementById('bankLng').value = lng.toFixed(6); 
+  reverseGeocode_Bank(lat, lng); 
+}
+
 function openCustomSelect(selectId, title) {
   const selectEl = document.getElementById(selectId); const currentVal = selectEl.value; let html = '';
   Array.from(selectEl.options).forEach(function(opt) {
@@ -894,8 +921,78 @@ function tutupConfirm() { document.getElementById('modalConfirm').style.display 
 function eksekusiConfirm() { if (confirmCallback) { const cb = confirmCallback; tutupConfirm(); cb(); } }
 function bukaHargaSampah() { document.getElementById('modalHarga').style.display = 'flex'; }
 function tutupHarga() { document.getElementById('modalHarga').style.display = 'none'; }
-function bukaDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'flex'; }
-function tutupDaftarBank() { document.getElementById('modalDaftarBank').style.display = 'none'; }
+
+// ============ FUNGSI DAFTAR BANK SAMPAH ============
+function bukaDaftarBank() { 
+  document.getElementById('formDaftarBank').reset();
+  aturEditNama();
+  document.getElementById('modalDaftarBank').style.display = 'flex'; 
+}
+function tutupDaftarBank() { 
+  document.getElementById('modalDaftarBank').style.display = 'none'; 
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+}
+
+function ambilLokasiGPS_Bank() {
+  if (navigator.geolocation) { 
+    navigator.geolocation.getCurrentPosition(function(pos) { 
+      updateKoordinat_Bank(pos.coords.latitude, pos.coords.longitude); 
+      showToast("Lokasi diambil!", "success"); 
+    }, function() { showToast("Gagal mengambil GPS", "error"); }); 
+  }
+}
+
+function mulaiPilihPeta_Bank() {
+  document.getElementById('modalDaftarBank').style.display = 'none'; 
+  showToast("Geser pin di peta", "info");
+  const lat = parseFloat(document.getElementById('bankLat').value) || map.getCenter().lat; 
+  const lng = parseFloat(document.getElementById('bankLng').value) || map.getCenter().lng;
+  
+  if (tempMarker) map.removeLayer(tempMarker);
+  tempMarker = L.marker([lat, lng], { draggable: true }).addTo(map).bindPopup("<b>Geser Pin</b>").openPopup();
+  tempMarker.on('dragend', function(e) { const ll = e.target.getLatLng(); updateKoordinat_Bank(ll.lat, ll.lng); });
+  updateKoordinat_Bank(lat, lng); // koordinat langsung terisi walau pin belum digeser
+  map.setView([lat, lng], 17);
+  
+  const btnKonfirm = document.createElement('button');
+  btnKonfirm.innerText = "Konfirmasi Lokasi";
+  btnKonfirm.style.cssText = "position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; padding:12px 24px; background:#059669; color:white; border:none; border-radius:30px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer;";
+  btnKonfirm.onclick = function() { 
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; } 
+    btnKonfirm.remove(); 
+    document.getElementById('modalDaftarBank').style.display = 'flex'; 
+  };
+  document.getElementById('app').appendChild(btnKonfirm);
+}
+
+document.getElementById('formDaftarBank').onsubmit = async function(e) {
+  e.preventDefault(); 
+  if (!document.getElementById('bankLat').value || !document.getElementById('bankLng').value) { showToast("Lokasi belum diambil. Geser pin atau ambil GPS dulu.", "warning"); return; }
+  if (document.getElementById('bankNamaJalan').value === "Mendeteksi...") { showToast("Nama lokasi masih diproses, tunggu sebentar.", "warning"); return; }
+  const btn = document.getElementById('btnKirimBank'); btn.textContent = "Mengirim..."; btn.disabled = true;
+  const dataBank = { 
+    nama: document.getElementById('bankNama').value, 
+    lat: parseFloat(document.getElementById('bankLat').value), 
+    lng: parseFloat(document.getElementById('bankLng').value), 
+    wilayah: "Kota Gorontalo", 
+    kecamatan: document.getElementById('bankKecamatan').value, 
+    kategori: 'bank_sampah', 
+    kritis: 'Sedang', 
+    jenis: document.getElementById('bankJenis').value, 
+    status: 'Belum Ditangani', 
+    is_approved: false, 
+    catatan: "Pendaftaran mandiri", 
+    alamat: document.getElementById('bankNamaJalan').value, 
+    jam_operasional: document.getElementById('bankJam').value, 
+    kontak: document.getElementById('bankKontak').value, 
+    jenis_diterima: document.getElementById('bankJenis').value, 
+    foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah', 
+    jumlah_dukungan: 0 
+  };
+  const res = await supabaseClient.from('titik_sampah').insert([dataBank]);
+  if (res.error) { showToast("Gagal: " + res.error.message, "error"); btn.textContent = "Kirim"; btn.disabled = false; }
+  else { showToast("Menunggu verifikasi Admin.", "success"); tutupDaftarBank(); btn.textContent = "Kirim"; btn.disabled = false; document.getElementById('formDaftarBank').reset(); }
+};
 
 // ============ FUNGSI DAFTAR TPA KHUSUS ADMIN ============
 function bukaDaftarTPS() { 
@@ -975,19 +1072,6 @@ document.getElementById('formDaftarTPS').onsubmit = async function(e) {
     document.getElementById('formDaftarTPS').reset(); 
     ambilData(); 
   }
-};
-
-
-function ambilLokasiBank() {
-  if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos) { document.getElementById('bankLat').value = pos.coords.latitude; document.getElementById('bankLng').value = pos.coords.longitude; showToast("Lokasi diambil!", "success"); }); }
-}
-
-document.getElementById('formDaftarBank').onsubmit = async function(e) {
-  e.preventDefault(); const btn = document.getElementById('btnKirimBank'); btn.textContent = "Mengirim..."; btn.disabled = true;
-  const dataBank = { nama: document.getElementById('bankNama').value, lat: parseFloat(document.getElementById('bankLat').value), lng: parseFloat(document.getElementById('bankLng').value), wilayah: "Kota Gorontalo", kecamatan: document.getElementById('bankKecamatan').value, kategori: 'bank_sampah', kritis: 'Sedang', jenis: document.getElementById('bankJenis').value, status: 'Belum Ditangani', is_approved: false, catatan: "Pendaftaran mandiri", alamat: "-", jam_operasional: document.getElementById('bankJam').value, kontak: document.getElementById('bankKontak').value, jenis_diterima: document.getElementById('bankJenis').value, foto: 'https://via.placeholder.com/400x200?text=Bank+Sampah', jumlah_dukungan: 0 };
-  const res = await supabaseClient.from('titik_sampah').insert([dataBank]);
-  if (res.error) { showToast("Gagal: " + res.error.message, "error"); btn.textContent = "Kirim"; btn.disabled = false; }
-  else { showToast("Menunggu verifikasi Admin.", "success"); tutupDaftarBank(); btn.textContent = "Kirim"; btn.disabled = false; document.getElementById('formDaftarBank').reset(); }
 };
 
 function bukaFilter() { document.getElementById('modalFilter').style.display = 'flex'; }
